@@ -4,18 +4,23 @@
 <p>Регина Попова</p>
 <p>Ирина Разинкова</p>
 </br>
+<h3>Технологии:</h3>
+<p>JDK 26</p>
+<p>JUnit Jupiter 6.1.3</p>
+<p>Hibernate 7.4.7.Final</p>
+</br>
 <h3>Договоренности:</h3>
 <p>1) Не используем комментарии и javadoc
 (Потому что код живет после того, как его написали. В процессе его жизни он будет не раз меняться и наступит переломный момент, когда код изменят, а javadoc - нет. В итоге этот javadoc никто так и не поменяет, он будет висеть бесполезным, потому что он противоречит реализации. Документацию в коде стоит писать только для библиотек/фреймворков/инструментов)</p>
 <p>2) Каждый пишет JUnit тесты для своего кода</p>
-<p>3) Используем Jira для декомпозиции задач</p>
+<p>3) Используем Jira для декомпозиции задач
+(Ссылка на Jira: https://maxitool.atlassian.net/?continue=https%3A%2F%2Fmaxitool.atlassian.net%2Fwelcome%2Fsoftware%3FprojectId%3D10000&atlOrigin=eyJpIjoiMjAzMzEzY2IzM2Y0NDllMzliNmI4Njc2MWViMjBhYjUiLCJwIjoiamlyYS1zb2Z0d2FyZSJ9)</p>
 </br>
 
 <h2>Ход разработки</h2>
 <h3>Задание 1:</h3>
 <p>Разработать консольное приложение(user-service) на Java, использующее Hibernate для взаимодействия с PostgreSQL, без использования Spring. Приложение должно поддерживать базовые операции CRUD (Create, Read, Update, Delete) над сущностью User.</p>
-</br>
-<h4 style="font-size: 250rem;"><i>Требования</i></h4>
+<h4><i>Требования</i></h4>
 <p>Использовать Hibernate в качестве ORM.</p>
 <p>База данных — PostgreSQL.</p>
 <p>Настроить Hibernate без Spring, используя hibernate.cfg.xml или properties-файл.</p>
