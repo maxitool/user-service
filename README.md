@@ -15,7 +15,7 @@
 <h3>Задание 1:</h3>
 <p>Разработать консольное приложение(user-service) на Java, использующее Hibernate для взаимодействия с PostgreSQL, без использования Spring. Приложение должно поддерживать базовые операции CRUD (Create, Read, Update, Delete) над сущностью User.</p>
 </br>
-<h4 style="font-size: 20px;"><i>Требования</i></h4>
+<h4 style="font-size: 25px;"><i>Требования</i></h4>
 <p>Использовать Hibernate в качестве ORM.</p>
 <p>База данных — PostgreSQL.</p>
 <p>Настроить Hibernate без Spring, используя hibernate.cfg.xml или properties-файл.</p>
