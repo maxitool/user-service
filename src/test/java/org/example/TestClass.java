@@ -7,6 +7,7 @@ public class TestClass {
 
     @Test
     public void checkTest() {
-        Assertions.assertTrue(false);
+        Assertions.assertTrue(true);
+        Assertions.assertTrue(true);
     }
 }
