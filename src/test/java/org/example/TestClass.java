@@ -8,5 +8,6 @@ public class TestClass {
     @Test
     public void checkTest() {
         Assertions.assertTrue(true);
+        Assertions.assertTrue(false);
     }
 }
