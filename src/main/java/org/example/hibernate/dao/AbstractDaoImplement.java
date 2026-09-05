@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 abstract public class AbstractDaoImplement<T, ID> implements Dao<T, ID> {
@@ -25,12 +24,12 @@ abstract public class AbstractDaoImplement<T, ID> implements Dao<T, ID> {
 
     @Override
     public final boolean save(T entity) {
-        return executeInTransaction(session -> session.persist(entity));
+        return ValidatorUtil.validate(entity) && executeInTransaction(session -> session.persist(entity));
     }
 
     @Override
     public final boolean update(T entity) {
-        return executeInTransaction(session -> session.merge(entity));
+        return ValidatorUtil.validate(entity) && executeInTransaction(session -> session.merge(entity));
     }
 
     @Override

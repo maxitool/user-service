@@ -16,13 +16,14 @@ import org.example.hibernate.entities.User;
 import java.util.List;
 import java.util.Map;
 
-public class GuiSingleton {
-    private static final UserDaoImplement userDao = new UserDaoImplement();
+public class Gui {
 
     private static final String YES = "yes", NO = "no";
     private static final String GO_BACK_GUI = StringConsoleReader.GO_BACK_COMMAND + ".Go back";
     private static final String CANT_RECOGNIZE_OPTION = "Can't recognize wrote option";
     private static final String SOMETHING_WENT_WRONG_GUI = "Something went wrong";
+    private static final String USER = "User:";
+    private static final String USERS = "Users:";
 
     private static final String USER_GUI = '\n' + """
             User GUI
@@ -32,10 +33,10 @@ public class GuiSingleton {
             4.Delete
             """ + StringConsoleReader.GO_BACK_COMMAND + ".Exit";
     private final Map<Integer, Runnable> USER_ACTIONS = Map.of(
-            1, getInstance()::createUserFromConsole,
-            2, getInstance()::readUserFromConsole,
-            3, getInstance()::updateUserFromConsole,
-            4, getInstance()::deleteUserFromConsole
+            1, this::createUserFromConsole,
+            2, this::readUserFromConsole,
+            3, this::updateUserFromConsole,
+            4, this::deleteUserFromConsole
     );
 
     private static final String READ_USER_GUI = '\n' + """
@@ -47,11 +48,11 @@ public class GuiSingleton {
             5.Read by age
             """ + GO_BACK_GUI;
     private final Map<Integer, Runnable> READ_USER_ACTIONS = Map.of(
-            1, getInstance()::readAllUsersFromConsole,
-            2, getInstance()::readByIdUserFromConsole,
-            3, getInstance()::readByEmailUserFromConsole,
-            4, getInstance()::readByNameUsersFromConsole,
-            5, getInstance()::readByAgeUsersFromConsole
+            1, this::readAllUsersFromConsole,
+            2, this::readByIdUserFromConsole,
+            3, this::readByEmailUserFromConsole,
+            4, this::readByNameUsersFromConsole,
+            5, this::readByAgeUsersFromConsole
     );
 
     private static final String CREATE_NEW_USER_GUI = '\n' + """
@@ -89,7 +90,7 @@ public class GuiSingleton {
     private static final String BAD_ID_GUI =
             "Id must be greater than or equal to 0";
     private static final String BAD_AGE_GUI =
-            "Age must be greater than or equal to 0";
+            "Age must be greater than 0";
 
     private static final String CANT_FIND_USER_BY_ID_GUI = '\n' +
             "Can't find user by id";
@@ -101,9 +102,8 @@ public class GuiSingleton {
             "Can't find users by age";
 
 
-    private GuiSingleton() {}
-
-    public static GuiSingleton getInstance() {return Holder.instance;}
+    public Gui() {
+    }
 
     public void run() {
         IntResponse intResponse;
@@ -121,6 +121,7 @@ public class GuiSingleton {
     }
 
     private void createUserFromConsole() {
+        UserDaoImplement userDao = new UserDaoImplement();
         StringResponse strResponse;
         IntResponse intResponse;
         User user;
@@ -170,10 +171,13 @@ public class GuiSingleton {
     }
 
     private void readAllUsersFromConsole() {
+        UserDaoImplement userDao = new UserDaoImplement();
+        System.out.println(USERS);
         userDao.findAll().forEach(System.out::println);
     }
 
     private void readByIdUserFromConsole() {
+        UserDaoImplement userDao = new UserDaoImplement();
         LongResponse longResponse;
         User user;
         do {
@@ -188,13 +192,14 @@ public class GuiSingleton {
             if ((user = userDao.findById(longResponse.longData)) == null) {
                 System.out.println(CANT_FIND_USER_BY_ID_GUI);
             } else {
-                System.out.println(user);
+                System.out.println(USER + '\n' + user);
             }
             System.out.println(GO_BACK_GUI);
         } while (true);
     }
 
     private void readByEmailUserFromConsole() {
+        UserDaoImplement userDao = new UserDaoImplement();
         StringResponse strResponse;
         User user;
         do {
@@ -205,13 +210,14 @@ public class GuiSingleton {
             if ((user = userDao.findByEmail(strResponse.stringData)) == null) {
                 System.out.println(CANT_FIND_USER_BY_EMAIL_GUI);
             } else {
-                System.out.println(user);
+                System.out.println(USER + '\n' + user);
             }
             System.out.println(GO_BACK_GUI);
         } while (true);
     }
 
     private void readByNameUsersFromConsole() {
+        UserDaoImplement userDao = new UserDaoImplement();
         StringResponse strResponse;
         List<User> users;
         do {
@@ -222,6 +228,7 @@ public class GuiSingleton {
             if ((users = userDao.findByName(strResponse.stringData)) == null || users.isEmpty()) {
                 System.out.println(CANT_FIND_USERS_BY_NAME_GUI);
             } else {
+                System.out.println(USERS);
                 users.forEach(System.out::println);
             }
             System.out.println(GO_BACK_GUI);
@@ -229,6 +236,7 @@ public class GuiSingleton {
     }
 
     private void readByAgeUsersFromConsole() {
+        UserDaoImplement userDao = new UserDaoImplement();
         IntResponse intResponse;
         List<User> users;
         do {
@@ -236,13 +244,14 @@ public class GuiSingleton {
             if ((intResponse = getIntFromConsole()).state == StringResponse.States.BACK_COMMAND) {
                 return;
             }
-            if (intResponse.intData < 0) {
+            if (intResponse.intData <= 0) {
                 System.out.println(BAD_AGE_GUI);
                 continue;
             }
             if ((users = userDao.findByAge(intResponse.intData)) == null || users.isEmpty()) {
                 System.out.println(CANT_FIND_USERS_BY_AGE_GUI);
             } else {
+                System.out.println(USERS);
                 users.forEach(System.out::println);
             }
             System.out.println(GO_BACK_GUI);
@@ -251,6 +260,7 @@ public class GuiSingleton {
 
 
     private void updateUserFromConsole() {
+        UserDaoImplement userDao = new UserDaoImplement();
         StringResponse strResponse;
         IntResponse intResponse;
         LongResponse longResponse;
@@ -321,6 +331,7 @@ public class GuiSingleton {
 
 
     private void deleteUserFromConsole() {
+        UserDaoImplement userDao = new UserDaoImplement();
         LongResponse response;
         System.out.println(DELETING_USER_GUI);
         do {
@@ -340,7 +351,6 @@ public class GuiSingleton {
             System.out.println(GO_BACK_GUI);
         } while (true);
     }
-
 
 
     private StringResponse getStrFromConsole() {
@@ -389,10 +399,5 @@ public class GuiSingleton {
             response = DoubleConsoleReader.getDoubleData();
         } while (response.state != StringResponse.States.BACK_COMMAND && response.state != StringResponse.States.OK);
         return response;
-    }
-
-
-    private static class Holder {
-        public static final GuiSingleton instance = new GuiSingleton();
     }
 }

@@ -12,7 +12,7 @@ public class LongConsoleReader extends StringConsoleReader {
             return longResponse;
         }
         try {
-            longResponse.longData = Integer.parseInt(longResponse.stringData.replace(" ", ""));
+            longResponse.longData = Long.parseLong(longResponse.stringData.replace(" ", ""));
         } catch (NumberFormatException e) {
             System.out.println("Can't convert the wrote data to long. " + e.getMessage());
             longResponse.errorMessage = e.getMessage();

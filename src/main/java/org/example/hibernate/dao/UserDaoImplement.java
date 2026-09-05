@@ -16,9 +16,15 @@ public class UserDaoImplement extends AbstractDaoImplement<User, Long> implement
     @Override
     public User findByEmail(String email) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            return session.find(entityClass, email);
+            Query<User> query = session.createQuery("FROM User user WHERE user.email = ?1", entityClass);
+            query.setParameter(1, email);
+            List<User> list = query.list();
+            if (list.isEmpty()) {
+                return null;
+            }
+            return list.getFirst();
         } catch (Exception e) {
-            logger.error("Error finding user by email {}: {}", email, e.getMessage());
+            logger.error("Error finding users by name: {}", e.getMessage());
         }
         return null;
     }
