@@ -1,6 +1,9 @@
-package entity;
+package org.example.hibernate.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Positive;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -15,9 +18,11 @@ public class User {
     private String name;
 
     @Column(unique = true, nullable = false, length = 100)
+    @Email(message = "Некорректный формат email")
     private String email;
 
     @Column(nullable = false)
+    @Positive(message = "Возраст должен быть больше нуля")
     private Integer age;
 
     @Column(name = "created_at", nullable = false, updatable = false)
