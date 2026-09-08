@@ -14,7 +14,7 @@ public class UserDaoImplement extends AbstractDaoImplement<User, Long> implement
     }
 
     @Override
-    public User findByEmail(String email) {
+    public final User findByEmail(String email) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Query<User> query = session.createQuery("FROM User user WHERE user.email = ?1", entityClass);
             query.setParameter(1, email);
@@ -24,13 +24,13 @@ public class UserDaoImplement extends AbstractDaoImplement<User, Long> implement
             }
             return list.getFirst();
         } catch (Exception e) {
-            logger.error("Error finding users by name: {}", e.getMessage());
+            logger.error("Error finding users by email: {}", e.getMessage());
         }
         return null;
     }
 
     @Override
-    public List<User> findByName(String name) {
+    public final List<User> findByName(String name) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Query<User> query = session.createQuery("FROM User user WHERE user.name = ?1", entityClass);
             query.setParameter(1, name);
@@ -42,7 +42,7 @@ public class UserDaoImplement extends AbstractDaoImplement<User, Long> implement
     }
 
     @Override
-    public List<User> findByAge(Integer age) {
+    public final List<User> findByAge(Integer age) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Query<User> query = session.createQuery("FROM User user WHERE user.age = ?1", entityClass);
             query.setParameter(1, age);

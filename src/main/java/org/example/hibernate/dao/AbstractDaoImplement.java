@@ -25,16 +25,29 @@ abstract public class AbstractDaoImplement<T, ID> implements Dao<T, ID> {
 
     @Override
     public final T save(T entity) {
-        return (ValidatorUtil.validate(entity) && executeInTransaction(session -> session.persist(entity))) ? entity : null;
+        if (entity == null) {
+            logger.error("entity argument in save method is null");
+            return null;
+        }
+        return (ValidatorUtil.validate(entity) && executeInTransaction(session -> session.persist(entity)))
+                ? entity : null;
     }
 
     @Override
     public final boolean update(T entity) {
+        if (entity == null) {
+            logger.error("entity argument in update method is null");
+            return false;
+        }
         return ValidatorUtil.validate(entity) && executeInTransaction(session -> session.merge(entity));
     }
 
     @Override
     public final T findById(ID id) {
+        if (id == null) {
+            logger.error("id argument in findById method is null");
+            return null;
+        }
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             return session.find(entityClass, id);
         } catch (Exception e) {
@@ -56,11 +69,19 @@ abstract public class AbstractDaoImplement<T, ID> implements Dao<T, ID> {
 
     @Override
     public final boolean delete(T entity) {
+        if (entity == null) {
+            logger.error("entity argument in delete method is null");
+            return false;
+        }
         return executeInTransaction(session -> session.remove(entity));
     }
 
     @Override
     public final boolean deleteById(ID id) {
+        if (id == null) {
+            logger.error("id argument in deleteById method is null");
+            return false;
+        }
         T entity = findById(id);
         return entity != null && delete(entity);
     }

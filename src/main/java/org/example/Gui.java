@@ -12,11 +12,13 @@ import org.example.console.readers.primitives.responses.LongResponse;
 import org.example.console.readers.primitives.responses.StringResponse;
 import org.example.hibernate.dao.UserDaoImplement;
 import org.example.hibernate.entities.User;
+import org.example.hibernate.services.UserService;
 
 import java.util.List;
 import java.util.Map;
 
 public class Gui {
+    private final UserService userService = new UserService();
 
     private static final String YES = "yes", NO = "no";
     private static final String GO_BACK_GUI = StringConsoleReader.GO_BACK_COMMAND + ".Go back";
@@ -121,7 +123,6 @@ public class Gui {
     }
 
     private void createUserFromConsole() {
-        UserDaoImplement userDao = new UserDaoImplement();
         StringResponse strResponse;
         IntResponse intResponse;
         User user;
@@ -146,7 +147,7 @@ public class Gui {
             }
             user.setAge(intResponse.intData);
 
-            if ((user = userDao.save(user)) != null) {
+            if ((user = userService.save(user)) != null) {
                 System.out.println(USER_SAVED_GUI);
                 return;
             }
@@ -171,13 +172,11 @@ public class Gui {
     }
 
     private void readAllUsersFromConsole() {
-        UserDaoImplement userDao = new UserDaoImplement();
         System.out.println(USERS);
-        userDao.findAll().forEach(System.out::println);
+        userService.findAll().forEach(System.out::println);
     }
 
     private void readByIdUserFromConsole() {
-        UserDaoImplement userDao = new UserDaoImplement();
         LongResponse longResponse;
         User user;
         do {
@@ -189,7 +188,7 @@ public class Gui {
                 System.out.println(BAD_ID_GUI);
                 continue;
             }
-            if ((user = userDao.findById(longResponse.longData)) == null) {
+            if ((user = userService.findById(longResponse.longData)) == null) {
                 System.out.println(CANT_FIND_USER_BY_ID_GUI);
             } else {
                 System.out.println(USER + '\n' + user);
@@ -199,7 +198,6 @@ public class Gui {
     }
 
     private void readByEmailUserFromConsole() {
-        UserDaoImplement userDao = new UserDaoImplement();
         StringResponse strResponse;
         User user;
         do {
@@ -207,7 +205,7 @@ public class Gui {
             if ((strResponse = getStrFromConsole()).state == StringResponse.States.BACK_COMMAND) {
                 return;
             }
-            if ((user = userDao.findByEmail(strResponse.stringData)) == null) {
+            if ((user = userService.findByEmail(strResponse.stringData)) == null) {
                 System.out.println(CANT_FIND_USER_BY_EMAIL_GUI);
             } else {
                 System.out.println(USER + '\n' + user);
@@ -217,7 +215,6 @@ public class Gui {
     }
 
     private void readByNameUsersFromConsole() {
-        UserDaoImplement userDao = new UserDaoImplement();
         StringResponse strResponse;
         List<User> users;
         do {
@@ -225,7 +222,7 @@ public class Gui {
             if ((strResponse = getStrFromConsole()).state == StringResponse.States.BACK_COMMAND) {
                 return;
             }
-            if ((users = userDao.findByName(strResponse.stringData)) == null || users.isEmpty()) {
+            if ((users = userService.findByName(strResponse.stringData)) == null || users.isEmpty()) {
                 System.out.println(CANT_FIND_USERS_BY_NAME_GUI);
             } else {
                 System.out.println(USERS);
@@ -236,7 +233,6 @@ public class Gui {
     }
 
     private void readByAgeUsersFromConsole() {
-        UserDaoImplement userDao = new UserDaoImplement();
         IntResponse intResponse;
         List<User> users;
         do {
@@ -248,7 +244,7 @@ public class Gui {
                 System.out.println(BAD_AGE_GUI);
                 continue;
             }
-            if ((users = userDao.findByAge(intResponse.intData)) == null || users.isEmpty()) {
+            if ((users = userService.findByAge(intResponse.intData)) == null || users.isEmpty()) {
                 System.out.println(CANT_FIND_USERS_BY_AGE_GUI);
             } else {
                 System.out.println(USERS);
@@ -260,7 +256,6 @@ public class Gui {
 
 
     private void updateUserFromConsole() {
-        UserDaoImplement userDao = new UserDaoImplement();
         StringResponse strResponse;
         IntResponse intResponse;
         LongResponse longResponse;
@@ -276,7 +271,7 @@ public class Gui {
                 System.out.println(BAD_ID_GUI);
                 continue;
             }
-            if ((user = userDao.findById(longResponse.longData)) == null) {
+            if ((user = userService.findById(longResponse.longData)) == null) {
                 System.out.println(CANT_FIND_USER_BY_ID_GUI);
                 continue;
             }
@@ -320,7 +315,7 @@ public class Gui {
                 user.setAge(intResponse.intData);
             }
 
-            if (userDao.update(user)) {
+            if (userService.update(user)) {
                 System.out.println(USER_UPDATED_GUI);
             } else {
                 System.out.println(SOMETHING_WENT_WRONG_GUI);
@@ -331,7 +326,6 @@ public class Gui {
 
 
     private void deleteUserFromConsole() {
-        UserDaoImplement userDao = new UserDaoImplement();
         LongResponse response;
         System.out.println(DELETING_USER_GUI);
         do {
@@ -343,7 +337,7 @@ public class Gui {
                 System.out.println(BAD_ID_GUI);
                 continue;
             }
-            if (userDao.deleteById(response.longData)) {
+            if (userService.deleteById(response.longData)) {
                 System.out.println(USER_DELETED_GUI);
             } else {
                 System.out.println(CANT_FIND_USER_BY_ID_GUI + " or " + SOMETHING_WENT_WRONG_GUI);
