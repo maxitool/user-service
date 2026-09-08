@@ -146,7 +146,7 @@ public class Gui {
             }
             user.setAge(intResponse.intData);
 
-            if (userDao.save(user)) {
+            if ((user = userDao.save(user)) != null) {
                 System.out.println(USER_SAVED_GUI);
                 return;
             }

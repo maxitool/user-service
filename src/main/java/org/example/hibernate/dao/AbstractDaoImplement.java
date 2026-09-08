@@ -5,6 +5,7 @@ import org.example.hibernate.validator.ValidatorUtil;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
+import org.hibernate.resource.transaction.spi.TransactionStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,8 +24,11 @@ abstract public class AbstractDaoImplement<T, ID> implements Dao<T, ID> {
     }
 
     @Override
-    public final boolean save(T entity) {
-        return ValidatorUtil.validate(entity) && executeInTransaction(session -> session.persist(entity));
+    public final T save(T entity) {
+        if (ValidatorUtil.validate(entity) && executeInTransaction(session -> session.persist(entity))) {
+            return entity;
+        }
+        return null;
     }
 
     @Override
@@ -74,7 +78,7 @@ abstract public class AbstractDaoImplement<T, ID> implements Dao<T, ID> {
             logger.info("Transaction was successfully completed: {}", action);
             return true;
         } catch (Exception e) {
-            if (transaction != null) {
+            if (transaction != null && transaction.getStatus() == TransactionStatus.COMMITTED) {
                 transaction.rollback();
             }
             logger.error("Error transaction: {}", e.getMessage());

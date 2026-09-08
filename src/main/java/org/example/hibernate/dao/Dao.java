@@ -3,7 +3,7 @@ package org.example.hibernate.dao;
 import java.util.List;
 
 public interface Dao<T, ID> {
-    boolean save(T entity);
+    T save(T entity);
 
     boolean update(T entity);
 
