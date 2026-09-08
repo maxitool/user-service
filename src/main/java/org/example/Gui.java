@@ -10,7 +10,6 @@ import org.example.console.readers.primitives.responses.DoubleResponse;
 import org.example.console.readers.primitives.responses.IntResponse;
 import org.example.console.readers.primitives.responses.LongResponse;
 import org.example.console.readers.primitives.responses.StringResponse;
-import org.example.hibernate.dao.UserDaoImplement;
 import org.example.hibernate.entities.User;
 import org.example.hibernate.services.UserService;
 
