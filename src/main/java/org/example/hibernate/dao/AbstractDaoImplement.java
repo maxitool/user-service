@@ -25,10 +25,7 @@ abstract public class AbstractDaoImplement<T, ID> implements Dao<T, ID> {
 
     @Override
     public final T save(T entity) {
-        if (ValidatorUtil.validate(entity) && executeInTransaction(session -> session.persist(entity))) {
-            return entity;
-        }
-        return null;
+        return (ValidatorUtil.validate(entity) && executeInTransaction(session -> session.persist(entity))) ? entity : null;
     }
 
     @Override
