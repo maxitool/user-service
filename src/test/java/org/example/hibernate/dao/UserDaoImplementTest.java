@@ -1,6 +1,5 @@
-package user.dao.test;
+package org.example.hibernate.dao;
 
-import org.example.hibernate.dao.UserDaoImplement;
 import org.example.hibernate.entities.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -8,7 +7,11 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 @Testcontainers
@@ -35,7 +38,6 @@ public class UserDaoImplementTest extends AbstractIntegrationTest {
 
     @Test
     void when_saveUser_then_returnFoundUser() {
-
         User newUser = new User("Liza", "1@4.com", 13);
         userDao.save(newUser);
         User found = userDao.findById(newUser.getId());
