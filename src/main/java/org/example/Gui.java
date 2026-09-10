@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 public class Gui {
-    private final UserService userService = new UserService();
+    private final UserService userService;
 
     private static final String YES = "yes", NO = "no";
     private static final String GO_BACK_GUI = StringConsoleReader.GO_BACK_COMMAND + ".Go back";
@@ -104,6 +104,7 @@ public class Gui {
 
 
     public Gui() {
+        userService = new UserService();
     }
 
     public void run() {

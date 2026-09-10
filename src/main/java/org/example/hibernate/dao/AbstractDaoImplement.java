@@ -5,7 +5,6 @@ import org.example.hibernate.validator.ValidatorUtil;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
-import org.hibernate.resource.transaction.spi.TransactionStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,8 +95,12 @@ abstract public class AbstractDaoImplement<T, ID> implements Dao<T, ID> {
             logger.info("Transaction was successfully completed: {}", action);
             return true;
         } catch (Exception e) {
-            if (transaction != null && transaction.getStatus() == TransactionStatus.COMMITTED) {
-                transaction.rollback();
+            if (transaction != null && transaction.getStatus().canRollback()) {
+                try {
+                    transaction.rollback();
+                } catch (Exception ex) {
+                    logger.error("Rollback failed: {}, for action: {}", ex.getMessage(), action);
+                }
             }
             logger.error("Error transaction: {}", e.getMessage());
         }

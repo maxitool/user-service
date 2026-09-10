@@ -11,6 +11,10 @@
 <p>slf4j</p>
 <p>PostgreSQL</p>
 </br>
+<h3>Для корректной работы проекта необходимо:</h3>
+<p>1) Вставить переменные окружения: DATABASE_URL=jdbc:postgresql://ep-lingering-cake-auei7dld-pooler.c-10.us-east-1.aws.neon.tech:5432/neondb;DATABASE_USER=neondb_owner;DATABASE_PASSWORD=npg_bQTMegkcO58F;DATABASE_SCHEMA=public</p>
+<p>Для Idea IDE это можно сделать следующим образом: More Actions (три точки сверху) -> Edit... -> Environment variables</p>
+</br>
 <h3>База данных:</h3>
 <p>Используем общую PostgreSQL, которая хостится на ресурсе neondb, ниже описаны настройки для подключения к ней</p>
 <p>PGHOST = ep-lingering-cake-auei7dld-pooler.c-10.us-east-1.aws.neon.tech</p>
