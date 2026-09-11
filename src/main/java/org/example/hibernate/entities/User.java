@@ -7,7 +7,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -22,17 +24,23 @@ public class User {
     private Long id;
 
     @Column(nullable = false, length = 100)
+    @NotNull(message = "Name can't be null")
+    @Size(min = 1, max = 100, message = "Length of name must be between 1 and 100")
     private String name;
 
     @Column(unique = true, nullable = false, length = 100)
+    @NotNull(message = "Email can't be null")
+    @Size(min = 1, max = 100, message = "Length of email must be between 1 and 100")
     @Email(message = "Incorrect email format")
     private String email;
 
     @Column(nullable = false)
+    @NotNull(message = "Age can't be null")
     @Positive(message = "Age must be greater than 0")
     private Integer age;
 
     @Column(name = "created_at", nullable = false, updatable = false)
+    @NotNull(message = "CreatedAt can't be null")
     private LocalDateTime createdAt;
 
     public User() {
@@ -50,10 +58,6 @@ public class User {
 
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getName() {

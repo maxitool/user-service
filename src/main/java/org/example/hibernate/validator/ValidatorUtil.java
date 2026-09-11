@@ -20,8 +20,12 @@ public class ValidatorUtil {
         }
     }
 
-    public static <T> boolean validate(T object) {
-        Set<ConstraintViolation<T>> violations = VALIDATOR.validate(object);
+    public static <T> boolean validate(T entity) {
+        if (entity == null) {
+            System.err.println("The entity is null");
+            return false;
+        }
+        Set<ConstraintViolation<T>> violations = VALIDATOR.validate(entity);
         if (!violations.isEmpty()) {
             System.err.println(violations.iterator().next().getMessage());
             return false;

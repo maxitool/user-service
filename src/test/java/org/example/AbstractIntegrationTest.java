@@ -1,4 +1,4 @@
-package org.example.hibernate.dao;
+package org.example;
 
 import org.example.hibernate.config.HibernateUtil;
 import org.hibernate.SessionFactory;

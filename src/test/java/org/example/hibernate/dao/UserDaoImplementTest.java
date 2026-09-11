@@ -1,5 +1,6 @@
 package org.example.hibernate.dao;
 
+import org.example.AbstractIntegrationTest;
 import org.example.hibernate.entities.User;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -70,7 +71,6 @@ public class UserDaoImplementTest extends AbstractIntegrationTest {
     @Test
     void when_findByEmail_then_returnFoundUser() {
         User found = userDao.findByEmail(userIrina2.getEmail());
-
         assertNotNull(found);
         assertEquals(userIrina2.getId(), found.getId());
         assertEquals(userIrina2.getName(), found.getName());
@@ -81,14 +81,12 @@ public class UserDaoImplementTest extends AbstractIntegrationTest {
     @Test
     void when_findByEmail_then_userNotFound() {
         User result = userDao.findByEmail("2@2.com");
-
         assertNull(result);
     }
 
     @Test
     void when_findByName_then_returnListUser() {
         List<User> result = userDao.findByName("Irina");
-
         assertNotNull(result);
         assertEquals(2, result.size());
         assertTrue(result.stream().anyMatch(u -> u.getEmail().equals(userIrina1.getEmail())));
@@ -98,7 +96,6 @@ public class UserDaoImplementTest extends AbstractIntegrationTest {
     @Test
     void when_findByName_then_returnListUserEmpty() {
         List<User> result = userDao.findByName("Lara");
-
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }
@@ -106,7 +103,6 @@ public class UserDaoImplementTest extends AbstractIntegrationTest {
     @Test
     void when_findByAge_then_returnListUser() {
         List<User> result = userDao.findByAge(userIrina1.getAge());
-
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertTrue(result.stream().anyMatch(u -> u.getEmail().equals(userIrina1.getEmail())));
@@ -115,7 +111,6 @@ public class UserDaoImplementTest extends AbstractIntegrationTest {
     @Test
     void when_findByAge_then_returnListEmpty() {
         List<User> result = userDao.findByAge(33);
-
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }
@@ -145,23 +140,22 @@ public class UserDaoImplementTest extends AbstractIntegrationTest {
     @Test
     void when_updateNullEntity_then_returnFalse() {
         boolean result = userDao.update(null);
-
         assertFalse(result);
     }
 
     @Test
-    void when_updateNonExistentEntity_then_returnFalse() {
+    void when_updateNonExistentEntity_then_saveItAndReturnTrue() {
         User nonExistentUser = new User("NonExistent", "test@test.com", 20);
-        nonExistentUser.setId(99999L);
-        boolean result = userDao.update(nonExistentUser);
+        boolean answer = userDao.update(nonExistentUser);
+        assertTrue(answer);
 
-        assertFalse(result);
+        nonExistentUser = userDao.findByEmail(nonExistentUser.getEmail());
+        userDao.delete(nonExistentUser);
     }
 
     @Test
     void when_findAll_then_returnListUser() {
         List<User> result = userDao.findAll();
-
         assertNotNull(result);
         assertEquals(2, result.size());
     }
