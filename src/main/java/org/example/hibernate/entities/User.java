@@ -10,6 +10,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Positive;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 @Entity
@@ -36,6 +37,7 @@ public class User {
 
     public User() {
         this.createdAt = LocalDateTime.now();
+        this.createdAt = this.createdAt.truncatedTo(ChronoUnit.MICROS);
     }
 
     public User(String name, String email, Integer age) {
@@ -43,6 +45,7 @@ public class User {
         this.email = email;
         this.age = age;
         this.createdAt = LocalDateTime.now();
+        this.createdAt = this.createdAt.truncatedTo(ChronoUnit.MICROS);
     }
 
     public Long getId() {
