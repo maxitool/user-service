@@ -2,16 +2,13 @@ package org.example.hibernate.dao;
 
 import org.example.hibernate.entities.User;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 @Testcontainers
@@ -47,6 +44,14 @@ public class UserDaoImplementTest extends AbstractIntegrationTest {
     }
 
     @Test
+    void when_saveUserWithDuplicateEmail_then_returnNull() {
+        User duplicateUser = new User("Duplicate", "1@1.com", 20);
+        User savedUser = userDao.save(duplicateUser);
+        assertNull(savedUser);
+    }
+
+
+    @Test
     void when_findByEmail_then_returnFoundUser() {
         User found = userDao.findByEmail(userIrina2.getEmail());
         assertNotNull(found);
@@ -60,7 +65,7 @@ public class UserDaoImplementTest extends AbstractIntegrationTest {
         assertNull(result);
     }
 
-    @Test
+    @RepeatedTest(3)
     void when_findByName_then_returnListUser() {
         List<User> result = userDao.findByName("Irina");
 
@@ -81,7 +86,7 @@ public class UserDaoImplementTest extends AbstractIntegrationTest {
         assertEquals(0, result.size());
     }
 
-    @Test
+    @RepeatedTest(3)
     void when_findByAge_then_returnListUser() {
         List<User> result = userDao.findByAge(13);
 
@@ -98,7 +103,7 @@ public class UserDaoImplementTest extends AbstractIntegrationTest {
         assertEquals(0, result.size());
     }
 
-    @Test
+    @RepeatedTest(3)
     void when_update_then_return_true() {
         User userUpdate = userDao.findByEmail("1@1.com");
         userUpdate.setName("Lara");
@@ -134,7 +139,7 @@ public class UserDaoImplementTest extends AbstractIntegrationTest {
         assertEquals(3, result.size());
     }
 
-    @Test
+    @RepeatedTest(3)
     void when_delete_then_true() {
         User deleteUser = new User("IrinaForDelete", "delete@test.com", 25);
         boolean isDeleted = userDao.delete(deleteUser);
