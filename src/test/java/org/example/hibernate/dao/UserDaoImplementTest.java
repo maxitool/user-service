@@ -180,7 +180,7 @@ public class UserDaoImplementTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void when_deleteByExistentId_then_true() {
+    void when_deleteByExistentId_then_returnTrue() {
         User deleteUser = new User("IrinaForDelete", "delete@test.com", 25);
         userDao.save(deleteUser);
 
@@ -192,7 +192,7 @@ public class UserDaoImplementTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void when_deleteByNotExistentId_then_false() {
+    void when_deleteByNotExistentId_then_returnFalse() {
         boolean isDeleted = userDao.deleteById(99999L);
         assertFalse(isDeleted);
     }
