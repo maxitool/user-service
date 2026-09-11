@@ -1,69 +1,69 @@
 package org.example.console.readers.primitives;
 
-import org.example.console.readers.primitives.responses.IntResponse;
+import org.example.console.readers.primitives.responses.LongResponse;
 import org.example.console.readers.primitives.responses.StringResponse;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class IntConsoleReaderTest extends AbstractConsoleReaderTest {
+public class LongConsoleReaderTest extends AbstractConsoleReaderTest {
 
     @Test
-    public void when_getInt_then_returnResponseWithOkState() {
-        provideInput("123");
-        IntResponse response = IntConsoleReader.getIntData();
+    public void when_getLong_then_returnResponseWithOkState() {
+        provideInput("3000000000000");
+        LongResponse response = LongConsoleReader.getLongData();
         assertEquals(StringResponse.States.OK, response.state);
-        assertEquals(123, response.intData);
+        assertEquals(3000000000000L, response.longData);
     }
 
     @Test
-    public void when_getNegativeInt_then_returnResponseWithOkState() {
-        provideInput("-123");
-        IntResponse response = IntConsoleReader.getIntData();
+    public void when_getNegativeLong_then_returnResponseWithOkState() {
+        provideInput("-3000000000000");
+        LongResponse response = LongConsoleReader.getLongData();
         assertEquals(StringResponse.States.OK, response.state);
-        assertEquals(-123, response.intData);
+        assertEquals(-3000000000000L, response.longData);
     }
 
     @Test
-    public void when_getIntAndSpaces_then_returnResponseWithOkState() {
-        provideInput(" 100 000 000 ");
-        IntResponse response = IntConsoleReader.getIntData();
+    public void when_getLongAndSpaces_then_returnResponseWithOkState() {
+        provideInput(" 3 000 000 000 000 ");
+        LongResponse response = LongConsoleReader.getLongData();
         assertEquals(StringResponse.States.OK, response.state);
-        assertEquals(100000000, response.intData);
+        assertEquals(3000000000000L, response.longData);
     }
 
     @Test
-    public void when_getBeyondRangeInt_then_returnResponseWithCantConvertState() {
-        provideInput("1232834823482394823948923");
-        IntResponse response = IntConsoleReader.getIntData();
+    public void when_getBeyondRangeLong_then_returnResponseWithCantConvertState() {
+        provideInput(Long.toString(Long.MAX_VALUE) + '0');
+        LongResponse response = LongConsoleReader.getLongData();
         assertEquals(StringResponse.States.CANT_CONVERT, response.state);
     }
 
     @Test
     public void when_getDouble_then_returnResponseWithCantConvertState() {
         provideInput("123.43");
-        IntResponse response = IntConsoleReader.getIntData();
+        LongResponse response = LongConsoleReader.getLongData();
         assertEquals(StringResponse.States.CANT_CONVERT, response.state);
     }
 
     @Test
     public void when_getEmpty_then_returnResponseWithBadResponseState() {
         provideInput("");
-        IntResponse response = IntConsoleReader.getIntData();
+        LongResponse response = LongConsoleReader.getLongData();
         assertEquals(StringResponse.States.BAD_RESPONSE, response.state);
     }
 
     @Test
     public void when_getString_then_returnResponseWithCantConvertState() {
         provideInput("data");
-        IntResponse response = IntConsoleReader.getIntData();
+        LongResponse response = LongConsoleReader.getLongData();
         assertEquals(StringResponse.States.CANT_CONVERT, response.state);
     }
 
     @Test
     public void when_getBoolean_then_returnResponseWithCantConvertState() {
         provideInput("true");
-        IntResponse response = IntConsoleReader.getIntData();
+        LongResponse response = LongConsoleReader.getLongData();
         assertEquals(StringResponse.States.CANT_CONVERT, response.state);
     }
 }

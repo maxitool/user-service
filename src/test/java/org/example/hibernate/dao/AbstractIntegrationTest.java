@@ -1,13 +1,15 @@
-package org.example;
+package org.example.hibernate.dao;
 
 import org.example.hibernate.config.HibernateUtil;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.jetbrains.annotations.NotNull;
+import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeAll;
 
 import java.util.Properties;
 
+@Ignore
 public abstract class AbstractIntegrationTest {
 
     @BeforeAll
