@@ -1,6 +1,5 @@
 package org.example.hibernate.dao;
 
-import org.example.AbstractIntegrationTest;
 import org.example.hibernate.entities.User;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

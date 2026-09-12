@@ -1,12 +1,16 @@
 package org.example.hibernate.services;
 
-import org.example.hibernate.dao.UserDaoImplement;
+import org.example.hibernate.dao.UserDao;
 import org.example.hibernate.entities.User;
 
 import java.util.List;
 
 public class UserService {
-    private final UserDaoImplement userDao = new UserDaoImplement();
+    private final UserDao userDao;
+
+    public UserService(UserDao userDao) {
+        this.userDao = userDao;
+    }
 
     public User save(User user) {
         return userDao.save(user);
