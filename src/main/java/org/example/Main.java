@@ -1,7 +1,7 @@
 package org.example;
 
 public class Main {
-    static void main() {
+    public static void main(String[] args) {
         System.setProperty("org.jboss.logging.provider", "slf4j");
         Gui gui = new Gui();
         gui.run();
