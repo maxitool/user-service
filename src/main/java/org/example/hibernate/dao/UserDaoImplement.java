@@ -22,7 +22,7 @@ public class UserDaoImplement extends AbstractDaoImplement<User, Long> implement
             if (list.isEmpty()) {
                 return null;
             }
-            return list.getFirst();
+            return list.get(0);
         } catch (Exception e) {
             logger.error("Error finding users by email: {}", e.getMessage());
         }
