@@ -28,18 +28,18 @@ import static org.mockito.Mockito.when;
 
 
 @Testcontainers
-public class UserDaoImplementTest extends AbstractIntegrationTest {
+public class UserRepositoryImplementTest extends AbstractIntegrationTest {
 
     @Nested
     class GoodSessionFactoryTest {
-        private UserDaoImplement userDao;
+        private UserRepositoryImplement userDao;
 
         private User userIrina1;
         private User userIrina2;
 
         @BeforeEach
         void SetUpDao() {
-            userDao = new UserDaoImplement(HibernateUtil.getSessionFactory());
+            userDao = new UserRepositoryImplement(HibernateUtil.getSessionFactory());
 
             userIrina1 = new User("Irina", "1@1.com", 13);
             userDao.save(userIrina1);
@@ -269,14 +269,14 @@ public class UserDaoImplementTest extends AbstractIntegrationTest {
     @Tag("SkipInitDatabase")
     class BadSessionFactoryTest {
         private static SessionFactory sessionFactoryMock;
-        private static UserDaoImplement badSessionFactoryDao;
+        private static UserRepositoryImplement badSessionFactoryDao;
         private static User user;
 
         @BeforeAll
         static void SetUpSessionFactoryMock() {
             sessionFactoryMock = mock();
             when(sessionFactoryMock.openSession()).thenThrow(new HibernateException("HibernateException"));
-            badSessionFactoryDao = new UserDaoImplement(sessionFactoryMock);
+            badSessionFactoryDao = new UserRepositoryImplement(sessionFactoryMock);
         }
 
         @BeforeEach
@@ -296,7 +296,7 @@ public class UserDaoImplementTest extends AbstractIntegrationTest {
         }
 
         private void initUserDaoWithNull() {
-            new UserDaoImplement(null);
+            new UserRepositoryImplement(null);
         }
 
 

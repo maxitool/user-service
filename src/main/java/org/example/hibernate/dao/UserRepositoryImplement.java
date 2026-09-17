@@ -7,9 +7,9 @@ import org.hibernate.query.Query;
 
 import java.util.List;
 
-public class UserDaoImplement extends AbstractDaoImplement<User, Long> implements UserDao {
+public class UserRepositoryImplement extends AbstractDaoImplement<User, Long> implements UserRepository {
 
-    public UserDaoImplement(SessionFactory sessionFactory) {
+    public UserRepositoryImplement(SessionFactory sessionFactory) {
         super(User.class, sessionFactory);
     }
 

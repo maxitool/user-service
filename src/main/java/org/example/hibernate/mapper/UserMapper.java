@@ -3,7 +3,9 @@ package org.example.hibernate.mapper;
 import org.example.hibernate.dto.UserCreateUpdateDto;
 import org.example.hibernate.dto.UserDto;
 import org.example.hibernate.entities.User;
+import org.springframework.stereotype.Component;
 
+@Component
 public class UserMapper {
 
     public User toEntity(UserCreateUpdateDto userCreateUpdateDto) {
