@@ -1,11 +1,16 @@
 package org.example.hibernate.dao;
 
 import org.example.hibernate.entities.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
-public interface UserDao extends Dao<User, Long> {
-    User findByEmail(String email);
+@Repository
+public interface UserDao extends JpaRepository<User, Long> {
+
+    Optional<User> findByEmail(String email);
 
     List<User> findByName(String name);
 
