@@ -2,14 +2,12 @@ package org.example.spring.repositories;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
-import lombok.extern.slf4j.Slf4j;
 import org.example.spring.entities.User;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 
 import java.util.List;
 import java.util.Optional;
 
-@Slf4j
 public class UserRepositoryImplement extends SimpleJpaRepository<User, Long> implements UserRepository {
 
     private final EntityManagerFactory entityManagerFactory;
