@@ -1,11 +1,14 @@
 package org.example.hibernate.services;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.example.hibernate.dao.UserRepository;
 import org.example.hibernate.dto.UserCreateUpdateDto;
 import org.example.hibernate.dto.UserDto;
 import org.example.hibernate.entities.User;
 import org.example.hibernate.mapper.UserMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -22,6 +25,13 @@ public class UserService {
     }
 
     public UserDto createUser(UserCreateUpdateDto dto) {
+        if (userRepository.existsByEmail(dto.email())) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "User with email " + dto.email() + " already exists"
+            );
+        }
+
         User user = userMapper.toEntity(dto);
         User saved = userRepository.save(user);
 
@@ -43,9 +53,10 @@ public class UserService {
     public User getUserOrThrow(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException(
+                        new EntityNotFoundException(
                                 "User with id " + id + " not found"
-                        ));
+                        )
+                );
     }
 
     public UserDto findById(Long id) {
@@ -70,9 +81,10 @@ public class UserService {
     public UserDto findByEmail(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() ->
-                        new RuntimeException(
+                        new EntityNotFoundException(
                                 "User with email " + email + " not found"
-                        ));
+                        )
+                );
 
         return userMapper.toDto(user);
     }
