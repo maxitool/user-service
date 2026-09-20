@@ -9,8 +9,6 @@ import org.example.spring.exception.UserAlreadyExistsException;
 import org.example.spring.mappers.UserMapper;
 import org.example.spring.repositories.UserRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -27,15 +25,16 @@ public class UserService {
     }
 
     public UserDto createUser(UserCreateUpdateDto dto) {
-        userRepository.findByEmail(dto.email())
-                .ifPresent(user -> {
-                    throw new UserAlreadyExistsException(String.format(ErrorMessag.USER_ALREADY_EXISTS, dto.email()));
-                });
+        if (userRepository.findByEmail(dto.email()).isPresent()) {
+            throw new UserAlreadyExistsException(dto.email());
+        }
 
         User user = userMapper.toEntity(dto);
         User saved = userRepository.save(user);
+
         return userMapper.toDto(saved);
     }
+
     public UserDto updateUser(Long id, UserCreateUpdateDto dto) {
         User user = getUserOrThrow(id);
 
@@ -46,13 +45,6 @@ public class UserService {
         User saved = userRepository.save(user);
 
         return userMapper.toDto(saved);
-    }
-
-    public User getUserOrThrow(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() ->
-                        new EntityNotFoundException(String.format(ErrorMessag.USER_NOT_FOND_ID, id)
-                        ));
     }
 
     public UserDto findById(Long id) {
@@ -77,8 +69,7 @@ public class UserService {
     public UserDto findByEmail(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() ->
-                        new EntityNotFoundException(String.format(ErrorMessag.USER_NOT_FOND_EMAIL, email)
-                        ));
+                        new EntityNotFoundException(String.format(ErrorMessag.USER_NOT_FOND_EMAIL, email)));
 
         return userMapper.toDto(user);
     }
@@ -95,5 +86,11 @@ public class UserService {
                 .stream()
                 .map(userMapper::toDto)
                 .toList();
+    }
+
+    private User getUserOrThrow(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() ->
+                        new EntityNotFoundException(String.format(ErrorMessag.USER_NOT_FOND_ID, id)));
     }
 }
