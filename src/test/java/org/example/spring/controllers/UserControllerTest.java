@@ -3,27 +3,18 @@ package org.example.spring.controllers;
 import jakarta.persistence.EntityNotFoundException;
 import org.example.spring.dto.UserCreateUpdateDto;
 import org.example.spring.dto.UserDto;
-import org.example.spring.entities.User;
 import org.example.spring.exception.ErrorMessag;
 import org.example.spring.exception.UserAlreadyExistsException;
 import org.example.spring.services.UserService;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.BeanPropertyBindingResult;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -31,12 +22,10 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import tools.jackson.databind.ObjectMapper;
 
-import java.lang.reflect.Method;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -50,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(UserController.class)
 class UserControllerTest {
-    private static final String REQUEST_MAPPING ="/api/users";
+    private static final String REQUEST_MAPPING = "/api/users";
     private static ObjectMapper mapper;
     private static UserDto userIrina1;
     private static UserDto userIrina2;
@@ -66,9 +55,9 @@ class UserControllerTest {
     @BeforeAll
     static void setUp() {
         mapper = new ObjectMapper();
-        userIrina1 = new UserDto(1L,"Irina", "test1@mail.ru", 13);
+        userIrina1 = new UserDto(1L, "Irina", "test1@mail.ru", 13);
         userIrina1CreateUpdateDto = new UserCreateUpdateDto(userIrina1.name(), userIrina1.email(), userIrina1.age());
-        userIrina2 = new UserDto(2L,userIrina1.name(), "test2@mail.ru", userIrina1.age());
+        userIrina2 = new UserDto(2L, userIrina1.name(), "test2@mail.ru", userIrina1.age());
         users = List.of(userIrina1, userIrina2);
     }
 
@@ -115,7 +104,7 @@ class UserControllerTest {
                 .andDo(print())
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.name()))
-                .andExpect(result ->  assertThat(result.getResolvedException())
+                .andExpect(result -> assertThat(result.getResolvedException())
                         .isInstanceOf(EntityNotFoundException.class));
         verify(userService).findById(any(Long.class));
     }
@@ -147,7 +136,7 @@ class UserControllerTest {
                 .andDo(print())
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.name()))
-                .andExpect(result ->  assertThat(result.getResolvedException())
+                .andExpect(result -> assertThat(result.getResolvedException())
                         .isInstanceOf(EntityNotFoundException.class));
         verify(userService).findByEmail(any(String.class));
     }
@@ -158,7 +147,7 @@ class UserControllerTest {
                 .andDo(print())
                 .andExpect(status().isMethodNotAllowed())
                 .andExpect(jsonPath("$.status").value(HttpStatus.METHOD_NOT_ALLOWED.name()))
-                .andExpect(result ->  assertThat(result.getResolvedException())
+                .andExpect(result -> assertThat(result.getResolvedException())
                         .isInstanceOf(MissingServletRequestParameterException.class));
     }
 
@@ -188,7 +177,7 @@ class UserControllerTest {
                 .andDo(print())
                 .andExpect(status().isMethodNotAllowed())
                 .andExpect(jsonPath("$.status").value(HttpStatus.METHOD_NOT_ALLOWED.name()))
-                .andExpect(result ->  assertThat(result.getResolvedException())
+                .andExpect(result -> assertThat(result.getResolvedException())
                         .isInstanceOf(MissingServletRequestParameterException.class));
     }
 
@@ -218,7 +207,7 @@ class UserControllerTest {
                 .andDo(print())
                 .andExpect(status().isMethodNotAllowed())
                 .andExpect(jsonPath("$.status").value(HttpStatus.METHOD_NOT_ALLOWED.name()))
-                .andExpect(result ->  assertThat(result.getResolvedException())
+                .andExpect(result -> assertThat(result.getResolvedException())
                         .isInstanceOf(MissingServletRequestParameterException.class));
     }
 
@@ -252,7 +241,7 @@ class UserControllerTest {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.name()))
-                .andExpect(result ->  assertThat(result.getResolvedException())
+                .andExpect(result -> assertThat(result.getResolvedException())
                         .isInstanceOf(MethodArgumentNotValidException.class));
     }
 
@@ -270,7 +259,7 @@ class UserControllerTest {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.name()))
-                .andExpect(result ->  assertThat(result.getResolvedException())
+                .andExpect(result -> assertThat(result.getResolvedException())
                         .isInstanceOf(MethodArgumentNotValidException.class));
     }
 
@@ -285,7 +274,7 @@ class UserControllerTest {
                 .andDo(print())
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.status").value(HttpStatus.CONFLICT.name()))
-                .andExpect(result ->  assertThat(result.getResolvedException())
+                .andExpect(result -> assertThat(result.getResolvedException())
                         .isInstanceOf(UserAlreadyExistsException.class));
         verify(userService).createUser(any(UserCreateUpdateDto.class));
     }
@@ -318,7 +307,7 @@ class UserControllerTest {
                 .andDo(print())
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.name()))
-                .andExpect(result ->  assertThat(result.getResolvedException())
+                .andExpect(result -> assertThat(result.getResolvedException())
                         .isInstanceOf(EntityNotFoundException.class));
         verify(userService).updateUser(any(Long.class), any(UserCreateUpdateDto.class));
     }
@@ -341,7 +330,7 @@ class UserControllerTest {
                 .andDo(print())
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.name()))
-                .andExpect(result ->  assertThat(result.getResolvedException())
+                .andExpect(result -> assertThat(result.getResolvedException())
                         .isInstanceOf(EntityNotFoundException.class));
         verify(userService).deleteById(any(Long.class));
     }
@@ -356,7 +345,7 @@ class UserControllerTest {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.name()))
-                .andExpect(result ->  assertThat(result.getResolvedException())
+                .andExpect(result -> assertThat(result.getResolvedException())
                         .isInstanceOf(HttpMessageNotReadableException.class));
     }
 
@@ -366,7 +355,7 @@ class UserControllerTest {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.name()))
-                .andExpect(result ->  assertThat(result.getResolvedException())
+                .andExpect(result -> assertThat(result.getResolvedException())
                         .isInstanceOf(MethodArgumentTypeMismatchException.class));
     }
 
@@ -376,7 +365,7 @@ class UserControllerTest {
                 .andDo(print())
                 .andExpect(status().isMethodNotAllowed())
                 .andExpect(jsonPath("$.status").value(HttpStatus.METHOD_NOT_ALLOWED.name()))
-                .andExpect(result ->  assertThat(result.getResolvedException())
+                .andExpect(result -> assertThat(result.getResolvedException())
                         .isInstanceOf(HttpRequestMethodNotSupportedException.class));
     }
 
@@ -386,7 +375,7 @@ class UserControllerTest {
                 .andDo(print())
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.name()))
-                .andExpect(result ->  assertThat(result.getResolvedException())
+                .andExpect(result -> assertThat(result.getResolvedException())
                         .isInstanceOf(NoResourceFoundException.class));
     }
 
@@ -398,7 +387,7 @@ class UserControllerTest {
                 .andDo(print())
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.status").value(HttpStatus.INTERNAL_SERVER_ERROR.name()))
-                .andExpect(result ->  assertThat(result.getResolvedException())
+                .andExpect(result -> assertThat(result.getResolvedException())
                         .isInstanceOf(RuntimeException.class));
     }
 }
