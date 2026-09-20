@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.example.spring.dto.UserCreateUpdateDto;
 import org.example.spring.dto.UserDto;
 import org.example.spring.entities.User;
+import org.example.spring.exception.UserAlreadyExistsException;
 import org.example.spring.mappers.UserMapper;
 import org.example.spring.repositories.UserRepository;
 import org.junit.jupiter.api.BeforeAll;
@@ -74,8 +75,12 @@ class UserServiceTest {
         verify(userMapper).toDto(any(User.class));
     }
 
-    //add when_saveUserWithDuplicateEmail_then_returnThrow
+    @Test
+    void when_saveUserWithDuplicateEmail_then_throwUserAlreadyExistsException() {
+        UserCreateUpdateDto newUser = new UserCreateUpdateDto("Irina", userIrina1.getEmail(), 13);
 
+        assertThrows(UserAlreadyExistsException.class, () -> userService.createUser(newUser));
+    }
 
     @Test
     void when_updateExistentUser_then_returnUserDtoAndVerify() {

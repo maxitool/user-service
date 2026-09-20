@@ -6,7 +6,6 @@ import org.example.spring.dto.UserCreateUpdateDto;
 import org.example.spring.dto.UserDto;
 import org.example.spring.services.UserService;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,28 +28,33 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping
-    public ResponseEntity<List<UserDto>> findAll() {
-        return ResponseEntity.ok(userService.findAll());
+    @ResponseStatus(HttpStatus.OK)
+    public List<UserDto> findAll() {
+        return userService.findAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserDto> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.findById(id));
+    @ResponseStatus(HttpStatus.FOUND)
+    public UserDto findById(@PathVariable Long id) {
+        return userService.findById(id);
     }
 
-    @GetMapping("/findByEmail/{email}")
-    public ResponseEntity<UserDto> findByEmail(@PathVariable String email) {
-        return ResponseEntity.ok(userService.findByEmail(email));
+    @GetMapping("/findByEmail")
+    @ResponseStatus(HttpStatus.FOUND)
+    public UserDto findByEmail(@RequestParam String email) {
+        return userService.findByEmail(email);
     }
 
-    @GetMapping("/findByName/{name}")
-    public ResponseEntity<List<UserDto>> findByName(@PathVariable String name) {
-        return ResponseEntity.ok(userService.findByName(name));
+    @GetMapping("/findByName")
+    @ResponseStatus(HttpStatus.FOUND)
+    public List<UserDto> findByName(@RequestParam String name) {
+        return userService.findByName(name);
     }
 
-    @GetMapping("/findByAge/{age}")
-    public ResponseEntity<List<UserDto>> findByAge(@PathVariable Integer age) {
-        return ResponseEntity.ok(userService.findByAge(age));
+    @GetMapping("/findByAge")
+    @ResponseStatus(HttpStatus.FOUND)
+    public List<UserDto> findByAge(@RequestParam Integer age) {
+        return userService.findByAge(age);
     }
 
     @PostMapping()
@@ -59,8 +64,9 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @RequestBody @Valid UserCreateUpdateDto userDto) {
-        return ResponseEntity.ok(userService.updateUser(id, userDto));
+    @ResponseStatus(HttpStatus.OK)
+    public UserDto updateUser(@PathVariable Long id, @RequestBody @Valid UserCreateUpdateDto userDto) {
+        return userService.updateUser(id, userDto);
     }
 
     @DeleteMapping("/{id}")

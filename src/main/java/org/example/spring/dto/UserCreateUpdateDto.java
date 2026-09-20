@@ -33,7 +33,6 @@ public record UserCreateUpdateDto(
                 example = "25",
                 minimum = "1"
         )
-        @NotBlank(message = "Age can't be null")
         @NotNull(message = "Age can't be null")
         @Positive(message = "Age must be greater than 0")
         Integer age) {
