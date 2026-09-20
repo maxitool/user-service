@@ -25,7 +25,7 @@ public class UserService {
     }
 
     public UserDto createUser(UserCreateUpdateDto dto) {
-        if (userRepository.existsByEmail(dto.email())) {
+        if (userRepository.findByEmail(dto.email()).isPresent()) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
                     "User with email " + dto.email() + " already exists"
