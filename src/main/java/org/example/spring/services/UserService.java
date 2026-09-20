@@ -41,14 +41,6 @@ public class UserService {
         return userMapper.toDto(saved);
     }
 
-    public User getUserOrThrow(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() ->
-                        new EntityNotFoundException(
-                                "User with id " + id + " not found"
-                        ));
-    }
-
     public UserDto findById(Long id) {
         User user = getUserOrThrow(id);
 
@@ -90,5 +82,13 @@ public class UserService {
                 .stream()
                 .map(userMapper::toDto)
                 .toList();
+    }
+
+    private User getUserOrThrow(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() ->
+                        new EntityNotFoundException(
+                                "User with id " + id + " not found"
+                        ));
     }
 }

@@ -6,7 +6,7 @@ public final class ErrorMessag {
 
     public static final String UNKNOWN_TYPE = "Unknown type";
 
-    public static final String VALIDATION_ERROR = "Ошибка валидации";
+    public static final String VALIDATION_ERROR = "Validation error";
 
     public static final String METHOD_NOT_ALLOWED = "Method Not Allowed";
 

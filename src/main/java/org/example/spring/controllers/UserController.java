@@ -54,8 +54,8 @@ public class UserController {
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<UserDto> createUser(@RequestBody @Valid UserCreateUpdateDto userDto) {
-        return ResponseEntity.ok(userService.createUser(userDto));
+    public UserDto createUser(@RequestBody @Valid UserCreateUpdateDto userDto) {
+        return userService.createUser(userDto);
     }
 
     @PutMapping("/{id}")

@@ -18,7 +18,6 @@ public record UserCreateUpdateDto(
         @Size(min = 1, max = 100, message = "Length of email must be between 1 and 100")
         @Email(message = "Incorrect email format")
         String email,
-        @NotBlank(message = "Age can't be null")
         @NotNull(message = "Age can't be null")
         @Positive(message = "Age must be greater than 0")
         Integer age) {
