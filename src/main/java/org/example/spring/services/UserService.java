@@ -4,6 +4,8 @@ import jakarta.persistence.EntityNotFoundException;
 import org.example.spring.dto.UserCreateUpdateDto;
 import org.example.spring.dto.UserDto;
 import org.example.spring.entities.User;
+import org.example.spring.exception.ErrorMessag;
+import org.example.spring.exception.UserAlreadyExistsException;
 import org.example.spring.mappers.UserMapper;
 import org.example.spring.repositories.UserRepository;
 import org.springframework.stereotype.Service;
@@ -25,16 +27,13 @@ public class UserService {
     }
 
     public UserDto createUser(UserCreateUpdateDto dto) {
-        if (userRepository.findByEmail(dto.email()).isPresent()) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "User with email " + dto.email() + " already exists"
-            );
-        }
+        userRepository.findByEmail(dto.email())
+                .ifPresent(user -> {
+                    throw new UserAlreadyExistsException(String.format(ErrorMessag.USER_ALREADY_EXISTS, dto.email()));
+                });
 
         User user = userMapper.toEntity(dto);
         User saved = userRepository.save(user);
-
         return userMapper.toDto(saved);
     }
     public UserDto updateUser(Long id, UserCreateUpdateDto dto) {
@@ -52,8 +51,7 @@ public class UserService {
     public User getUserOrThrow(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() ->
-                        new EntityNotFoundException(
-                                "User with id " + id + " not found"
+                        new EntityNotFoundException(String.format(ErrorMessag.USER_NOT_FOND_ID, id)
                         ));
     }
 
@@ -79,8 +77,7 @@ public class UserService {
     public UserDto findByEmail(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() ->
-                        new EntityNotFoundException(
-                                "User with email " + email + " not found"
+                        new EntityNotFoundException(String.format(ErrorMessag.USER_NOT_FOND_EMAIL, email)
                         ));
 
         return userMapper.toDto(user);
