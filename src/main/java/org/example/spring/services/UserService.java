@@ -9,6 +9,8 @@ import org.example.spring.exception.UserAlreadyExistsException;
 import org.example.spring.mappers.UserMapper;
 import org.example.spring.repositories.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -30,12 +32,10 @@ public class UserService {
                     throw new UserAlreadyExistsException(String.format(ErrorMessag.USER_ALREADY_EXISTS, dto.email()));
                 });
 
-
         User user = userMapper.toEntity(dto);
         User saved = userRepository.save(user);
         return userMapper.toDto(saved);
     }
-
     public UserDto updateUser(Long id, UserCreateUpdateDto dto) {
         User user = getUserOrThrow(id);
 
