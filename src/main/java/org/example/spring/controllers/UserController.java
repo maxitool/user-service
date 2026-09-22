@@ -62,7 +62,7 @@ public class UserController {
             description = "Returns a user with the specified identifier"
     )
     @ApiResponse(
-            responseCode = "302",
+            responseCode = "200",
             description = "User successfully found",
             content = @Content(
                     schema = @Schema(implementation = UserDto.class)
@@ -73,7 +73,7 @@ public class UserController {
             description = "User not found"
     )
     @GetMapping("/{id}")
-    @ResponseStatus(HttpStatus.FOUND)
+    @ResponseStatus(HttpStatus.OK)
     public UserDto findById(@PathVariable Long id) {
         return userService.findById(id);
     }
@@ -84,7 +84,7 @@ public class UserController {
     )
     @ApiResponses({
             @ApiResponse(
-                    responseCode = "302",
+                    responseCode = "200",
                     description = "User successfully found",
                     content = @Content(
                             schema = @Schema(implementation = UserDto.class)
@@ -97,7 +97,7 @@ public class UserController {
     })
 
     @GetMapping("/findByEmail")
-    @ResponseStatus(HttpStatus.FOUND)
+    @ResponseStatus(HttpStatus.OK)
     public UserDto findByEmail(@RequestParam String email) {
         return userService.findByEmail(email);
     }
@@ -107,7 +107,7 @@ public class UserController {
             description = "Returns users with the specified name"
     )
     @ApiResponse(
-            responseCode = "302",
+            responseCode = "200",
             description = "Search completed successfully",
             content = @Content(
                     array = @ArraySchema(
@@ -116,7 +116,7 @@ public class UserController {
             )
     )
     @GetMapping("/findByName")
-    @ResponseStatus(HttpStatus.FOUND)
+    @ResponseStatus(HttpStatus.OK)
     public List<UserDto> findByName(@RequestParam String name) {
         return userService.findByName(name);
     }
@@ -126,7 +126,7 @@ public class UserController {
             description = "Returns users with the specified age"
     )
     @ApiResponse(
-            responseCode = "302",
+            responseCode = "200",
             description = "Search completed successfully",
             content = @Content(
                     array = @ArraySchema(
@@ -135,7 +135,7 @@ public class UserController {
             )
     )
     @GetMapping("/findByAge")
-    @ResponseStatus(HttpStatus.FOUND)
+    @ResponseStatus(HttpStatus.OK)
     public List<UserDto> findByAge(@RequestParam Integer age) {
         return userService.findByAge(age);
     }

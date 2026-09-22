@@ -79,12 +79,12 @@ public class GlobalExceptionHandler {
 
     public ResponseEntity<ErrorDto> handleServletRequestParameter(MissingServletRequestParameterException ex, HttpServletRequest request) {
 
-        ErrorDto errorDto = ErrorDto.of(HttpStatus.METHOD_NOT_ALLOWED.name(),
+        ErrorDto errorDto = ErrorDto.of(HttpStatus.BAD_REQUEST.name(),
                 ErrorMessag.MISSING_PARAMETER + ex);
 
 
         logError(HttpStatus.valueOf(errorDto.status()), request, errorDto);
-        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(errorDto);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDto);
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
