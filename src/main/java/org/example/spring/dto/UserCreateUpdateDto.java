@@ -15,16 +15,14 @@ public record UserCreateUpdateDto(
                 description = "User name",
                 example = "Ivan Ivanov"
         )
-        @NotBlank(message = "Name can't be null")
-        @NotNull(message = "Name can't be null")
+        @NotBlank(message = "Name can't be blank")
         @Size(min = 1, max = 100, message = "Length of name must be between 1 and 100")
         String name,
         @Schema(
                 description = "Unique user email",
                 example = "ivan@example.com"
         )
-        @NotBlank(message = "Email can't be null")
-        @NotNull(message = "Email can't be null")
+        @NotBlank(message = "Email can't be blank")
         @Size(min = 1, max = 100, message = "Length of email must be between 1 and 100")
         @Email(message = "Incorrect email format")
         String email,

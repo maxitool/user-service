@@ -86,7 +86,7 @@ class UserControllerTest {
 
         mockMvc.perform(get(REQUEST_MAPPING + "/{id}", userIrina1.id()))
                 .andDo(print())
-                .andExpect(status().isFound())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(userIrina1.id()))
                 .andExpect(jsonPath("$.name").value(userIrina1.name()))
                 .andExpect(jsonPath("$.email").value(userIrina1.email()))
@@ -116,7 +116,7 @@ class UserControllerTest {
         mockMvc.perform(get(REQUEST_MAPPING + "/findByEmail")
                         .param("email", userIrina1.email()))
                 .andDo(print())
-                .andExpect(status().isFound())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(userIrina1.id()))
                 .andExpect(jsonPath("$.name").value(userIrina1.name()))
                 .andExpect(jsonPath("$.email").value(userIrina1.email()))
@@ -142,11 +142,11 @@ class UserControllerTest {
     }
 
     @Test
-    void when_findByEmailWithoutParam_then_returnNotFound() throws Exception {
+    void when_findByEmailWithoutParam_then_returnBadRequest() throws Exception {
         mockMvc.perform(get(REQUEST_MAPPING + "/findByEmail"))
                 .andDo(print())
-                .andExpect(status().isMethodNotAllowed())
-                .andExpect(jsonPath("$.status").value(HttpStatus.METHOD_NOT_ALLOWED.name()))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.name()))
                 .andExpect(result -> assertThat(result.getResolvedException())
                         .isInstanceOf(MissingServletRequestParameterException.class));
     }
@@ -158,7 +158,7 @@ class UserControllerTest {
         mockMvc.perform(get(REQUEST_MAPPING + "/findByName")
                         .param("name", userIrina1.name()))
                 .andDo(print())
-                .andExpect(status().isFound())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").value(users.size()))
                 .andExpect(jsonPath("$[0].id").value(users.get(0).id()))
                 .andExpect(jsonPath("$[0].name").value(users.get(0).name()))
@@ -172,11 +172,11 @@ class UserControllerTest {
     }
 
     @Test
-    void when_findByNameWithoutParam_then_returnNotFound() throws Exception {
+    void when_findByNameWithoutParam_then_returnBadRequest() throws Exception {
         mockMvc.perform(get(REQUEST_MAPPING + "/findByName"))
                 .andDo(print())
-                .andExpect(status().isMethodNotAllowed())
-                .andExpect(jsonPath("$.status").value(HttpStatus.METHOD_NOT_ALLOWED.name()))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.name()))
                 .andExpect(result -> assertThat(result.getResolvedException())
                         .isInstanceOf(MissingServletRequestParameterException.class));
     }
@@ -188,7 +188,7 @@ class UserControllerTest {
         mockMvc.perform(get(REQUEST_MAPPING + "/findByAge")
                         .param("age", userIrina1.age().toString()))
                 .andDo(print())
-                .andExpect(status().isFound())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").value(users.size()))
                 .andExpect(jsonPath("$[0].id").value(users.get(0).id()))
                 .andExpect(jsonPath("$[0].name").value(users.get(0).name()))
@@ -202,11 +202,11 @@ class UserControllerTest {
     }
 
     @Test
-    void when_findByAgeWithoutParam_then_returnNotFound() throws Exception {
+    void when_findByAgeWithoutParam_then_returnBadRequest() throws Exception {
         mockMvc.perform(get(REQUEST_MAPPING + "/findByAge"))
                 .andDo(print())
-                .andExpect(status().isMethodNotAllowed())
-                .andExpect(jsonPath("$.status").value(HttpStatus.METHOD_NOT_ALLOWED.name()))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(HttpStatus.BAD_REQUEST.name()))
                 .andExpect(result -> assertThat(result.getResolvedException())
                         .isInstanceOf(MissingServletRequestParameterException.class));
     }
