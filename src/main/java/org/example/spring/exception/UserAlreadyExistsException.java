@@ -4,7 +4,7 @@ import org.springframework.http.HttpStatus;
 
 public class UserAlreadyExistsException extends BusinessLogicExceptionsAbstract {
     public UserAlreadyExistsException(String email) {
-        super(String.format(ErrorMessag.USER_ALREADY_EXISTS, email));
+        super(String.format(ErrorMessage.USER_ALREADY_EXISTS, email));
     }
 
     @Override

@@ -1,8 +1,8 @@
 package org.example.spring.services;
 
 import jakarta.persistence.EntityNotFoundException;
-import org.example.spring.dto.UserCreateUpdateDto;
-import org.example.spring.dto.UserDto;
+import org.example.spring.dto.user_service.UserCreateUpdateDto;
+import org.example.spring.dto.user_service.UserDto;
 import org.example.spring.entities.User;
 import org.example.spring.exception.UserAlreadyExistsException;
 import org.example.spring.mappers.UserMapper;

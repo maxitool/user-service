@@ -1,4 +1,4 @@
-package org.example.spring.dto;
+package org.example.spring.dto.user_service;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;

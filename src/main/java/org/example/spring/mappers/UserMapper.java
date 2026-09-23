@@ -1,7 +1,7 @@
 package org.example.spring.mappers;
 
-import org.example.spring.dto.UserCreateUpdateDto;
-import org.example.spring.dto.UserDto;
+import org.example.spring.dto.user_service.UserCreateUpdateDto;
+import org.example.spring.dto.user_service.UserDto;
 import org.example.spring.entities.User;
 import org.springframework.stereotype.Component;
 

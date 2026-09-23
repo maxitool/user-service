@@ -1,7 +1,7 @@
 package org.example.spring.exception;
 
-public final class ErrorMessag {
-    private ErrorMessag() {
+public final class ErrorMessage {
+    private ErrorMessage() {
     }
 
     public static final String MALFORMED_JSON_REQUEST = "Malformed JSON Request";

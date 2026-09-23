@@ -2,10 +2,10 @@ package org.example.spring.services;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
-import org.example.spring.dto.UserCreateUpdateDto;
-import org.example.spring.dto.UserDto;
+import org.example.spring.dto.user_service.UserCreateUpdateDto;
+import org.example.spring.dto.user_service.UserDto;
 import org.example.spring.entities.User;
-import org.example.spring.exception.ErrorMessag;
+import org.example.spring.exception.ErrorMessage;
 import org.example.spring.exception.UserAlreadyExistsException;
 import org.example.spring.mappers.UserMapper;
 import org.example.spring.repositories.UserRepository;
@@ -102,7 +102,7 @@ public class UserService {
     public UserDto findByEmail(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() ->
-                        new EntityNotFoundException(String.format(ErrorMessag.USER_NOT_FOND_EMAIL, email)));
+                        new EntityNotFoundException(String.format(ErrorMessage.USER_NOT_FOND_EMAIL, email)));
         log.info("User with {} email retrieved.", email);
 
         UserDto result = userMapper.toDto(user);
@@ -136,7 +136,7 @@ public class UserService {
     private User getUserOrThrow(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() ->
-                        new EntityNotFoundException(String.format(ErrorMessag.USER_NOT_FOND_ID, id)));
+                        new EntityNotFoundException(String.format(ErrorMessage.USER_NOT_FOND_ID, id)));
         log.info("User with {} id retrieved.", id);
         return user;
     }

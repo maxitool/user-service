@@ -23,7 +23,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorDto> handleReadableException(HttpMessageNotReadableException ex, HttpServletRequest request) {
         ErrorDto errorDto = ErrorDto.of(
                 HttpStatus.BAD_REQUEST.name(),
-                ErrorMessag.MALFORMED_JSON_REQUEST + ex
+                ErrorMessage.MALFORMED_JSON_REQUEST + ex
 
         );
         logError(HttpStatus.valueOf(errorDto.status()), request, errorDto);
@@ -36,10 +36,10 @@ public class GlobalExceptionHandler {
 
         String requiredType = (ex.getRequiredType() != null)
                 ? ex.getRequiredType().getSimpleName()
-                : ErrorMessag.UNKNOWN_TYPE;
+                : ErrorMessage.UNKNOWN_TYPE;
 
         String message = String.format(
-                ErrorMessag.UNKNOWN_TYPE,
+                ErrorMessage.UNKNOWN_TYPE,
                 ex.getName(),
                 ex.getValue(),
                 requiredType
@@ -57,7 +57,7 @@ public class GlobalExceptionHandler {
 
         ErrorDto errorDto = ErrorDto.of(
                 HttpStatus.BAD_REQUEST.name(),
-                ErrorMessag.VALIDATION_ERROR + ex
+                ErrorMessage.VALIDATION_ERROR + ex
         );
 
         logError(HttpStatus.valueOf(errorDto.status()), request, errorDto);
@@ -69,7 +69,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorDto> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex, HttpServletRequest request) {
 
         ErrorDto errorDto = ErrorDto.of(HttpStatus.METHOD_NOT_ALLOWED.name(),
-                ErrorMessag.METHOD_NOT_ALLOWED + ex);
+                ErrorMessage.METHOD_NOT_ALLOWED + ex);
 
         logError(HttpStatus.valueOf(errorDto.status()), request, errorDto);
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(errorDto);
@@ -80,7 +80,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorDto> handleServletRequestParameter(MissingServletRequestParameterException ex, HttpServletRequest request) {
 
         ErrorDto errorDto = ErrorDto.of(HttpStatus.BAD_REQUEST.name(),
-                ErrorMessag.MISSING_PARAMETER + ex);
+                ErrorMessage.MISSING_PARAMETER + ex);
 
 
         logError(HttpStatus.valueOf(errorDto.status()), request, errorDto);
@@ -92,7 +92,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorDto> handleNoResourceFound(NoResourceFoundException ex, HttpServletRequest request) {
 
         ErrorDto errorDto = ErrorDto.of(HttpStatus.NOT_FOUND.name(),
-                ErrorMessag.RESOURCE_NOT_FOUND + ex);
+                ErrorMessage.RESOURCE_NOT_FOUND + ex);
 
         logError(HttpStatus.valueOf(errorDto.status()), request, errorDto);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorDto);
@@ -127,7 +127,7 @@ public class GlobalExceptionHandler {
 
         ErrorDto error = ErrorDto.of(
                 HttpStatus.INTERNAL_SERVER_ERROR.name(),
-                ErrorMessag.INTERNAL_ERROR + ex
+                ErrorMessage.INTERNAL_ERROR + ex
         );
 
         logError(HttpStatus.valueOf(error.status()), request, error);

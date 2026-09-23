@@ -1,9 +1,9 @@
 package org.example.spring.controllers;
 
 import jakarta.persistence.EntityNotFoundException;
-import org.example.spring.dto.UserCreateUpdateDto;
-import org.example.spring.dto.UserDto;
-import org.example.spring.exception.ErrorMessag;
+import org.example.spring.dto.user_service.UserCreateUpdateDto;
+import org.example.spring.dto.user_service.UserDto;
+import org.example.spring.exception.ErrorMessage;
 import org.example.spring.exception.UserAlreadyExistsException;
 import org.example.spring.services.UserService;
 import org.junit.jupiter.api.BeforeAll;
@@ -97,7 +97,7 @@ class UserControllerTest {
     @Test
     void when_findByNonExistentId_then_returnNotFoundAndVerify() throws Exception {
         EntityNotFoundException exception = new EntityNotFoundException(
-                String.format(ErrorMessag.USER_NOT_FOND_ID, 9999L));
+                String.format(ErrorMessage.USER_NOT_FOND_ID, 9999L));
         when(userService.findById(9999L)).thenThrow(exception);
 
         mockMvc.perform(get(REQUEST_MAPPING + "/{id}", 9999L))
@@ -128,7 +128,7 @@ class UserControllerTest {
     void when_findByNonExistentEmail_then_returnNotFoundAndVerify() throws Exception {
         String email = "Non" + userIrina1.email();
         EntityNotFoundException exception = new EntityNotFoundException(
-                String.format(ErrorMessag.USER_NOT_FOND_EMAIL, email));
+                String.format(ErrorMessage.USER_NOT_FOND_EMAIL, email));
         when(userService.findByEmail(email)).thenThrow(exception);
 
         mockMvc.perform(get(REQUEST_MAPPING + "/findByEmail")
@@ -298,7 +298,7 @@ class UserControllerTest {
     @Test
     void when_updateUserWithNonExistentId_then_returnNotFoundAndVerify() throws Exception {
         EntityNotFoundException exception = new EntityNotFoundException(
-                String.format(ErrorMessag.USER_NOT_FOND_ID, 9999L));
+                String.format(ErrorMessage.USER_NOT_FOND_ID, 9999L));
         when(userService.updateUser(9999L, userIrina1CreateUpdateDto)).thenThrow(exception);
 
         mockMvc.perform(put(REQUEST_MAPPING + "/{id}", 9999L)
@@ -323,7 +323,7 @@ class UserControllerTest {
     @Test
     void when_deleteByNonExistentId_then_returnNotFoundAndVerify() throws Exception {
         EntityNotFoundException exception = new EntityNotFoundException(
-                String.format(ErrorMessag.USER_NOT_FOND_ID, 9999L));
+                String.format(ErrorMessage.USER_NOT_FOND_ID, 9999L));
         doThrow(exception).when(userService).deleteById(9999L);
 
         mockMvc.perform(delete(REQUEST_MAPPING + "/{id}", 9999L))
