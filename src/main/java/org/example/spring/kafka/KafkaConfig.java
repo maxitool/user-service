@@ -1,12 +1,16 @@
 package org.example.spring.kafka;
 
+import org.apache.kafka.clients.admin.AdminClientConfig;
+import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.example.spring.dto.notification_service.NotificationDto;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka; // Обязательно добавьте эту аннотацию!
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
+import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.*;
 
 import java.util.HashMap;
@@ -15,6 +19,7 @@ import java.util.Map;
 @Configuration
 @EnableKafka
 public class KafkaConfig {
+
 
     @Bean
     public ProducerFactory<String, NotificationDto> producerFactory() {
@@ -50,12 +55,24 @@ public class KafkaConfig {
         return new DefaultKafkaConsumerFactory<>(configProps);
     }
 
-
-
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, NotificationDto> kafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, NotificationDto> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
         return factory;
+    }
+
+    @Bean
+    public KafkaAdmin kafkaAdmin () {
+        Map<String, Object> config = new HashMap<>();
+        config.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092,localhost:9095,localhost:9096");
+        return new KafkaAdmin(config);
+    }
+    @Bean
+    public NewTopic newTopic () {
+        return TopicBuilder.name("ui-notification")
+                .partitions(3)
+                .replicas(2)
+                .build();
     }
 }
