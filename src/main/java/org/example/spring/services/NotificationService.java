@@ -1,5 +1,6 @@
 package org.example.spring.services;
 
+import io.swagger.v3.oas.annotations.headers.Header;
 import org.example.spring.dto.notification_service.NotificationDto;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
@@ -8,17 +9,20 @@ import org.springframework.stereotype.Service;
 public class NotificationService {
 
     @KafkaListener(
-            topics = "ui-notifications",
+            topics = "ui-notification",
             groupId = "notification-group",
             containerFactory = "kafkaListenerContainerFactory"
     )
 
-    public void listenNotifications (NotificationDto notification) {
-        System.out.println("=================================================");
-        System.out.println("🔔 ИНФОРМАЦИЯ ДЛЯ СЕРВИСА УВЕДОМЛЕНИЙ (RECORD):");
-        System.out.println("Кому отправить (ID): " + notification.userEmail());
-        System.out.println("Тип отправки: " + notification.operationType());
-        System.out.println("Текст сообщения: " + notification.message());
-        System.out.println("=================================================");
+    public void listenNotifications(
+            NotificationDto notification) {
+
     }
 }
+//@KafkaListener(topics = "ui-notification", groupId = "notification-group")
+//public void listenNotifications(
+//        NotificationDto notification,
+//        @Header("user-email") String userEmail,
+//        // Достаем автоматически сгенерированное брокером время!
+//        @Header(org.springframework.kafka.support.KafkaHeaders.RECEIVED_TIMESTAMP) long timestamp
+//)

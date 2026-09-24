@@ -2,16 +2,23 @@ package org.example.spring.services;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.header.internals.RecordHeader;
+import org.example.spring.constants.AccountNotificationMessages;
+import org.example.spring.dto.notification_service.NotificationDto;
 import org.example.spring.dto.user_service.UserCreateUpdateDto;
 import org.example.spring.dto.user_service.UserDto;
 import org.example.spring.entities.User;
+import org.example.spring.enums.TypeOperation;
 import org.example.spring.exception.ErrorMessage;
 import org.example.spring.exception.UserAlreadyExistsException;
 import org.example.spring.mappers.UserMapper;
 import org.example.spring.repositories.UserRepository;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Service
@@ -21,9 +28,11 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final KafkaTemplate<String, NotificationDto> kafkaTemplate;
 
     public UserService(UserRepository userRepository,
-                       UserMapper userMapper) {
+                       UserMapper userMapper,
+                       KafkaTemplate<String, NotificationDto> kafkaTemplate) {
         if (userRepository == null) {
             log.error("userRepository is null");
         }
@@ -32,6 +41,7 @@ public class UserService {
             log.error("userMapper is null");
         }
         this.userMapper = userMapper;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
     public UserDto createUser(UserCreateUpdateDto dto) {
@@ -49,6 +59,12 @@ public class UserService {
 
         UserDto result = userMapper.toDto(saved);
         log.debug("User {} to UserDto entity {} was successful.", saved, result);
+
+        NotificationDto event = NotificationDto.of(dto.email(), TypeOperation.CREATE, AccountNotificationMessages.ACCOUNT_CREATED);
+
+        ProducerRecord<String, NotificationDto> producerRecord = createKafkaEvent(event);
+        kafkaTemplate.send(producerRecord);
+        log.info("Kafka send event {} ", producerRecord);
 
         return result;
     }
@@ -95,6 +111,11 @@ public class UserService {
         User user = getUserOrThrow(id);
 
         userRepository.delete(user);
+        NotificationDto event = NotificationDto.of(user.getEmail(), TypeOperation.DELETE, AccountNotificationMessages.ACCOUNT_DELETED);
+
+        ProducerRecord<String, NotificationDto> producerRecord = createKafkaEvent(event);
+        kafkaTemplate.send(producerRecord);
+        log.info("Kafka send event {} ", producerRecord);
         log.info("{} user was deleted", user);
     }
 
@@ -139,5 +160,12 @@ public class UserService {
                         new EntityNotFoundException(String.format(ErrorMessage.USER_NOT_FOND_ID, id)));
         log.info("User with {} id retrieved.", id);
         return user;
+    }
+
+
+    protected ProducerRecord createKafkaEvent (NotificationDto notification) {
+        ProducerRecord<String, NotificationDto> producerRecord = new ProducerRecord<>("ui-notification", notification.userEmail(), notification);
+        producerRecord.headers().add(new RecordHeader("user-email", notification.userEmail().getBytes(StandardCharsets.UTF_8)));
+        return producerRecord;
     }
 }
