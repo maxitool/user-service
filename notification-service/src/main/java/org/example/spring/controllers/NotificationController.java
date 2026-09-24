@@ -28,11 +28,11 @@ public class NotificationController {
             summary = "Send user created message to email"
     )
     @ApiResponse(
-            responseCode = "204",
+            responseCode = "200",
             description = "User created message was sent"
     )
     @GetMapping("/sendUserCreatedToEmail")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseStatus(HttpStatus.OK)
     public void sendUserCreatedToEmail(@RequestParam String email) {
         notificationService.sendUserCreatedToEmail(email);
     }
@@ -41,11 +41,11 @@ public class NotificationController {
             summary = "Send user deleted message to email"
     )
     @ApiResponse(
-            responseCode = "204",
+            responseCode = "200",
             description = "User deleted message was sent"
     )
     @GetMapping("/sendUserDeletedToEmail")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseStatus(HttpStatus.OK)
     public void sendUserDeletedToEmail(@RequestParam String email) {
         notificationService.sendUserDeletedToEmail(email);
     }
