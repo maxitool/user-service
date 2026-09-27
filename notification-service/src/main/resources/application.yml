@@ -9,8 +9,8 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
-        spring.json.trusted.packages: "org.example"
-        spring.json.value.default.type: org.example.kafka.SendToEmailCreateDeleteDto
+        spring.json.trusted.packages: "org.example.kafka"
+        spring.json.value.default.type: org.example.kafka.EmailDto
   mail:
     host: smtp.gmail.com
     port: 587

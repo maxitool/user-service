@@ -9,7 +9,8 @@ import org.example.kafka.EmailDto;
 import org.example.spring.services.NotificationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,10 +33,10 @@ public class NotificationController {
             responseCode = "200",
             description = "User created message was sent"
     )
-    @GetMapping("/sendUserCreatedToEmail")
+    @PostMapping("/sendUserCreatedToEmail")
     @ResponseStatus(HttpStatus.OK)
-    public void sendUserCreatedToEmail(@Valid EmailDto email) {
-        notificationService.sendUserCreatedToEmail(email);
+    public void sendUserCreatedToEmail(@Valid @RequestBody EmailDto emailDto) {
+        notificationService.sendUserCreatedToEmail(emailDto);
     }
 
     @Operation(
@@ -45,9 +46,9 @@ public class NotificationController {
             responseCode = "200",
             description = "User deleted message was sent"
     )
-    @GetMapping("/sendUserDeletedToEmail")
+    @PostMapping("/sendUserDeletedToEmail")
     @ResponseStatus(HttpStatus.OK)
-    public void sendUserDeletedToEmail(@Valid EmailDto email) {
-        notificationService.sendUserDeletedToEmail(email);
+    public void sendUserDeletedToEmail(@Valid @RequestBody EmailDto emailDto) {
+        notificationService.sendUserDeletedToEmail(emailDto);
     }
 }
