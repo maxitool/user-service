@@ -1,8 +1,7 @@
 package org.example.spring.services;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.SendToEmailCreateDeleteDto;
+import org.example.kafka.EmailDto;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -14,45 +13,31 @@ public class SendEmailService {
     private final RestClient restClient;
 
     public SendEmailService() {
-        this.restClient = RestClient.create();
+        this.restClient = RestClient.create("http://localhost:8081");
     }
 
-    private static final String FALL_BACK_URL_DELETED = "http://localhost:8081/api/notification/sendUserDeletedToEmail";
-    private static final String FALL_BACK_URL_CREATE = "http://localhost:8081/api/notification/sendUserCreatedToEmail";
+    private static final String FALL_BACK_URL_DELETED = "/api/notification/sendUserDeletedToEmail";
+    private static final String FALL_BACK_URL_CREATED = "/api/notification/sendUserCreatedToEmail";
 
-    public void sendViaHttpFallbackDelete(SendToEmailCreateDeleteDto dto) {
-
-        String userEmail = dto.email();
-
-        try {
-
-            restClient.get()
-                    .uri(FALL_BACK_URL_DELETED, uriBuilder -> uriBuilder
-                            .queryParam("email", userEmail)
-                            .build())
-                    .retrieve()
-                    .toBodilessEntity();
-            log.info("Fallback HTTP request for user {} successfully sent to the endpoint", userEmail);
-        } catch (Exception httpEx) {
-            log.error("Error sending fallback HTTP request for user {}: {}", userEmail, httpEx.getMessage(), httpEx);
-        }
+    public void sendViaHttpFallbackDelete(EmailDto emailDto) {
+        sendViaHttpFallbackWithEmailDto(emailDto, FALL_BACK_URL_DELETED);
     }
 
-    public void sendViaHttpFallbackCreate(SendToEmailCreateDeleteDto dto) {
+    public void sendViaHttpFallbackCreate(EmailDto emailDto) {
+        sendViaHttpFallbackWithEmailDto(emailDto, FALL_BACK_URL_CREATED);
+    }
 
-        String userEmail = dto.email();
-
+    private void sendViaHttpFallbackWithEmailDto(EmailDto emailDto, String url) {
         try {
-
-            restClient.get()
-                    .uri(FALL_BACK_URL_CREATE, uriBuilder -> uriBuilder
-                            .queryParam("email", userEmail)
-                            .build())
+            restClient.post()
+                    .uri(url)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(emailDto)
                     .retrieve()
                     .toBodilessEntity();
-            log.info("Fallback HTTP request for user {} successfully sent to the endpoint", userEmail);
+            log.info("Fallback HTTP request for user {} successfully sent to the endpoint", emailDto.email());
         } catch (Exception httpEx) {
-            log.error("Error sending fallback HTTP request for user {}: {}", userEmail, httpEx.getMessage(), httpEx);
+            log.error("Error sending fallback HTTP request for user {}: {}", emailDto.email(), httpEx.getMessage(), httpEx);
         }
     }
 }

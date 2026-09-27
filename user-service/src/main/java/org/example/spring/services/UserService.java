@@ -7,7 +7,7 @@ import org.example.spring.dto.UserDto;
 import org.example.spring.entities.User;
 import org.example.spring.exception.ErrorMessag;
 import org.example.spring.exception.UserAlreadyExistsException;
-import org.example.spring.kafka.SendToEmailCreateDeleteDtoProducer;
+import org.example.spring.kafka.EmailDtoProducer;
 import org.example.spring.mappers.UserMapper;
 import org.example.spring.repositories.UserRepository;
 import org.springframework.stereotype.Service;
@@ -22,11 +22,11 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    private final SendToEmailCreateDeleteDtoProducer kafkaProducer;
+    private final EmailDtoProducer kafkaProducer;
 
     public UserService(UserRepository userRepository,
                        UserMapper userMapper,
-                       SendToEmailCreateDeleteDtoProducer kafkaProducer) {
+                       EmailDtoProducer kafkaProducer) {
         if (userRepository == null) {
             log.error("userRepository is null");
         }
@@ -51,7 +51,7 @@ public class UserService {
         User saved = userRepository.save(user);
         log.info("User {} was created.", user);
 
-        kafkaProducer.sendToEmailUserCreated(saved.getId(), saved.getEmail());
+        kafkaProducer.sendToEmailUserCreated(saved.getEmail());
 
         UserDto result = userMapper.toDto(saved);
         log.debug("User {} to UserDto entity {} was successful.", saved, result);
@@ -103,7 +103,7 @@ public class UserService {
         userRepository.delete(user);
         log.info("{} user was deleted", user);
 
-        kafkaProducer.sendToEmailUserDeleted(user.getId(), user.getEmail());
+        kafkaProducer.sendToEmailUserDeleted(user.getEmail());
     }
 
     @Transactional(readOnly = true)

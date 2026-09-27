@@ -2,6 +2,7 @@ package org.example;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import org.example.kafka.EmailDto;
 import org.example.spring.services.NotificationService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,7 +13,14 @@ import org.springframework.mail.MailSendException;
 import org.springframework.mail.javamail.JavaMailSender;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class NotificationServiceTest {
@@ -25,7 +33,7 @@ public class NotificationServiceTest {
 
     @Test
     void when_sendUserCreatedToEmail_then_success() {
-        SendToEmailCreateDeleteDto dto = new SendToEmailCreateDeleteDto(Operation.CREATE, "test@mail.ru");
+        EmailDto dto = new EmailDto("test@mail.ru");
         MimeMessage message = new MimeMessage((jakarta.mail.Session) null);
         when(javaMailSender.createMimeMessage()).thenReturn(message);
         assertDoesNotThrow(() -> notificationService.sendUserCreatedToEmail(dto));
@@ -33,8 +41,8 @@ public class NotificationServiceTest {
     }
 
     @Test
-    void when_sendUserCreatedToEmail_then_errorMailException () {
-        SendToEmailCreateDeleteDto dto = new SendToEmailCreateDeleteDto(Operation.CREATE, "test@mail.ru");
+    void when_sendUserCreatedToEmail_then_errorMailException() {
+        EmailDto dto = new EmailDto("test@mail.ru");
         MimeMessage mimeMessage = new MimeMessage((jakarta.mail.Session) null);
         when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
         doThrow(new MailSendException("SMTP server connection failed"))
@@ -43,8 +51,8 @@ public class NotificationServiceTest {
     }
 
     @Test
-    void when_sendUserCreatedToEmail_then_errorMessagingException () throws MessagingException {
-        SendToEmailCreateDeleteDto dto = new SendToEmailCreateDeleteDto(Operation.CREATE, "test@mail.ru");
+    void when_sendUserCreatedToEmail_then_errorMessagingException() throws MessagingException {
+        EmailDto dto = new EmailDto("test@mail.ru");
         MimeMessage mimeMessageMock = mock(MimeMessage.class);
         when(javaMailSender.createMimeMessage()).thenReturn(mimeMessageMock);
         doThrow(new MessagingException("Error JavaMail API"))
@@ -56,7 +64,7 @@ public class NotificationServiceTest {
     @Test
     void when_sendUserDeletedToEmail_then_success() {
 
-        SendToEmailCreateDeleteDto dto = new SendToEmailCreateDeleteDto(Operation.DELETE, "test@mail.ru");
+        EmailDto dto = new EmailDto("test@mail.ru");
         MimeMessage message = new MimeMessage((jakarta.mail.Session) null);
         when(javaMailSender.createMimeMessage()).thenReturn(message);
         assertDoesNotThrow(() -> notificationService.sendUserDeletedToEmail(dto));
@@ -64,8 +72,8 @@ public class NotificationServiceTest {
     }
 
     @Test
-    void when_sendUserDeletedToEmail_then_errorMailException (){
-        SendToEmailCreateDeleteDto dto = new SendToEmailCreateDeleteDto(Operation.DELETE, "test@mail.ru");
+    void when_sendUserDeletedToEmail_then_errorMailException() {
+        EmailDto dto = new EmailDto("test@mail.ru");
         MimeMessage mimeMessage = new MimeMessage((jakarta.mail.Session) null);
         when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
         doThrow(new MailSendException("SMTP server connection failed"))
@@ -75,7 +83,7 @@ public class NotificationServiceTest {
 
     @Test
     void when_sendUserDeletedToEmail_then_errorMessagingException() throws MessagingException {
-        SendToEmailCreateDeleteDto dto = new SendToEmailCreateDeleteDto(Operation.DELETE, "test@mail.ru");
+        EmailDto dto = new EmailDto("test@mail.ru");
         MimeMessage mimeMessageMock = mock(MimeMessage.class);
         when(javaMailSender.createMimeMessage()).thenReturn(mimeMessageMock);
         doThrow(new MessagingException("Error JavaMail API"))

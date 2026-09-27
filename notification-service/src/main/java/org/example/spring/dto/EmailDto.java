@@ -8,7 +8,7 @@ public record EmailDto(
         @Email(message = "Некорректные данные")
         String email) {
 
-    public static EmailDto of (String email) {
+    public static EmailDto of(String email) {
         return new EmailDto(email);
     }
 }

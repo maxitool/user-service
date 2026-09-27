@@ -3,9 +3,9 @@ package org.example.spring.services;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
-import org.example.SendToEmailCreateDeleteDto;
 import org.example.constants.EmailMessages;
 import org.example.constants.ResourcesUrl;
+import org.example.kafka.EmailDto;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -23,13 +23,13 @@ public class NotificationService {
         this.mailSender = mailSender;
     }
 
-    public void sendUserCreatedToEmail(SendToEmailCreateDeleteDto toEmail) {
-        send(toEmail.email(), EmailMessages.USER_CREATED_SUBJECT,
+    public void sendUserCreatedToEmail(EmailDto emailDto) {
+        send(emailDto.email(), EmailMessages.USER_CREATED_SUBJECT,
                 String.format(EmailMessages.USER_CREATED_TEXT, ResourcesUrl.CREATED_IMAGE_URL));
     }
 
-    public void sendUserDeletedToEmail(SendToEmailCreateDeleteDto toEmail) {
-        send(toEmail.email(), EmailMessages.USER_DELETED_SUBJECT,
+    public void sendUserDeletedToEmail(EmailDto emailDto) {
+        send(emailDto.email(), EmailMessages.USER_DELETED_SUBJECT,
                 String.format(EmailMessages.USER_DELETED_TEXT, ResourcesUrl.DELETED_IMAGE_URL));
     }
 

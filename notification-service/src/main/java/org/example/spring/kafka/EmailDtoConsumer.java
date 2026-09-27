@@ -1,9 +1,8 @@
 package org.example.spring.kafka;
 
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.example.Operation;
-import org.example.SendToEmailCreateDeleteDto;
+import org.example.kafka.EmailDto;
+import org.example.kafka.Operation;
 import org.example.spring.services.NotificationService;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;
@@ -11,15 +10,20 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import static org.example.kafka.CommunicationData.RECORD_HEADER_OPERATION_KEY;
+import static org.example.kafka.CommunicationData.TOPIC;
+
 @Component
 @Slf4j
-public class SendToEmailCreateDeleteDtoConsumer {
-    private final Map<Operation, Consumer<SendToEmailCreateDeleteDto>> methods;
+public class EmailDtoConsumer {
 
-    public SendToEmailCreateDeleteDtoConsumer(NotificationService notificationService) {
+    private final Map<Operation, Consumer<EmailDto>> methods;
+
+    public EmailDtoConsumer(NotificationService notificationService) {
         if (notificationService == null) {
             log.error("notificationService is null.");
             this.methods = Map.of();
@@ -31,17 +35,20 @@ public class SendToEmailCreateDeleteDtoConsumer {
         );
     }
 
-    @KafkaListener(topics = "send-to-email-create-delete-dto", groupId = "all-users-group")
+    @KafkaListener(topics = TOPIC, groupId = "all-users-group")
     public void handleSendToEmailCreateDeleteDto(
-            @Payload  @Valid SendToEmailCreateDeleteDto dto,
+            @Payload EmailDto dto,
+            @Header(value = RECORD_HEADER_OPERATION_KEY) byte[] operationString,
             @Header(KafkaHeaders.RECEIVED_PARTITION) int partition,
             @Header(KafkaHeaders.OFFSET) long offset) {
         log.info("Received {} for {} (partition {}, offset {})",
-                dto.operation(), dto.email(), partition, offset);
-        if (!methods.containsKey(dto.operation())) {
-            log.error("Can't recognize the received operation.");
+                operationString, dto.email(), partition, offset);
+        Operation operation = Operation.fromString(new String(operationString, StandardCharsets.UTF_8));
+        log.debug("Received correct operation {}.", operation);
+        if (!methods.containsKey(operation)) {
+            log.error("Can't recognize the received operation {}.", operation);
             return;
         }
-        methods.get(dto.operation()).accept(dto);
+        methods.get(operation).accept(dto);
     }
 }
