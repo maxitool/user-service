@@ -1,8 +1,8 @@
 package org.example.spring.kafka;
 
 import lombok.extern.slf4j.Slf4j;
-import org.example.Operation;
-import org.example.SendToEmailCreateDeleteDto;
+import org.example.kafka.Operation;
+import org.example.kafka.EmailDto;
 import org.example.spring.services.NotificationService;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;
@@ -16,6 +16,7 @@ import java.util.function.Consumer;
 @Component
 @Slf4j
 public class SendToEmailCreateDeleteDtoConsumer {
+
     private final Map<Operation, Consumer<String>> methods;
 
     public SendToEmailCreateDeleteDtoConsumer(NotificationService notificationService) {
@@ -30,9 +31,10 @@ public class SendToEmailCreateDeleteDtoConsumer {
         );
     }
 
-    @KafkaListener(topics = "send-to-email-create-delete-dto", groupId = "all-users-group")
+    @KafkaListener(topics = "email-dto", groupId = "all-users-group")
     public void handleSendToEmailCreateDeleteDto(
-            @Payload SendToEmailCreateDeleteDto dto,
+            @Payload EmailDto dto,
+            @Header(value = "user-email", required = false) byte[] userEmailBytes,
             @Header(KafkaHeaders.RECEIVED_PARTITION) int partition,
             @Header(KafkaHeaders.OFFSET) long offset) {
         log.info("Received {} for {} (partition {}, offset {})",

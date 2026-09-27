@@ -1,4 +1,4 @@
-package org.example;
+package org.example.kafka;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
@@ -9,21 +9,9 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.Objects;
 
-public record SendToEmailCreateDeleteDto(
-        @Schema(
-                description = "Database operation",
-                allowableValues = {"create", "delete"}
-        )
-        @NotNull
-        @EnumSource(value = Operation.class, names = {"CREATE", "DELETE"})
-        Operation operation,
+public record EmailDto(
         @NotBlank(message = "Email can't be blank")
         @Size(min = 1, max = 100, message = "Length of email must be between 1 and 100")
         @Email(message = "Incorrect email format")
         String email
-) {
-    @Override
-    public int hashCode() {
-        return Objects.hash(operation, email);
-    }
-}
+) { }

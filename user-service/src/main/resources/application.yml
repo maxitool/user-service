@@ -32,4 +32,4 @@ server:
 app:
   kafka:
     topic:
-      send-to-email-create-delete-dto: send-to-email-create-delete-dto
+      email-dto: email-dto

@@ -1,9 +1,7 @@
 package org.example.spring.services;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.SendToEmailCreateDeleteDto;
-import org.springframework.http.MediaType;
+import org.example.kafka.EmailDto;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
@@ -20,7 +18,7 @@ public class SendEmailService {
     private static final String FALL_BACK_URL_DELETED = "http://localhost:8081/api/notification/sendUserDeletedToEmail";
     private static final String FALL_BACK_URL_CREATE = "http://localhost:8081/api/notification/sendUserCreatedToEmail";
 
-    public void sendViaHttpFallbackDelete(SendToEmailCreateDeleteDto dto) {
+    public void sendViaHttpFallbackDelete(EmailDto dto) {
 
         String userEmail = dto.email();
 
@@ -38,7 +36,7 @@ public class SendEmailService {
         }
     }
 
-    public void sendViaHttpFallbackCreate(SendToEmailCreateDeleteDto dto) {
+    public void sendViaHttpFallbackCreate(EmailDto dto) {
 
         String userEmail = dto.email();
 
