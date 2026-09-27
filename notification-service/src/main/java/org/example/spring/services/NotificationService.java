@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.kafka.EmailDto;
 import org.example.constants.EmailMessages;
 import org.example.constants.ResourcesUrl;
+import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -41,7 +42,7 @@ public class NotificationService {
             helper.setText(text, true);
             mailSender.send(message);
             log.info("Message was sent to {} successfully.", toEmail);
-        } catch (MessagingException ex) {
+        } catch (MessagingException | MailException ex) {
             log.error(ex.getMessage(), ex);
         }
     }
