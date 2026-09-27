@@ -1,4 +1,4 @@
-package org.example.spring.exception;
+package org.example.exception;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;

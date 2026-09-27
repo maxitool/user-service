@@ -1,4 +1,4 @@
-package org.example.spring.exception;
+package org.example.exception;
 
 public final class ErrorMessag {
     private ErrorMessag() {

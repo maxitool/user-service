@@ -2,11 +2,11 @@ package org.example.spring.services;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.example.exception.ErrorMessag;
+import org.example.exception.UserAlreadyExistsException;
 import org.example.spring.dto.UserCreateUpdateDto;
 import org.example.spring.dto.UserDto;
 import org.example.spring.entities.User;
-import org.example.spring.exception.ErrorMessag;
-import org.example.spring.exception.UserAlreadyExistsException;
 import org.example.spring.kafka.EmailDtoProducer;
 import org.example.spring.mappers.UserMapper;
 import org.example.spring.repositories.UserRepository;
@@ -35,6 +35,9 @@ public class UserService {
             log.error("userMapper is null");
         }
         this.userMapper = userMapper;
+        if (kafkaProducer == null) {
+            log.error("kafkaProducer is null");
+        }
         this.kafkaProducer = kafkaProducer;
     }
 

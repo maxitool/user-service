@@ -1,10 +1,10 @@
 package org.example.spring.controllers;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.example.exception.ErrorMessag;
+import org.example.exception.UserAlreadyExistsException;
 import org.example.spring.dto.UserCreateUpdateDto;
 import org.example.spring.dto.UserDto;
-import org.example.spring.exception.ErrorMessag;
-import org.example.spring.exception.UserAlreadyExistsException;
 import org.example.spring.services.UserService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -381,7 +381,7 @@ class UserControllerTest {
 
     @Test
     void when_throwSomeKindException_then_returnInternalServerError() throws Exception {
-        when(userService.findById(userIrina1.id())).thenThrow(new RuntimeException("Some kind of excaption"));
+        when(userService.findById(userIrina1.id())).thenThrow(new RuntimeException("Some kind of exception"));
 
         mockMvc.perform(get(REQUEST_MAPPING + "/{id}", userIrina1.id()))
                 .andDo(print())

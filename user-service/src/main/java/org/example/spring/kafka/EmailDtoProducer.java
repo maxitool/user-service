@@ -33,14 +33,14 @@ public class EmailDtoProducer {
     }
 
     public void sendToEmailUserCreated(String email) {
-        sendAsync(Operation.CREATE, new EmailDto(email), sendEmailService::sendViaHttpFallbackCreate);
+        send(Operation.CREATE, new EmailDto(email), sendEmailService::sendViaHttpFallbackCreate);
     }
 
     public void sendToEmailUserDeleted(String email) {
-        sendAsync(Operation.DELETE, new EmailDto(email), sendEmailService::sendViaHttpFallbackDelete);
+        send(Operation.DELETE, new EmailDto(email), sendEmailService::sendViaHttpFallbackDelete);
     }
 
-    protected void sendAsync(Operation operation, EmailDto emailDto, Consumer<EmailDto> sendViaHttpFallbackFunction) {
+    protected void send(Operation operation, EmailDto emailDto, Consumer<EmailDto> sendViaHttpFallbackFunction) {
         kafkaTemplate.send(createKafkaEvent(operation, emailDto))
                 .orTimeout(KAFKA_SEND_TIMEOUT, TimeUnit.SECONDS)
                 .whenComplete((result, ex) -> {
