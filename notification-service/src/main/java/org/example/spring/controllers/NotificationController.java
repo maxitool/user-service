@@ -3,7 +3,9 @@ package org.example.spring.controllers;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.spring.dto.EmailDto;
 import org.example.spring.services.NotificationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -33,7 +35,7 @@ public class NotificationController {
     )
     @GetMapping("/sendUserCreatedToEmail")
     @ResponseStatus(HttpStatus.OK)
-    public void sendUserCreatedToEmail(@RequestParam String email) {
+    public void sendUserCreatedToEmail(@Valid EmailDto email) {
         notificationService.sendUserCreatedToEmail(email);
     }
 
@@ -46,7 +48,7 @@ public class NotificationController {
     )
     @GetMapping("/sendUserDeletedToEmail")
     @ResponseStatus(HttpStatus.OK)
-    public void sendUserDeletedToEmail(@RequestParam String email) {
+    public void sendUserDeletedToEmail(@Valid EmailDto email) {
         notificationService.sendUserDeletedToEmail(email);
     }
 }
