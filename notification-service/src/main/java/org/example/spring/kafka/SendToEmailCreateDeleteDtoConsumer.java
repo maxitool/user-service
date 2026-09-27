@@ -1,5 +1,6 @@
 package org.example.spring.kafka;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.example.Operation;
 import org.example.SendToEmailCreateDeleteDto;
@@ -16,7 +17,7 @@ import java.util.function.Consumer;
 @Component
 @Slf4j
 public class SendToEmailCreateDeleteDtoConsumer {
-    private final Map<Operation, Consumer<String>> methods;
+    private final Map<Operation, Consumer<SendToEmailCreateDeleteDto>> methods;
 
     public SendToEmailCreateDeleteDtoConsumer(NotificationService notificationService) {
         if (notificationService == null) {
@@ -32,7 +33,7 @@ public class SendToEmailCreateDeleteDtoConsumer {
 
     @KafkaListener(topics = "send-to-email-create-delete-dto", groupId = "all-users-group")
     public void handleSendToEmailCreateDeleteDto(
-            @Payload SendToEmailCreateDeleteDto dto,
+            @Payload  @Valid SendToEmailCreateDeleteDto dto,
             @Header(KafkaHeaders.RECEIVED_PARTITION) int partition,
             @Header(KafkaHeaders.OFFSET) long offset) {
         log.info("Received {} for {} (partition {}, offset {})",
@@ -41,6 +42,6 @@ public class SendToEmailCreateDeleteDtoConsumer {
             log.error("Can't recognize the received operation.");
             return;
         }
-        methods.get(dto.operation()).accept(dto.email());
+        methods.get(dto.operation()).accept(dto);
     }
 }
