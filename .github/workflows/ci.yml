@@ -5,6 +5,8 @@ on:
     branches: 
       - main
       - develop
+      - spring-develop
+      - spring-kafka-develop
 
 jobs:
   build:

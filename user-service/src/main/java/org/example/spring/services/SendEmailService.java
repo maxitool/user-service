@@ -5,15 +5,18 @@ import org.example.kafka.EmailDto;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import tools.jackson.databind.ObjectMapper;
 
 @Slf4j
 @Component
 public class SendEmailService {
 
     private final RestClient restClient;
+    private final ObjectMapper mapper;
 
     public SendEmailService() {
-        this.restClient = RestClient.create("http://localhost:8081");
+        this.restClient = RestClient.create("http://notification-service:8081");
+        this.mapper = new ObjectMapper();
     }
 
     private static final String FALL_BACK_URL_DELETED = "/api/notification/sendUserDeletedToEmail";
@@ -32,7 +35,7 @@ public class SendEmailService {
             restClient.post()
                     .uri(url)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(emailDto)
+                    .body(mapper.writeValueAsString(emailDto))
                     .retrieve()
                     .toBodilessEntity();
             log.info("Fallback HTTP request for user {} successfully sent to the endpoint", emailDto.email());
