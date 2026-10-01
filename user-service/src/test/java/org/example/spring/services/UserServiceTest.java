@@ -4,9 +4,8 @@ import jakarta.persistence.EntityNotFoundException;
 import org.example.spring.dto.UserCreateUpdateDto;
 import org.example.spring.dto.UserDto;
 import org.example.spring.entities.User;
-import org.example.spring.hateoas.UserAssembler;
-import org.example.spring.kafka.EmailDtoProducer;
 import org.example.spring.exception.UserAlreadyExistsException;
+import org.example.spring.hateoas.UserAssembler;
 import org.example.spring.mappers.UserMapper;
 import org.example.spring.repositories.UserRepository;
 import org.junit.jupiter.api.BeforeAll;
@@ -16,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.transaction.annotation.Transactional;
 

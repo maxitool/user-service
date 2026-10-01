@@ -6,17 +6,14 @@ import org.example.kafka.Operation;
 import org.example.spring.dto.UserCreateUpdateDto;
 import org.example.spring.dto.UserDto;
 import org.example.spring.entities.User;
-import org.example.spring.hateoas.UserAssembler;
-import org.example.spring.kafka.EmailDtoProducer;
-import org.example.spring.mappers.UserMapper;
-import org.example.spring.repositories.UserRepository;
-import org.springframework.hateoas.EntityModel;
 import org.example.spring.events.UserCreatedDeletedEvent;
 import org.example.spring.exception.ErrorMessag;
 import org.example.spring.exception.UserAlreadyExistsException;
+import org.example.spring.hateoas.UserAssembler;
 import org.example.spring.mappers.UserMapper;
 import org.example.spring.repositories.UserRepository;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,11 +27,12 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final ApplicationEventPublisher eventPublisher;
+    private final UserAssembler userAssembler;
 
     public UserService(UserRepository userRepository,
                        UserMapper userMapper,
                        ApplicationEventPublisher eventPublisher,
-                      UserAssembler userAssembler) {
+                       UserAssembler userAssembler) {
         if (userRepository == null) {
             log.error("userRepository is null");
         }
@@ -46,18 +44,11 @@ public class UserService {
         if (eventPublisher == null) {
             log.error("eventPublisher is null");
         }
+        this.eventPublisher = eventPublisher;
         if (userAssembler == null) {
             log.error("userAssembler is null");
         }
         this.userAssembler = userAssembler;
-    }
-
-    public EntityModel<UserDto> createUser(UserCreateUpdateDto dto) {
-
-        if (userRepository.findByEmail(dto.email()).isPresent()) {
-            log.info("{} email already exist.", dto.email());
-            throw new UserAlreadyExistsException(dto.email());
-        }
     }
 
     public EntityModel<UserDto> createUser(UserCreateUpdateDto dto) {
