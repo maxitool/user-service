@@ -1,5 +1,6 @@
 package org.example.spring.services;
 
+
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +43,7 @@ public class NotificationService {
             helper.setText(text, true);
             mailSender.send(message);
             log.info("Message was sent to {} successfully.", toEmail);
-        } catch (MessagingException | MailException ex) {
+        } catch (MailException | MessagingException ex) {
             log.error(ex.getMessage(), ex);
         }
     }

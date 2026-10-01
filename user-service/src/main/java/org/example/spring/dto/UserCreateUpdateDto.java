@@ -20,7 +20,7 @@ public record UserCreateUpdateDto(
         String name,
         @Schema(
                 description = "Unique user email",
-                example = "ivan@example.com"
+                example = "test@mail.ru"
         )
         @NotBlank(message = "Email can't be blank")
         @Size(min = 1, max = 100, message = "Length of email must be between 1 and 100")

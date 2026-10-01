@@ -1,6 +1,5 @@
-package org.example.exception;
+package org.example.spring.exception;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -96,30 +95,6 @@ public class GlobalExceptionHandler {
 
         logError(HttpStatus.valueOf(errorDto.status()), request, errorDto);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorDto);
-    }
-
-    @ExceptionHandler(EntityNotFoundException.class)
-
-    public ResponseEntity<ErrorDto> handleNotFound(EntityNotFoundException ex, HttpServletRequest request) {
-
-        ErrorDto errorDto = ErrorDto.of(HttpStatus.NOT_FOUND.name(),
-                ex.getMessage()
-        );
-
-        logError(HttpStatus.valueOf(errorDto.status()), request, errorDto);
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorDto);
-    }
-
-    @ExceptionHandler(UserAlreadyExistsException.class)
-
-    public ResponseEntity<ErrorDto> handleUserAlready(UserAlreadyExistsException ex, HttpServletRequest request) {
-
-        ErrorDto errorDto = ErrorDto.of(ex.getStatus().name(),
-                ex.getMessage());
-
-        logError(HttpStatus.valueOf(errorDto.status()), request, errorDto);
-
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorDto);
     }
 
     @ExceptionHandler(Exception.class)
