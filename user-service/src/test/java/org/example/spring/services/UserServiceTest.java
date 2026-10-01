@@ -5,6 +5,7 @@ import org.example.spring.dto.UserCreateUpdateDto;
 import org.example.spring.dto.UserDto;
 import org.example.spring.entities.User;
 import org.example.spring.exception.UserAlreadyExistsException;
+import org.example.spring.hateoas.UserAssembler;
 import org.example.spring.mappers.UserMapper;
 import org.example.spring.repositories.UserRepository;
 import org.junit.jupiter.api.BeforeAll;
@@ -12,7 +13,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +28,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @Transactional
@@ -38,6 +42,8 @@ class UserServiceTest {
     private UserRepository userRepository;
     @MockitoSpyBean
     private UserMapper userMapper;
+    @MockitoBean
+    private UserAssembler userAssembler;
 
     @Autowired
     private UserService userService;
@@ -58,20 +64,26 @@ class UserServiceTest {
         userRepository.save(userIrina2);
 
         clearInvocations(userRepository);
+        when(userAssembler.toModel(any(UserDto.class)))
+                .thenAnswer(invocation -> EntityModel.of(invocation.getArgument(0, UserDto.class)));
     }
 
     @Test
     void when_saveUser_then_returnUserDtoAndVerify() {
         UserCreateUpdateDto newUser = new UserCreateUpdateDto("Irina", "test3@mail.ru", 13);
 
-        UserDto saved = userService.createUser(newUser);
+        EntityModel<UserDto> saved = userService.createUser(newUser);
 
-        assertEquals(newUser.email(), saved.email());
-        assertEquals(newUser.name(), saved.name());
-        assertEquals(newUser.age(), saved.age());
+        assertNotNull(saved);
+        UserDto body = saved.getContent();
+        assertNotNull(body);
+        assertEquals(newUser.email(), body.email());
+        assertEquals(newUser.name(), body.name());
+        assertEquals(newUser.age(), body.age());
         verify(userRepository).save(any(User.class));
         verify(userMapper).toEntity(any(UserCreateUpdateDto.class));
         verify(userMapper).toDto(any(User.class));
+        verify(userAssembler).toModel(any(UserDto.class));
     }
 
     @Test
@@ -87,14 +99,17 @@ class UserServiceTest {
         int age = 60;
         UserCreateUpdateDto update = new UserCreateUpdateDto(name, email, age);
 
-        UserDto updated = userService.updateUser(userIrina1.getId(), update);
+        EntityModel<UserDto> updated = userService.updateUser(userIrina1.getId(), update);
 
         assertNotNull(updated);
-        assertEquals(name, updated.name());
-        assertEquals(email, updated.email());
-        assertEquals(age, updated.age());
+        UserDto body = updated.getContent();
+        assertNotNull(body);
+        assertEquals(name, body.name());
+        assertEquals(email, body.email());
+        assertEquals(age, body.age());
         verify(userRepository).save(any(User.class));
         verify(userMapper).toDto(any(User.class));
+        verify(userAssembler).toModel(any(UserDto.class));
     }
 
     @Test
@@ -108,11 +123,12 @@ class UserServiceTest {
 
     @Test
     void when_findByExistentId_then_returnUserDtoAndVerify() {
-        UserDto found = userService.findById(userIrina1.getId());
+        EntityModel<UserDto> found = userService.findById(userIrina1.getId());
 
         assertNotNull(found);
         verify(userRepository).findById(any(Long.class));
         verify(userMapper).toDto(any(User.class));
+        verify(userAssembler).toModel(any(UserDto.class));
     }
 
     @Test
@@ -123,12 +139,13 @@ class UserServiceTest {
 
     @Test
     void when_findAll_then_returnUsersDtoListAndVerify() {
-        List<UserDto> found = userService.findAll();
+        List<EntityModel<UserDto>> found = userService.findAll();
 
         assertNotNull(found);
         assertEquals(USERS_COUNT, found.size());
         verify(userRepository).findAll();
         verify(userMapper, times(USERS_COUNT)).toDto(any(User.class));
+        verify(userAssembler, times(USERS_COUNT)).toModel(any(UserDto.class));
     }
 
     @Test
@@ -145,11 +162,12 @@ class UserServiceTest {
 
     @Test
     void when_findByExistentEmail_then_returnUserDtoAndVerify() {
-        UserDto found = userService.findByEmail(userIrina1.getEmail());
+        EntityModel<UserDto> found = userService.findByEmail(userIrina1.getEmail());
 
         assertNotNull(found);
         verify(userRepository).findByEmail(any(String.class));
         verify(userMapper).toDto(any(User.class));
+        verify(userAssembler).toModel(any(UserDto.class));
     }
 
     @Test
@@ -160,21 +178,23 @@ class UserServiceTest {
 
     @Test
     void when_findByName_then_returnUsersDtoListAndVerify() {
-        List<UserDto> found = userService.findByName(userIrina1.getName());
+        List<EntityModel<UserDto>> found = userService.findByName(userIrina1.getName());
 
         assertNotNull(found);
         assertEquals(2, found.size());
         verify(userRepository).findByName(any(String.class));
         verify(userMapper, times(2)).toDto(any(User.class));
+        verify(userAssembler, times(2)).toModel(any(UserDto.class));
     }
 
     @Test
     void when_findByAge_then_returnUsersDtoListAndVerify() {
-        List<UserDto> found = userService.findByAge(userIrina1.getAge());
+        List<EntityModel<UserDto>> found = userService.findByAge(userIrina1.getAge());
 
         assertNotNull(found);
         assertEquals(2, found.size());
         verify(userRepository).findByAge(any(Integer.class));
         verify(userMapper, times(2)).toDto(any(User.class));
+        verify(userAssembler, times(2)).toModel(any(UserDto.class));
     }
 }

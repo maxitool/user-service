@@ -12,7 +12,9 @@ import lombok.RequiredArgsConstructor;
 import org.example.spring.dto.UserCreateUpdateDto;
 import org.example.spring.dto.UserDto;
 import org.example.spring.services.UserService;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -53,7 +55,7 @@ public class UserController {
     )
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<UserDto> findAll() {
+    public List<EntityModel<UserDto>> findAll() {
         return userService.findAll();
     }
 
@@ -74,7 +76,7 @@ public class UserController {
     )
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public UserDto findById(
+    public EntityModel<UserDto> findById(
             @PathVariable
             @Parameter(name = "id", description = "User id", example = "1")
             Long id) {
@@ -99,7 +101,7 @@ public class UserController {
 
     @GetMapping("/findByEmail")
     @ResponseStatus(HttpStatus.OK)
-    public UserDto findByEmail(
+    public EntityModel<UserDto> findByEmail(
             @RequestParam
             @Parameter(name = "email", description = "User email", example = "test@mail.ru")
             String email) {
@@ -121,7 +123,7 @@ public class UserController {
     )
     @GetMapping("/findByName")
     @ResponseStatus(HttpStatus.OK)
-    public List<UserDto> findByName(
+    public List<EntityModel<UserDto>> findByName(
             @RequestParam
             @Parameter(name = "name", description = "User name", example = "Ivan Ivanov")
             String name) {
@@ -143,7 +145,7 @@ public class UserController {
     )
     @GetMapping("/findByAge")
     @ResponseStatus(HttpStatus.OK)
-    public List<UserDto> findByAge(
+    public List<EntityModel<UserDto>> findByAge(
             @RequestParam
             @Parameter(name = "age", description = "User age", example = "12")
             Integer age) {
@@ -171,7 +173,7 @@ public class UserController {
     )
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDto createUser(
+    public EntityModel<UserDto> createUser(
             @RequestBody
             @Valid
             UserCreateUpdateDto userDto) {
@@ -199,7 +201,7 @@ public class UserController {
     )
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public UserDto updateUser(
+    public EntityModel<UserDto> updateUser(
             @PathVariable
             @Parameter(name = "id", description = "User id", example = "1")
             Long id,
@@ -223,10 +225,11 @@ public class UserController {
     )
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteById(
+    public ResponseEntity<Void> deleteById(
             @PathVariable
             @Parameter(name = "id", description = "User id", example = "1")
             Long id) {
         userService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }

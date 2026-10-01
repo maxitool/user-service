@@ -10,6 +10,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -44,6 +46,9 @@ class UserControllerTest {
     private static UserDto userIrina1;
     private static UserDto userIrina2;
     private static List<UserDto> users;
+    private static EntityModel<UserDto> userIrina1Model;
+    private static EntityModel<UserDto> userIrina2Model;
+    private static List<EntityModel<UserDto>> usersModel;
     private static UserCreateUpdateDto userIrina1CreateUpdateDto;
 
     @MockitoBean
@@ -59,11 +64,15 @@ class UserControllerTest {
         userIrina1CreateUpdateDto = new UserCreateUpdateDto(userIrina1.name(), userIrina1.email(), userIrina1.age());
         userIrina2 = new UserDto(2L, userIrina1.name(), "test2@mail.ru", userIrina1.age());
         users = List.of(userIrina1, userIrina2);
+
+        userIrina1Model = EntityModel.of(userIrina1, Link.of(REQUEST_MAPPING + "/" + userIrina1.id()));
+        userIrina2Model = EntityModel.of(userIrina2, Link.of(REQUEST_MAPPING + "/" + userIrina2.id()));
+        usersModel = List.of(userIrina1Model, userIrina2Model);
     }
 
     @Test
     void when_findAll_then_returnUsersDtoListAndVerify() throws Exception {
-        when(userService.findAll()).thenReturn(users);
+        when(userService.findAll()).thenReturn(usersModel);
 
         mockMvc.perform(get(REQUEST_MAPPING))
                 .andDo(print())
@@ -82,7 +91,7 @@ class UserControllerTest {
 
     @Test
     void when_findByExistentId_then_returnUserDtoAndVerify() throws Exception {
-        when(userService.findById(userIrina1.id())).thenReturn(userIrina1);
+        when(userService.findById(userIrina1.id())).thenReturn(userIrina1Model);
 
         mockMvc.perform(get(REQUEST_MAPPING + "/{id}", userIrina1.id()))
                 .andDo(print())
@@ -111,7 +120,7 @@ class UserControllerTest {
 
     @Test
     void when_findByExistentEmail_then_returnUserDtoAndVerify() throws Exception {
-        when(userService.findByEmail(userIrina1.email())).thenReturn(userIrina1);
+        when(userService.findByEmail(userIrina1.email())).thenReturn(userIrina1Model);
 
         mockMvc.perform(get(REQUEST_MAPPING + "/findByEmail")
                         .param("email", userIrina1.email()))
@@ -153,7 +162,7 @@ class UserControllerTest {
 
     @Test
     void when_findByName_then_returnUsersDtoListAndVerify() throws Exception {
-        when(userService.findByName(userIrina1.name())).thenReturn(users);
+        when(userService.findByName(userIrina1.name())).thenReturn(usersModel);
 
         mockMvc.perform(get(REQUEST_MAPPING + "/findByName")
                         .param("name", userIrina1.name()))
@@ -183,7 +192,7 @@ class UserControllerTest {
 
     @Test
     void when_findByAge_then_returnUsersDtoListAndVerify() throws Exception {
-        when(userService.findByAge(userIrina1.age())).thenReturn(users);
+        when(userService.findByAge(userIrina1.age())).thenReturn(usersModel);
 
         mockMvc.perform(get(REQUEST_MAPPING + "/findByAge")
                         .param("age", userIrina1.age().toString()))
@@ -213,7 +222,7 @@ class UserControllerTest {
 
     @Test
     void when_createUser_then_returnUserDtoAndVerify() throws Exception {
-        when(userService.createUser(userIrina1CreateUpdateDto)).thenReturn(userIrina1);
+        when(userService.createUser(userIrina1CreateUpdateDto)).thenReturn(userIrina1Model);
 
         mockMvc.perform(post(REQUEST_MAPPING)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -281,7 +290,7 @@ class UserControllerTest {
 
     @Test
     void when_updateUser_then_returnUserDtoAndVerify() throws Exception {
-        when(userService.updateUser(userIrina1.id(), userIrina1CreateUpdateDto)).thenReturn(userIrina1);
+        when(userService.updateUser(userIrina1.id(), userIrina1CreateUpdateDto)).thenReturn(userIrina1Model);
 
         mockMvc.perform(put(REQUEST_MAPPING + "/{id}", userIrina1.id())
                         .contentType(MediaType.APPLICATION_JSON)

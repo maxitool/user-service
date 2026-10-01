@@ -9,9 +9,11 @@ import org.example.spring.entities.User;
 import org.example.spring.events.UserCreatedDeletedEvent;
 import org.example.spring.exception.ErrorMessag;
 import org.example.spring.exception.UserAlreadyExistsException;
+import org.example.spring.hateoas.UserAssembler;
 import org.example.spring.mappers.UserMapper;
 import org.example.spring.repositories.UserRepository;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,10 +27,12 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final ApplicationEventPublisher eventPublisher;
+    private final UserAssembler userAssembler;
 
     public UserService(UserRepository userRepository,
                        UserMapper userMapper,
-                       ApplicationEventPublisher eventPublisher) {
+                       ApplicationEventPublisher eventPublisher,
+                       UserAssembler userAssembler) {
         if (userRepository == null) {
             log.error("userRepository is null");
         }
@@ -41,9 +45,13 @@ public class UserService {
             log.error("eventPublisher is null");
         }
         this.eventPublisher = eventPublisher;
+        if (userAssembler == null) {
+            log.error("userAssembler is null");
+        }
+        this.userAssembler = userAssembler;
     }
 
-    public UserDto createUser(UserCreateUpdateDto dto) {
+    public EntityModel<UserDto> createUser(UserCreateUpdateDto dto) {
         User user = userMapper.toEntity(dto);
         log.debug("UserCreateUpdateDto {} to User entity {} was successful.", dto, user);
 
@@ -61,10 +69,10 @@ public class UserService {
         UserDto result = userMapper.toDto(saved);
         log.debug("User {} to UserDto entity {} was successful.", saved, result);
 
-        return result;
+        return userAssembler.toModel(result);
     }
 
-    public UserDto updateUser(Long id, UserCreateUpdateDto dto) {
+    public EntityModel<UserDto> updateUser(Long id, UserCreateUpdateDto dto) {
         User user = getUserOrThrow(id);
 
         user.setName(dto.name());
@@ -78,26 +86,27 @@ public class UserService {
         UserDto result = userMapper.toDto(saved);
         log.debug("User {} to UserDto entity {} was successful.", saved, result);
 
-        return result;
+        return userAssembler.toModel(result);
     }
 
     @Transactional(readOnly = true)
-    public UserDto findById(Long id) {
+    public EntityModel<UserDto> findById(Long id) {
         User user = getUserOrThrow(id);
 
         UserDto result = userMapper.toDto(user);
         log.debug("User {} to UserDto entity {} was successful.", user, result);
 
-        return result;
+        return userAssembler.toModel(result);
     }
 
     @Transactional(readOnly = true)
-    public List<UserDto> findAll() {
+    public List<EntityModel<UserDto>> findAll() {
         List<User> users = userRepository.findAll();
         log.info("All users retrieved.");
 
         return users.stream()
                 .map(userMapper::toDto)
+                .map(userAssembler::toModel)
                 .peek(dto -> log.debug("Mapped to UserDto: {}", dto))
                 .toList();
     }
@@ -113,7 +122,7 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public UserDto findByEmail(String email) {
+    public EntityModel<UserDto> findByEmail(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() ->
                         new EntityNotFoundException(String.format(ErrorMessag.USER_NOT_FOND_EMAIL, email)));
@@ -122,27 +131,29 @@ public class UserService {
         UserDto result = userMapper.toDto(user);
         log.debug("User {} to UserDto entity {} was successful.", user, result);
 
-        return result;
+        return userAssembler.toModel(result);
     }
 
     @Transactional(readOnly = true)
-    public List<UserDto> findByName(String name) {
+    public List<EntityModel<UserDto>> findByName(String name) {
         List<User> users = userRepository.findByName(name);
         log.info("Users by {} name retrieved.", name);
 
         return users.stream()
                 .map(userMapper::toDto)
+                .map(userAssembler::toModel)
                 .peek(dto -> log.debug("Mapped to UserDto: {}", dto))
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<UserDto> findByAge(Integer age) {
+    public List<EntityModel<UserDto>> findByAge(Integer age) {
         List<User> users = userRepository.findByAge(age);
         log.info("Users by {} age retrieved.", age);
 
         return users.stream()
                 .map(userMapper::toDto)
+                .map(userAssembler::toModel)
                 .peek(dto -> log.debug("Mapped to UserDto: {}", dto))
                 .toList();
     }
