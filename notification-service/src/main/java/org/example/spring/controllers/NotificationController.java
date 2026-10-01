@@ -35,7 +35,10 @@ public class NotificationController {
     )
     @PostMapping("/sendUserCreatedToEmail")
     @ResponseStatus(HttpStatus.OK)
-    public void sendUserCreatedToEmail(@Valid @RequestBody EmailDto emailDto) {
+    public void sendUserCreatedToEmail(
+            @Valid
+            @RequestBody
+            EmailDto emailDto) {
         notificationService.sendUserCreatedToEmail(emailDto);
     }
 
@@ -48,7 +51,10 @@ public class NotificationController {
     )
     @PostMapping("/sendUserDeletedToEmail")
     @ResponseStatus(HttpStatus.OK)
-    public void sendUserDeletedToEmail(@Valid @RequestBody EmailDto emailDto) {
+    public void sendUserDeletedToEmail(
+            @Valid
+            @RequestBody
+            EmailDto emailDto) {
         notificationService.sendUserDeletedToEmail(emailDto);
     }
 }

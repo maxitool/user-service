@@ -1,6 +1,7 @@
 package org.example.spring.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -75,7 +76,10 @@ public class UserController {
     )
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public EntityModel<UserDto> findById(@PathVariable Long id) {
+    public EntityModel<UserDto> findById(
+            @PathVariable
+            @Parameter(name = "id", description = "User id", example = "1")
+            Long id) {
         return userService.findById(id);
     }
 
@@ -97,7 +101,10 @@ public class UserController {
 
     @GetMapping("/findByEmail")
     @ResponseStatus(HttpStatus.OK)
-    public EntityModel<UserDto> findByEmail(@RequestParam String email) {
+    public EntityModel<UserDto> findByEmail(
+            @RequestParam
+            @Parameter(name = "email", description = "User email", example = "test@mail.ru")
+            String email) {
         return userService.findByEmail(email);
     }
 
@@ -116,7 +123,10 @@ public class UserController {
     )
     @GetMapping("/findByName")
     @ResponseStatus(HttpStatus.OK)
-    public List<EntityModel<UserDto>> findByName(@RequestParam String name) {
+    public List<EntityModel<UserDto>> findByName(
+            @RequestParam
+            @Parameter(name = "name", description = "User name", example = "Ivan Ivanov")
+            String name) {
         return userService.findByName(name);
     }
 
@@ -135,7 +145,10 @@ public class UserController {
     )
     @GetMapping("/findByAge")
     @ResponseStatus(HttpStatus.OK)
-    public List<EntityModel<UserDto>> findByAge(@RequestParam Integer age) {
+    public List<EntityModel<UserDto>> findByAge(
+            @RequestParam
+            @Parameter(name = "age", description = "User age", example = "12")
+            Integer age) {
         return userService.findByAge(age);
     }
 
@@ -160,7 +173,10 @@ public class UserController {
     )
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
-    public EntityModel<UserDto> createUser(@RequestBody @Valid UserCreateUpdateDto userDto) {
+    public EntityModel<UserDto> createUser(
+            @RequestBody
+            @Valid
+            UserCreateUpdateDto userDto) {
         return userService.createUser(userDto);
     }
 
@@ -185,7 +201,13 @@ public class UserController {
     )
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public EntityModel<UserDto> updateUser(@PathVariable Long id, @RequestBody @Valid UserCreateUpdateDto userDto) {
+    public EntityModel<UserDto> updateUser(
+            @PathVariable
+            @Parameter(name = "id", description = "User id", example = "1")
+            Long id,
+            @RequestBody
+            @Valid
+            UserCreateUpdateDto userDto) {
         return userService.updateUser(id, userDto);
     }
 
@@ -202,7 +224,11 @@ public class UserController {
             description = "User not found"
     )
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteById(@PathVariable Long id) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ResponseEntity<Void> deleteById(
+            @PathVariable
+            @Parameter(name = "id", description = "User id", example = "1")
+            Long id) {
         userService.deleteById(id);
         return ResponseEntity.noContent().build();
     }

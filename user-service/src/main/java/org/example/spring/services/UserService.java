@@ -2,8 +2,7 @@ package org.example.spring.services;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
-import org.example.exception.ErrorMessag;
-import org.example.exception.UserAlreadyExistsException;
+import org.example.kafka.Operation;
 import org.example.spring.dto.UserCreateUpdateDto;
 import org.example.spring.dto.UserDto;
 import org.example.spring.entities.User;
@@ -12,25 +11,30 @@ import org.example.spring.kafka.EmailDtoProducer;
 import org.example.spring.mappers.UserMapper;
 import org.example.spring.repositories.UserRepository;
 import org.springframework.hateoas.EntityModel;
+import org.example.spring.events.UserCreatedDeletedEvent;
+import org.example.spring.exception.ErrorMessag;
+import org.example.spring.exception.UserAlreadyExistsException;
+import org.example.spring.mappers.UserMapper;
+import org.example.spring.repositories.UserRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
-@Transactional
 @Slf4j
+@Transactional
 public class UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    private final EmailDtoProducer kafkaProducer;
-    private final UserAssembler userAssembler;
+    private final ApplicationEventPublisher eventPublisher;
 
     public UserService(UserRepository userRepository,
                        UserMapper userMapper,
-                       EmailDtoProducer kafkaProducer,
-                       UserAssembler userAssembler) {
+                       ApplicationEventPublisher eventPublisher,
+                      UserAssembler userAssembler) {
         if (userRepository == null) {
             log.error("userRepository is null");
         }
@@ -39,10 +43,12 @@ public class UserService {
             log.error("userMapper is null");
         }
         this.userMapper = userMapper;
-        if (kafkaProducer == null) {
-            log.error("kafkaProducer is null");
+        if (eventPublisher == null) {
+            log.error("eventPublisher is null");
         }
-        this.kafkaProducer = kafkaProducer;
+        if (userAssembler == null) {
+            log.error("userAssembler is null");
+        }
         this.userAssembler = userAssembler;
     }
 
@@ -52,14 +58,22 @@ public class UserService {
             log.info("{} email already exist.", dto.email());
             throw new UserAlreadyExistsException(dto.email());
         }
+    }
 
+    public EntityModel<UserDto> createUser(UserCreateUpdateDto dto) {
         User user = userMapper.toEntity(dto);
         log.debug("UserCreateUpdateDto {} to User entity {} was successful.", dto, user);
 
-        User saved = userRepository.save(user);
-        log.info("User {} was created.", user);
+        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+            log.info("{} email already exist.", user.getEmail());
+            throw new UserAlreadyExistsException(user.getEmail());
+        }
 
-        kafkaProducer.sendToEmailUserCreated(saved.getEmail());
+        User saved = userRepository.save(user);
+        log.info("User {} was created.", saved);
+
+        UserCreatedDeletedEvent event = new UserCreatedDeletedEvent(Operation.CREATE, user.getEmail());
+        eventPublisher.publishEvent(event);
 
         UserDto result = userMapper.toDto(saved);
         log.debug("User {} to UserDto entity {} was successful.", saved, result);
@@ -112,7 +126,8 @@ public class UserService {
         userRepository.delete(user);
         log.info("{} user was deleted", user);
 
-        kafkaProducer.sendToEmailUserDeleted(user.getEmail());
+        UserCreatedDeletedEvent event = new UserCreatedDeletedEvent(Operation.DELETE, user.getEmail());
+        eventPublisher.publishEvent(event);
     }
 
     @Transactional(readOnly = true)

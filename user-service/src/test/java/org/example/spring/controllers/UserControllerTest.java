@@ -1,10 +1,10 @@
 package org.example.spring.controllers;
 
 import jakarta.persistence.EntityNotFoundException;
-import org.example.exception.ErrorMessag;
-import org.example.exception.UserAlreadyExistsException;
 import org.example.spring.dto.UserCreateUpdateDto;
 import org.example.spring.dto.UserDto;
+import org.example.spring.exception.ErrorMessag;
+import org.example.spring.exception.UserAlreadyExistsException;
 import org.example.spring.services.UserService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
