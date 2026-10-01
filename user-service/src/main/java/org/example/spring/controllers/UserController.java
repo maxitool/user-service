@@ -11,7 +11,9 @@ import lombok.RequiredArgsConstructor;
 import org.example.spring.dto.UserCreateUpdateDto;
 import org.example.spring.dto.UserDto;
 import org.example.spring.services.UserService;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -52,7 +54,7 @@ public class UserController {
     )
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<UserDto> findAll() {
+    public List<EntityModel<UserDto>> findAll() {
         return userService.findAll();
     }
 
@@ -73,7 +75,7 @@ public class UserController {
     )
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public UserDto findById(@PathVariable Long id) {
+    public EntityModel<UserDto> findById(@PathVariable Long id) {
         return userService.findById(id);
     }
 
@@ -95,7 +97,7 @@ public class UserController {
 
     @GetMapping("/findByEmail")
     @ResponseStatus(HttpStatus.OK)
-    public UserDto findByEmail(@RequestParam String email) {
+    public EntityModel<UserDto> findByEmail(@RequestParam String email) {
         return userService.findByEmail(email);
     }
 
@@ -114,7 +116,7 @@ public class UserController {
     )
     @GetMapping("/findByName")
     @ResponseStatus(HttpStatus.OK)
-    public List<UserDto> findByName(@RequestParam String name) {
+    public List<EntityModel<UserDto>> findByName(@RequestParam String name) {
         return userService.findByName(name);
     }
 
@@ -133,7 +135,7 @@ public class UserController {
     )
     @GetMapping("/findByAge")
     @ResponseStatus(HttpStatus.OK)
-    public List<UserDto> findByAge(@RequestParam Integer age) {
+    public List<EntityModel<UserDto>> findByAge(@RequestParam Integer age) {
         return userService.findByAge(age);
     }
 
@@ -158,7 +160,7 @@ public class UserController {
     )
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDto createUser(@RequestBody @Valid UserCreateUpdateDto userDto) {
+    public EntityModel<UserDto> createUser(@RequestBody @Valid UserCreateUpdateDto userDto) {
         return userService.createUser(userDto);
     }
 
@@ -183,7 +185,7 @@ public class UserController {
     )
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public UserDto updateUser(@PathVariable Long id, @RequestBody @Valid UserCreateUpdateDto userDto) {
+    public EntityModel<UserDto> updateUser(@PathVariable Long id, @RequestBody @Valid UserCreateUpdateDto userDto) {
         return userService.updateUser(id, userDto);
     }
 
@@ -200,8 +202,8 @@ public class UserController {
             description = "User not found"
     )
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteById(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteById(@PathVariable Long id) {
         userService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }
