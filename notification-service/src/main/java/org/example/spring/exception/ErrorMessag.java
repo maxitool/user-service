@@ -1,4 +1,4 @@
-package org.example.exception;
+package org.example.spring.exception;
 
 public final class ErrorMessag {
     private ErrorMessag() {
@@ -15,10 +15,6 @@ public final class ErrorMessag {
     public static final String MISSING_PARAMETER = "Missing Parameter";
 
     public static final String RESOURCE_NOT_FOUND = "Resource Not Found";
-
-    public static final String USER_NOT_FOND_ID = "User id %s not found";
-
-    public static final String USER_NOT_FOND_EMAIL = "User email %s not found";
 
     public static final String USER_ALREADY_EXISTS = "A user with this email %s already exists";
 

@@ -1,11 +1,10 @@
 package org.example.spring.services;
 
 import jakarta.persistence.EntityNotFoundException;
-import org.example.exception.UserAlreadyExistsException;
 import org.example.spring.dto.UserCreateUpdateDto;
 import org.example.spring.dto.UserDto;
 import org.example.spring.entities.User;
-import org.example.spring.kafka.EmailDtoProducer;
+import org.example.spring.exception.UserAlreadyExistsException;
 import org.example.spring.mappers.UserMapper;
 import org.example.spring.repositories.UserRepository;
 import org.junit.jupiter.api.BeforeAll;
@@ -14,7 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,8 +38,6 @@ class UserServiceTest {
     private UserRepository userRepository;
     @MockitoSpyBean
     private UserMapper userMapper;
-    @MockitoBean
-    private EmailDtoProducer emailDtoProducer;
 
     @Autowired
     private UserService userService;
@@ -76,7 +72,6 @@ class UserServiceTest {
         verify(userRepository).save(any(User.class));
         verify(userMapper).toEntity(any(UserCreateUpdateDto.class));
         verify(userMapper).toDto(any(User.class));
-        verify(emailDtoProducer).sendToEmailUserCreated(any(String.class));
     }
 
     @Test
@@ -141,7 +136,6 @@ class UserServiceTest {
         userService.deleteById(userIrina1.getId());
 
         verify(userRepository).delete(any(User.class));
-        verify(emailDtoProducer).sendToEmailUserDeleted(any(String.class));
     }
 
     @Test

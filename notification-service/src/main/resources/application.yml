@@ -20,6 +20,10 @@ spring:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
 
+logging:
+  level:
+    org.example.spring: DEBUG
+
 server:
   port: 8081
 

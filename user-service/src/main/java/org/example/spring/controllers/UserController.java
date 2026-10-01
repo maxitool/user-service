@@ -1,6 +1,7 @@
 package org.example.spring.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -73,7 +74,10 @@ public class UserController {
     )
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public UserDto findById(@PathVariable Long id) {
+    public UserDto findById(
+            @PathVariable
+            @Parameter(name = "id", description = "User id", example = "1")
+            Long id) {
         return userService.findById(id);
     }
 
@@ -95,7 +99,10 @@ public class UserController {
 
     @GetMapping("/findByEmail")
     @ResponseStatus(HttpStatus.OK)
-    public UserDto findByEmail(@RequestParam String email) {
+    public UserDto findByEmail(
+            @RequestParam
+            @Parameter(name = "email", description = "User email", example = "test@mail.ru")
+            String email) {
         return userService.findByEmail(email);
     }
 
@@ -114,7 +121,10 @@ public class UserController {
     )
     @GetMapping("/findByName")
     @ResponseStatus(HttpStatus.OK)
-    public List<UserDto> findByName(@RequestParam String name) {
+    public List<UserDto> findByName(
+            @RequestParam
+            @Parameter(name = "name", description = "User name", example = "Ivan Ivanov")
+            String name) {
         return userService.findByName(name);
     }
 
@@ -133,7 +143,10 @@ public class UserController {
     )
     @GetMapping("/findByAge")
     @ResponseStatus(HttpStatus.OK)
-    public List<UserDto> findByAge(@RequestParam Integer age) {
+    public List<UserDto> findByAge(
+            @RequestParam
+            @Parameter(name = "age", description = "User age", example = "12")
+            Integer age) {
         return userService.findByAge(age);
     }
 
@@ -158,7 +171,10 @@ public class UserController {
     )
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDto createUser(@RequestBody @Valid UserCreateUpdateDto userDto) {
+    public UserDto createUser(
+            @RequestBody
+            @Valid
+            UserCreateUpdateDto userDto) {
         return userService.createUser(userDto);
     }
 
@@ -183,7 +199,13 @@ public class UserController {
     )
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public UserDto updateUser(@PathVariable Long id, @RequestBody @Valid UserCreateUpdateDto userDto) {
+    public UserDto updateUser(
+            @PathVariable
+            @Parameter(name = "id", description = "User id", example = "1")
+            Long id,
+            @RequestBody
+            @Valid
+            UserCreateUpdateDto userDto) {
         return userService.updateUser(id, userDto);
     }
 
@@ -201,7 +223,10 @@ public class UserController {
     )
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteById(@PathVariable Long id) {
+    public void deleteById(
+            @PathVariable
+            @Parameter(name = "id", description = "User id", example = "1")
+            Long id) {
         userService.deleteById(id);
     }
 }
