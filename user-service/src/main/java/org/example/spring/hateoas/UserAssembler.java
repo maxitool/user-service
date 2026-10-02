@@ -2,6 +2,7 @@ package org.example.spring.hateoas;
 
 import org.example.spring.controllers.UserController;
 import org.example.spring.dto.UserDto;
+import org.jspecify.annotations.NonNull;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
@@ -14,7 +15,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class UserAssembler implements RepresentationModelAssembler<UserDto, EntityModel<UserDto>> {
 
     @Override
-    public EntityModel<UserDto> toModel(UserDto dto) {
+    public @NonNull EntityModel<UserDto> toModel(UserDto dto) {
         Link selfLink = linkTo(methodOn(UserController.class).findById(dto.id())).withSelfRel();
         Link createLink = linkTo(methodOn(UserController.class).createUser(null)).withRel("create");
         Link updateLink = linkTo(methodOn(UserController.class).updateUser(dto.id(), null)).withRel("update");
