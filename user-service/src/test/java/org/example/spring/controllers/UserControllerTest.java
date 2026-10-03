@@ -1,15 +1,18 @@
 package org.example.spring.controllers;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.example.spring.dto.ApiRootDto;
 import org.example.spring.dto.UserCreateUpdateDto;
 import org.example.spring.dto.UserDto;
 import org.example.spring.exception.ErrorMessag;
 import org.example.spring.exception.UserAlreadyExistsException;
+import org.example.spring.hateoas.assemblers.RepresentationAssembler;
 import org.example.spring.services.UserService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
@@ -42,17 +45,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(UserController.class)
 class UserControllerTest {
     private static final String REQUEST_MAPPING = "/api/users";
+    private static final String JSON_RESPONSE_COMMON = "$._embedded.userDtoList.";
     private static ObjectMapper mapper;
     private static UserDto userIrina1;
     private static UserDto userIrina2;
     private static List<UserDto> users;
     private static EntityModel<UserDto> userIrina1Model;
     private static EntityModel<UserDto> userIrina2Model;
-    private static List<EntityModel<UserDto>> usersModel;
+    private static CollectionModel<EntityModel<UserDto>> usersModel;
     private static UserCreateUpdateDto userIrina1CreateUpdateDto;
 
     @MockitoBean
     private UserService userService;
+    @MockitoBean
+    private RepresentationAssembler representationAssembler;
 
     @Autowired
     private MockMvc mockMvc;
@@ -67,7 +73,18 @@ class UserControllerTest {
 
         userIrina1Model = EntityModel.of(userIrina1, Link.of(REQUEST_MAPPING + "/" + userIrina1.id()));
         userIrina2Model = EntityModel.of(userIrina2, Link.of(REQUEST_MAPPING + "/" + userIrina2.id()));
-        usersModel = List.of(userIrina1Model, userIrina2Model);
+        usersModel = CollectionModel.of(List.of(userIrina1Model, userIrina2Model));
+    }
+
+    @Test
+    void when_api_then_returnApiRootDtoAndVerify() throws Exception {
+        EntityModel<ApiRootDto> result = EntityModel.of(new ApiRootDto());
+        when(representationAssembler.toModel(any())).thenReturn(result);
+
+        mockMvc.perform(get("/api"))
+                .andDo(print())
+                .andExpect(status().isOk());
+        verify(representationAssembler).toModel(any());
     }
 
     @Test
@@ -77,15 +94,15 @@ class UserControllerTest {
         mockMvc.perform(get(REQUEST_MAPPING))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()").value(users.size()))
-                .andExpect(jsonPath("$[0].id").value(users.get(0).id()))
-                .andExpect(jsonPath("$[0].name").value(users.get(0).name()))
-                .andExpect(jsonPath("$[0].email").value(users.get(0).email()))
-                .andExpect(jsonPath("$[0].age").value(users.get(0).age()))
-                .andExpect(jsonPath("$[1].id").value(users.get(1).id()))
-                .andExpect(jsonPath("$[1].name").value(users.get(1).name()))
-                .andExpect(jsonPath("$[1].email").value(users.get(1).email()))
-                .andExpect(jsonPath("$[1].age").value(users.get(1).age()));
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "size()").value(users.size()))
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[0].id").value(users.get(0).id()))
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[0].name").value(users.get(0).name()))
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[0].email").value(users.get(0).email()))
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[0].age").value(users.get(0).age()))
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[1].id").value(users.get(1).id()))
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[1].name").value(users.get(1).name()))
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[1].email").value(users.get(1).email()))
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[1].age").value(users.get(1).age()));
         verify(userService).findAll();
     }
 
@@ -168,15 +185,15 @@ class UserControllerTest {
                         .param("name", userIrina1.name()))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()").value(users.size()))
-                .andExpect(jsonPath("$[0].id").value(users.get(0).id()))
-                .andExpect(jsonPath("$[0].name").value(users.get(0).name()))
-                .andExpect(jsonPath("$[0].email").value(users.get(0).email()))
-                .andExpect(jsonPath("$[0].age").value(users.get(0).age()))
-                .andExpect(jsonPath("$[1].id").value(users.get(1).id()))
-                .andExpect(jsonPath("$[1].name").value(users.get(1).name()))
-                .andExpect(jsonPath("$[1].email").value(users.get(1).email()))
-                .andExpect(jsonPath("$[1].age").value(users.get(1).age()));
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "size()").value(users.size()))
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[0].id").value(users.get(0).id()))
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[0].name").value(users.get(0).name()))
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[0].email").value(users.get(0).email()))
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[0].age").value(users.get(0).age()))
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[1].id").value(users.get(1).id()))
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[1].name").value(users.get(1).name()))
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[1].email").value(users.get(1).email()))
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[1].age").value(users.get(1).age()));
         verify(userService).findByName(any(String.class));
     }
 
@@ -198,15 +215,15 @@ class UserControllerTest {
                         .param("age", userIrina1.age().toString()))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.size()").value(users.size()))
-                .andExpect(jsonPath("$[0].id").value(users.get(0).id()))
-                .andExpect(jsonPath("$[0].name").value(users.get(0).name()))
-                .andExpect(jsonPath("$[0].email").value(users.get(0).email()))
-                .andExpect(jsonPath("$[0].age").value(users.get(0).age()))
-                .andExpect(jsonPath("$[1].id").value(users.get(1).id()))
-                .andExpect(jsonPath("$[1].name").value(users.get(1).name()))
-                .andExpect(jsonPath("$[1].email").value(users.get(1).email()))
-                .andExpect(jsonPath("$[1].age").value(users.get(1).age()));
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "size()").value(users.size()))
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[0].id").value(users.get(0).id()))
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[0].name").value(users.get(0).name()))
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[0].email").value(users.get(0).email()))
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[0].age").value(users.get(0).age()))
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[1].id").value(users.get(1).id()))
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[1].name").value(users.get(1).name()))
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[1].email").value(users.get(1).email()))
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[1].age").value(users.get(1).age()));
         verify(userService).findByAge(any(Integer.class));
     }
 

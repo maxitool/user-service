@@ -5,7 +5,7 @@ import org.example.spring.dto.UserCreateUpdateDto;
 import org.example.spring.dto.UserDto;
 import org.example.spring.entities.User;
 import org.example.spring.exception.UserAlreadyExistsException;
-import org.example.spring.hateoas.UserAssembler;
+import org.example.spring.hateoas.assemblers.UserAssembler;
 import org.example.spring.mappers.UserMapper;
 import org.example.spring.repositories.UserRepository;
 import org.junit.jupiter.api.BeforeAll;
@@ -13,13 +13,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -28,7 +26,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @Transactional
@@ -42,7 +39,7 @@ class UserServiceTest {
     private UserRepository userRepository;
     @MockitoSpyBean
     private UserMapper userMapper;
-    @MockitoBean
+    @MockitoSpyBean
     private UserAssembler userAssembler;
 
     @Autowired
@@ -64,8 +61,6 @@ class UserServiceTest {
         userRepository.save(userIrina2);
 
         clearInvocations(userRepository);
-        when(userAssembler.toModel(any(UserDto.class)))
-                .thenAnswer(invocation -> EntityModel.of(invocation.getArgument(0, UserDto.class)));
     }
 
     @Test
@@ -139,10 +134,10 @@ class UserServiceTest {
 
     @Test
     void when_findAll_then_returnUsersDtoListAndVerify() {
-        List<EntityModel<UserDto>> found = userService.findAll();
+        CollectionModel<EntityModel<UserDto>> found = userService.findAll();
 
         assertNotNull(found);
-        assertEquals(USERS_COUNT, found.size());
+        assertEquals(USERS_COUNT, found.getContent().size());
         verify(userRepository).findAll();
         verify(userMapper, times(USERS_COUNT)).toDto(any(User.class));
         verify(userAssembler, times(USERS_COUNT)).toModel(any(UserDto.class));
@@ -178,10 +173,10 @@ class UserServiceTest {
 
     @Test
     void when_findByName_then_returnUsersDtoListAndVerify() {
-        List<EntityModel<UserDto>> found = userService.findByName(userIrina1.getName());
+        CollectionModel<EntityModel<UserDto>> found = userService.findByName(userIrina1.getName());
 
         assertNotNull(found);
-        assertEquals(2, found.size());
+        assertEquals(2, found.getContent().size());
         verify(userRepository).findByName(any(String.class));
         verify(userMapper, times(2)).toDto(any(User.class));
         verify(userAssembler, times(2)).toModel(any(UserDto.class));
@@ -189,10 +184,10 @@ class UserServiceTest {
 
     @Test
     void when_findByAge_then_returnUsersDtoListAndVerify() {
-        List<EntityModel<UserDto>> found = userService.findByAge(userIrina1.getAge());
+        CollectionModel<EntityModel<UserDto>> found = userService.findByAge(userIrina1.getAge());
 
         assertNotNull(found);
-        assertEquals(2, found.size());
+        assertEquals(2, found.getContent().size());
         verify(userRepository).findByAge(any(Integer.class));
         verify(userMapper, times(2)).toDto(any(User.class));
         verify(userAssembler, times(2)).toModel(any(UserDto.class));

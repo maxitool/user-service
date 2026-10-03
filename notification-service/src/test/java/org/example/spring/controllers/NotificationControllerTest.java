@@ -1,11 +1,14 @@
 package org.example.spring.controllers;
 
 import org.example.kafka.EmailDto;
+import org.example.spring.dto.ApiRootDto;
+import org.example.spring.hateoas.assemblers.RepresentationAssembler;
 import org.example.spring.services.NotificationService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -15,8 +18,10 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 import tools.jackson.databind.ObjectMapper;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -31,6 +36,8 @@ public class NotificationControllerTest {
 
     @MockitoBean
     private NotificationService service;
+    @MockitoBean
+    private RepresentationAssembler representationAssembler;
 
     @Autowired
     private MockMvc mockMvc;
@@ -42,12 +49,23 @@ public class NotificationControllerTest {
     }
 
     @Test
+    void when_api_then_returnApiRootDtoAndVerify() throws Exception {
+        EntityModel<ApiRootDto> result = EntityModel.of(new ApiRootDto());
+        when(representationAssembler.toModel(any())).thenReturn(result);
+
+        mockMvc.perform(get("/api"))
+                .andDo(print())
+                .andExpect(status().isOk());
+        verify(representationAssembler).toModel(any());
+    }
+
+    @Test
     void when_sendUserCreatedToEmail_then_verify() throws Exception {
         mockMvc.perform(post(REQUEST_MAPPING + "/sendUserCreatedToEmail")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(emailDto)))
                 .andDo(print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
         verify(service).sendUserCreatedToEmail(emailDto);
     }
 
@@ -79,7 +97,7 @@ public class NotificationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(emailDto)))
                 .andDo(print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
         verify(service).sendUserDeletedToEmail(emailDto);
     }
 
