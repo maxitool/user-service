@@ -9,10 +9,11 @@ import org.example.spring.entities.User;
 import org.example.spring.events.UserCreatedDeletedEvent;
 import org.example.spring.exception.ErrorMessag;
 import org.example.spring.exception.UserAlreadyExistsException;
-import org.example.spring.hateoas.UserAssembler;
+import org.example.spring.hateoas.assemblers.UserAssembler;
 import org.example.spring.mappers.UserMapper;
 import org.example.spring.repositories.UserRepository;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -100,15 +101,16 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public List<EntityModel<UserDto>> findAll() {
+    public CollectionModel<EntityModel<UserDto>> findAll() {
         List<User> users = userRepository.findAll();
         log.info("All users retrieved.");
 
-        return users.stream()
+        List<UserDto> userDtos = users.stream()
                 .map(userMapper::toDto)
-                .map(userAssembler::toModel)
                 .peek(dto -> log.debug("Mapped to UserDto: {}", dto))
                 .toList();
+
+        return userAssembler.toCollectionModel(userDtos);
     }
 
     public void deleteById(Long id) {
@@ -135,27 +137,29 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public List<EntityModel<UserDto>> findByName(String name) {
+    public CollectionModel<EntityModel<UserDto>> findByName(String name) {
         List<User> users = userRepository.findByName(name);
         log.info("Users by {} name retrieved.", name);
 
-        return users.stream()
+        List<UserDto> userDtos = users.stream()
                 .map(userMapper::toDto)
-                .map(userAssembler::toModel)
                 .peek(dto -> log.debug("Mapped to UserDto: {}", dto))
                 .toList();
+
+        return userAssembler.toCollectionModel(userDtos);
     }
 
     @Transactional(readOnly = true)
-    public List<EntityModel<UserDto>> findByAge(Integer age) {
+    public CollectionModel<EntityModel<UserDto>> findByAge(Integer age) {
         List<User> users = userRepository.findByAge(age);
         log.info("Users by {} age retrieved.", age);
 
-        return users.stream()
+        List<UserDto> userDtos = users.stream()
                 .map(userMapper::toDto)
-                .map(userAssembler::toModel)
                 .peek(dto -> log.debug("Mapped to UserDto: {}", dto))
                 .toList();
+
+        return userAssembler.toCollectionModel(userDtos);
     }
 
     private User getUserOrThrow(Long id) {

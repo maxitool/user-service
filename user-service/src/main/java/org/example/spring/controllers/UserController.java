@@ -9,9 +9,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.spring.dto.ApiRootDto;
 import org.example.spring.dto.UserCreateUpdateDto;
 import org.example.spring.dto.UserDto;
+import org.example.spring.hateoas.assemblers.RepresentationAssembler;
 import org.example.spring.services.UserService;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,10 +30,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping(
+        value = "/api",
+        produces = {"application/prs.hal-forms+json", "application/hal+json"}
+)
 @RequiredArgsConstructor
 @Validated
 @Tag(
@@ -38,7 +42,26 @@ import java.util.List;
         description = "Operations for creating, reading, updating and deleting users"
 )
 public class UserController {
+    private static final String API_MAPPING = "/users";
     private final UserService userService;
+    private final RepresentationAssembler representationAssembler;
+
+    @Operation(
+            summary = "Get api",
+            description = "Returns users api"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "api",
+            content = @Content(
+                    schema = @Schema(implementation = ApiRootDto.class)
+            )
+    )
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public EntityModel<ApiRootDto> getApi() {
+        return representationAssembler.toModel(new ApiRootDto());
+    }
 
     @Operation(
             summary = "Get all users",
@@ -53,9 +76,9 @@ public class UserController {
                     )
             )
     )
-    @GetMapping
+    @GetMapping(API_MAPPING)
     @ResponseStatus(HttpStatus.OK)
-    public List<EntityModel<UserDto>> findAll() {
+    public CollectionModel<EntityModel<UserDto>> findAll() {
         return userService.findAll();
     }
 
@@ -74,7 +97,7 @@ public class UserController {
             responseCode = "404",
             description = "User not found"
     )
-    @GetMapping("/{id}")
+    @GetMapping(API_MAPPING + "/{id}")
     @ResponseStatus(HttpStatus.OK)
     public EntityModel<UserDto> findById(
             @PathVariable
@@ -99,7 +122,7 @@ public class UserController {
             description = "User not found"
     )
 
-    @GetMapping("/findByEmail")
+    @GetMapping(API_MAPPING + "/findByEmail")
     @ResponseStatus(HttpStatus.OK)
     public EntityModel<UserDto> findByEmail(
             @RequestParam
@@ -121,9 +144,9 @@ public class UserController {
                     )
             )
     )
-    @GetMapping("/findByName")
+    @GetMapping(API_MAPPING + "/findByName")
     @ResponseStatus(HttpStatus.OK)
-    public List<EntityModel<UserDto>> findByName(
+    public CollectionModel<EntityModel<UserDto>> findByName(
             @RequestParam
             @Parameter(name = "name", description = "User name", example = "Ivan Ivanov")
             String name) {
@@ -143,9 +166,9 @@ public class UserController {
                     )
             )
     )
-    @GetMapping("/findByAge")
+    @GetMapping(API_MAPPING + "/findByAge")
     @ResponseStatus(HttpStatus.OK)
-    public List<EntityModel<UserDto>> findByAge(
+    public CollectionModel<EntityModel<UserDto>> findByAge(
             @RequestParam
             @Parameter(name = "age", description = "User age", example = "12")
             Integer age) {
@@ -171,7 +194,7 @@ public class UserController {
             responseCode = "409",
             description = "User with this email already exists"
     )
-    @PostMapping()
+    @PostMapping(API_MAPPING)
     @ResponseStatus(HttpStatus.CREATED)
     public EntityModel<UserDto> createUser(
             @RequestBody
@@ -199,7 +222,7 @@ public class UserController {
             responseCode = "404",
             description = "User not found"
     )
-    @PutMapping("/{id}")
+    @PutMapping(API_MAPPING + "/{id}")
     @ResponseStatus(HttpStatus.OK)
     public EntityModel<UserDto> updateUser(
             @PathVariable
@@ -223,7 +246,7 @@ public class UserController {
             responseCode = "404",
             description = "User not found"
     )
-    @DeleteMapping("/{id}")
+    @DeleteMapping(API_MAPPING + "/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseEntity<Void> deleteById(
             @PathVariable
