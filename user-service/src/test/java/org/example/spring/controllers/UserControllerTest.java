@@ -44,7 +44,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(UserController.class)
 class UserControllerTest {
-    private static final String REQUEST_MAPPING = "/api/users";
+    private static final String REQUEST_MAPPING = "/api/v1/users";
     private static final String JSON_RESPONSE_COMMON = "$._embedded.userDtoList.";
     private static ObjectMapper mapper;
     private static UserDto userIrina1;
@@ -81,7 +81,7 @@ class UserControllerTest {
         EntityModel<ApiRootDto> result = EntityModel.of(new ApiRootDto());
         when(representationAssembler.toModel(any())).thenReturn(result);
 
-        mockMvc.perform(get("/api"))
+        mockMvc.perform(get(REQUEST_MAPPING + "/getApi"))
                 .andDo(print())
                 .andExpect(status().isOk());
         verify(representationAssembler).toModel(any());

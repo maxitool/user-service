@@ -1,0 +1,44 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: gateway-service
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+          - id: user_service_route
+            uri: http://user-service:8081
+            predicates:
+              - Path=/api/v1/users/**
+
+          - id: notification_service_route
+            uri: http://notification-service:8082
+            predicates:
+              - Path=/api/v1/email/**
+
+          - id: user_service_api_docs
+            uri: http://user-service:8081
+            predicates:
+              - Path=/openapi/users/**
+            filters:
+              - RewritePath=/openapi/users/(?<segment>.*), /$\{segment}
+
+          - id: notification_service_api_docs
+            uri: http://notification-service:8082
+            predicates:
+              - Path=/openapi/email/**
+            filters:
+              - RewritePath=/openapi/email/(?<segment>.*), /$\{segment}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    disable-swagger-default-url: true
+    urls:
+      - name: user-service
+        url: /openapi/users/v3/api-docs
+      - name: notification-service
+        url: /openapi/email/v3/api-docs

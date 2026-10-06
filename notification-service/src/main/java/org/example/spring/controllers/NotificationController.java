@@ -24,8 +24,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(
-        value = "/api",
-        produces = {"application/prs.hal-forms+json", "application/hal+json"}
+        value = "/api/v1/email",
+        produces = {
+                "application/prs.hal-forms+json",
+                "application/hal+json",
+                "application/json"
+        }
 )
 @RequiredArgsConstructor
 @Validated
@@ -34,7 +38,6 @@ import org.springframework.web.bind.annotation.RestController;
         description = "Operations for users notification"
 )
 public class NotificationController {
-    private static final String API_MAPPING = "/notification";
     private final NotificationService notificationService;
     private final RepresentationAssembler representationAssembler;
 
@@ -49,7 +52,7 @@ public class NotificationController {
                     schema = @Schema(implementation = ApiRootDto.class)
             )
     )
-    @GetMapping
+    @GetMapping("/getApi")
     @ResponseStatus(HttpStatus.OK)
     public EntityModel<ApiRootDto> getApi() {
         return representationAssembler.toModel(new ApiRootDto());
@@ -62,7 +65,7 @@ public class NotificationController {
             responseCode = "204",
             description = "User created message was sent"
     )
-    @PostMapping(API_MAPPING + "/sendUserCreatedToEmail")
+    @PostMapping("/sendUserCreatedToEmail")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseEntity<Void> sendUserCreatedToEmail(
             @Valid
@@ -79,7 +82,7 @@ public class NotificationController {
             responseCode = "204",
             description = "User deleted message was sent"
     )
-    @PostMapping(API_MAPPING + "/sendUserDeletedToEmail")
+    @PostMapping("/sendUserDeletedToEmail")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseEntity<Void> sendUserDeletedToEmail(
             @Valid

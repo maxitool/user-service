@@ -13,6 +13,7 @@
         <module>user-service</module>
         <module>notification-service</module>
         <module>user-notification-common</module>
+        <module>gateway-service</module>
     </modules>
 
     <properties>
@@ -23,6 +24,7 @@
             <junit.version>6.1.3</junit.version>
             <mockito.version>5.14.2</mockito.version>
             <testcontainers.version>1.20.6</testcontainers.version>
+            <spring-cloud.version>2025.1.3</spring-cloud.version>
             <spring-boot.version>4.1.1</spring-boot.version>
             <h2database.version>2.4.240</h2database.version>
             <postgresql.version>42.7.13</postgresql.version>
@@ -83,12 +85,27 @@
             </dependency>
 
             <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webflux-ui</artifactId>
+                <version>${springdoc.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
                 <version>${spring-boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
         </dependencies>
     </dependencyManagement>
 

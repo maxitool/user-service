@@ -1,6 +1,17 @@
+server:
+  port: 8081
+  forward-headers-strategy: framework
+
+springdoc:
+  open-api:
+    servers:
+      - url: http://localhost:8080
+        description: API Gateway
+
 spring:
+  application:
+    name: user-service
   kafka:
-    bootstrap-servers: localhost:9092
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -26,9 +37,6 @@ spring:
 logging:
   level:
     org.example.spring: DEBUG
-
-server:
-  port: 8080
 
 app:
   kafka:

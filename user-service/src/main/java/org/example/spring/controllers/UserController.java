@@ -32,8 +32,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(
-        value = "/api",
-        produces = {"application/prs.hal-forms+json", "application/hal+json"}
+        value = "/api/v1/users",
+        produces = {
+                "application/prs.hal-forms+json",
+                "application/hal+json",
+                "application/json"
+        }
 )
 @RequiredArgsConstructor
 @Validated
@@ -42,7 +46,6 @@ import org.springframework.web.bind.annotation.RestController;
         description = "Operations for creating, reading, updating and deleting users"
 )
 public class UserController {
-    private static final String API_MAPPING = "/users";
     private final UserService userService;
     private final RepresentationAssembler representationAssembler;
 
@@ -57,7 +60,7 @@ public class UserController {
                     schema = @Schema(implementation = ApiRootDto.class)
             )
     )
-    @GetMapping
+    @GetMapping("/getApi")
     @ResponseStatus(HttpStatus.OK)
     public EntityModel<ApiRootDto> getApi() {
         return representationAssembler.toModel(new ApiRootDto());
@@ -76,7 +79,7 @@ public class UserController {
                     )
             )
     )
-    @GetMapping(API_MAPPING)
+    @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public CollectionModel<EntityModel<UserDto>> findAll() {
         return userService.findAll();
@@ -97,7 +100,7 @@ public class UserController {
             responseCode = "404",
             description = "User not found"
     )
-    @GetMapping(API_MAPPING + "/{id}")
+    @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public EntityModel<UserDto> findById(
             @PathVariable
@@ -122,7 +125,7 @@ public class UserController {
             description = "User not found"
     )
 
-    @GetMapping(API_MAPPING + "/findByEmail")
+    @GetMapping("/findByEmail")
     @ResponseStatus(HttpStatus.OK)
     public EntityModel<UserDto> findByEmail(
             @RequestParam
@@ -144,7 +147,7 @@ public class UserController {
                     )
             )
     )
-    @GetMapping(API_MAPPING + "/findByName")
+    @GetMapping("/findByName")
     @ResponseStatus(HttpStatus.OK)
     public CollectionModel<EntityModel<UserDto>> findByName(
             @RequestParam
@@ -166,7 +169,7 @@ public class UserController {
                     )
             )
     )
-    @GetMapping(API_MAPPING + "/findByAge")
+    @GetMapping("/findByAge")
     @ResponseStatus(HttpStatus.OK)
     public CollectionModel<EntityModel<UserDto>> findByAge(
             @RequestParam
@@ -194,7 +197,7 @@ public class UserController {
             responseCode = "409",
             description = "User with this email already exists"
     )
-    @PostMapping(API_MAPPING)
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public EntityModel<UserDto> createUser(
             @RequestBody
@@ -222,7 +225,7 @@ public class UserController {
             responseCode = "404",
             description = "User not found"
     )
-    @PutMapping(API_MAPPING + "/{id}")
+    @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public EntityModel<UserDto> updateUser(
             @PathVariable
@@ -246,7 +249,7 @@ public class UserController {
             responseCode = "404",
             description = "User not found"
     )
-    @DeleteMapping(API_MAPPING + "/{id}")
+    @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseEntity<Void> deleteById(
             @PathVariable

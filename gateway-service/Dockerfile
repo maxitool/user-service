@@ -10,11 +10,10 @@ COPY user-notification-common/pom.xml ./user-notification-common/
 COPY gateway-service/pom.xml ./gateway-service/
 
 # 2. ИСПРАВЛЕНО: Копируем код сервиса И код общего модуля
-COPY user-notification-common/src ./user-notification-common/src
-COPY notification-service/src ./notification-service/src
+COPY gateway-service/src ./gateway-service/src
 
 # 3. Собираем модуль notification-service (зависимость соберется автоматически)
-RUN mvn -pl notification-service -am clean package -DskipTests
+RUN mvn -pl gateway-service -am clean package -DskipTests
 
 # Этап 2: Финальный легковесный образ для запуска
 FROM eclipse-temurin:26
@@ -22,7 +21,7 @@ WORKDIR /app
 
 RUN groupadd --system spring && useradd --system --gid spring spring
 
-COPY --from=build --chown=spring:spring /app/notification-service/target/*.jar app.jar
+COPY --from=build --chown=spring:spring /app/gateway-service/target/*.jar app.jar
 
 USER spring:spring
 ENTRYPOINT ["java", "-jar", "app.jar"]
