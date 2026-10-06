@@ -7,6 +7,7 @@ COPY pom.xml .
 COPY user-service/pom.xml ./user-service/
 COPY notification-service/pom.xml ./notification-service/
 COPY user-notification-common/pom.xml ./user-notification-common/
+COPY gateway-service/pom.xml ./gateway-service/
 
 # 2. ИСПРАВЛЕНО: Копируем код сервиса И код общего модуля (он нужен для компиляции)
 COPY user-notification-common/src ./user-notification-common/src

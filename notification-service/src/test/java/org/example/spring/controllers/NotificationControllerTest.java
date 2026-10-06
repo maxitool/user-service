@@ -30,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(NotificationController.class)
 public class NotificationControllerTest {
-    private static final String REQUEST_MAPPING = "/api/notification";
+    private static final String REQUEST_MAPPING = "/api/v1/email";
     private static ObjectMapper mapper;
     private static EmailDto emailDto;
 
@@ -53,7 +53,7 @@ public class NotificationControllerTest {
         EntityModel<ApiRootDto> result = EntityModel.of(new ApiRootDto());
         when(representationAssembler.toModel(any())).thenReturn(result);
 
-        mockMvc.perform(get("/api"))
+        mockMvc.perform(get(REQUEST_MAPPING + "/getApi"))
                 .andDo(print())
                 .andExpect(status().isOk());
         verify(representationAssembler).toModel(any());
