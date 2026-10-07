@@ -1,4 +1,11 @@
 services:
+  discovery-service:
+    build:
+      context: .
+      dockerfile: ./discovery-service/Dockerfile
+    ports:
+      - "8761:8761"
+
   gateway-service:
     build:
       context: .
@@ -6,10 +13,14 @@ services:
     ports:
       - "8080:8080"
     depends_on:
+      discovery-service:
+        condition: service_started
       user-service:
         condition: service_started
       notification-service:
         condition: service_started
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
 
   user-service:
     build:
@@ -18,11 +29,16 @@ services:
     ports:
       - "8081:8081"
     depends_on:
+      discovery-service:
+        condition: service_started
+      notification-service:
+        condition: service_started
       kafka:
         condition: service_healthy
     env_file:
       - ./config/user.env
     environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
       - SPRING_KAFKA_BOOTSTRAP-SERVERS=kafka:9092
 
   notification-service:
@@ -32,11 +48,14 @@ services:
     ports:
       - "8082:8082"
     depends_on:
+      discovery-service:
+        condition: service_started
       kafka:
         condition: service_healthy
     env_file:
       - ./config/notification.env
     environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
       - SPRING_KAFKA_BOOTSTRAP-SERVERS=kafka:9092
 
   kafka:

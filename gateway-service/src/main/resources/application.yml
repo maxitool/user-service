@@ -8,30 +8,45 @@ spring:
     gateway:
       server:
         webflux:
+          trusted-proxies: ".*"
+          x-forwarded:
+            host-enabled: true
+            proto-enabled: true
+            port-enabled: true
+            prefix-enabled: true
+
           routes:
-          - id: user_service_route
-            uri: http://user-service:8081
-            predicates:
-              - Path=/api/v1/users/**
+            - id: user_service_route
+              uri: lb://user-service
+              predicates:
+                - Path=/api/v1/users/**
 
-          - id: notification_service_route
-            uri: http://notification-service:8082
-            predicates:
-              - Path=/api/v1/email/**
+            - id: notification_service_route
+              uri: lb://notification-service
+              predicates:
+                - Path=/api/v1/email/**
 
-          - id: user_service_api_docs
-            uri: http://user-service:8081
-            predicates:
-              - Path=/openapi/users/**
-            filters:
-              - RewritePath=/openapi/users/(?<segment>.*), /$\{segment}
+            - id: user_service_api_docs
+              uri: lb://user-service
+              predicates:
+                - Path=/openapi/users/**
+              filters:
+                - RewritePath=/openapi/users/(?<segment>.*), /$\{segment}
 
-          - id: notification_service_api_docs
-            uri: http://notification-service:8082
-            predicates:
-              - Path=/openapi/email/**
-            filters:
-              - RewritePath=/openapi/email/(?<segment>.*), /$\{segment}
+            - id: notification_service_api_docs
+              uri: lb://notification-service
+              predicates:
+                - Path=/openapi/email/**
+              filters:
+                - RewritePath=/openapi/email/(?<segment>.*), /$\{segment}
+
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                allowedOriginPatterns: "*"
+                allowedMethods: "*"
+                allowedHeaders: "*"
+                allowCredentials: true
 
 springdoc:
   swagger-ui:
@@ -42,3 +57,10 @@ springdoc:
         url: /openapi/users/v3/api-docs
       - name: notification-service
         url: /openapi/email/v3/api-docs
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-service:8761/eureka/
+  instance:
+    prefer-ip-address: true

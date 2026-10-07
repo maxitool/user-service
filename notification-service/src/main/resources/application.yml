@@ -1,12 +1,6 @@
 server:
-  forward-headers-strategy: framework
   port: 8082
-
-springdoc:
-  open-api:
-    servers:
-      - url: http://localhost:8080
-        description: API Gateway
+  forward-headers-strategy: framework
 
 spring:
   application:
@@ -29,6 +23,12 @@ spring:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
 
+  web:
+    cors:
+      allowed-origin-patterns: "*"
+      allowed-methods: "*"
+      allowed-headers: "*"
+
 logging:
   level:
     org.example.spring: DEBUG
@@ -37,3 +37,10 @@ app:
   kafka:
     topic:
       email-dto: email-dto
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-service:8761/eureka/
+  instance:
+    prefer-ip-address: true

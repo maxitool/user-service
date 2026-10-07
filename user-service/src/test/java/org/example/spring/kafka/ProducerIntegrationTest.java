@@ -5,7 +5,7 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.header.Header;
 import org.example.kafka.CommunicationData;
 import org.example.kafka.EmailDto;
-import org.example.spring.services.SendEmailService;
+import org.example.spring.eureka.NotificationServiceClient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -33,7 +33,7 @@ class ProducerIntegrationTest {
     private KafkaTemplate<String, EmailDto> kafkaTemplate;
 
     @Mock
-    private SendEmailService sendEmailService;
+    private NotificationServiceClient notificationServiceClient;
 
     @InjectMocks
     private EmailDtoProducer emailDtoProducer;
@@ -112,7 +112,7 @@ class ProducerIntegrationTest {
 
         emailDtoProducer.sendToEmailUserDeleted(testEmail);
 
-        verify(sendEmailService, times(1)).sendViaHttpFallbackDelete(any(EmailDto.class));
+        verify(notificationServiceClient, times(1)).sendUserDeletedToEmail(any(EmailDto.class));
     }
 
 }

@@ -2,12 +2,6 @@ server:
   port: 8081
   forward-headers-strategy: framework
 
-springdoc:
-  open-api:
-    servers:
-      - url: http://localhost:8080
-        description: API Gateway
-
 spring:
   application:
     name: user-service
@@ -34,6 +28,12 @@ spring:
       hibernate:
         format_sql: true
 
+  web:
+    cors:
+      allowed-origin-patterns: "*"
+      allowed-methods: "*"
+      allowed-headers: "*"
+
 logging:
   level:
     org.example.spring: DEBUG
@@ -42,3 +42,20 @@ app:
   kafka:
     topic:
       email-dto: email-dto
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 60000
+      notification-service:
+        connectTimeout: 5000
+        readTimeout: 60000
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-service:8761/eureka/
+  instance:
+    prefer-ip-address: true
