@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 
 @OpenAPIDefinition(
@@ -17,6 +18,7 @@ import org.springframework.hateoas.config.EnableHypermediaSupport;
         EnableHypermediaSupport.HypermediaType.HAL,
         EnableHypermediaSupport.HypermediaType.HAL_FORMS
 })
+@EnableDiscoveryClient
 @SpringBootApplication
 public class NotificationServiceApplication {
     static void main(String[] args) {

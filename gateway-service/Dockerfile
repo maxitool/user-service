@@ -2,17 +2,18 @@
 FROM maven:3.9-eclipse-temurin-26 AS build
 WORKDIR /app
 
-# 1. Копируем родительский pom.xml и pom-файлы ВСЕХ модулей
+# 1. Копируем все модули
 COPY pom.xml .
 COPY user-service/pom.xml ./user-service/
 COPY notification-service/pom.xml ./notification-service/
 COPY user-notification-common/pom.xml ./user-notification-common/
 COPY gateway-service/pom.xml ./gateway-service/
+COPY discovery-service/pom.xml ./discovery-service/
 
-# 2. ИСПРАВЛЕНО: Копируем код сервиса И код общего модуля
+# 2. Копируем код сервиса
 COPY gateway-service/src ./gateway-service/src
 
-# 3. Собираем модуль notification-service (зависимость соберется автоматически)
+# 3. Собираем модуль
 RUN mvn -pl gateway-service -am clean package -DskipTests
 
 # Этап 2: Финальный легковесный образ для запуска
