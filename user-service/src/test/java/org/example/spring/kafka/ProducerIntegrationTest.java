@@ -100,19 +100,4 @@ class ProducerIntegrationTest {
         assertThat(operationHeader).isNotNull();
         assertThat(new String(operationHeader.value(), StandardCharsets.UTF_8)).isEqualTo("CREATE");
     }
-
-    @Test
-    void when_send_then_error() {
-        String testEmail = "fallback@example.com";
-
-        CompletableFuture<SendResult<String, EmailDto>> failedFuture = new CompletableFuture<>();
-        failedFuture.completeExceptionally(new RuntimeException("Kafka connection timeout"));
-
-        when(kafkaTemplate.send(any(ProducerRecord.class))).thenReturn(failedFuture);
-
-        emailDtoProducer.sendToEmailUserDeleted(testEmail);
-
-        verify(sendEmailService, times(1)).sendViaHttpFallbackDelete(any(EmailDto.class));
-    }
-
 }

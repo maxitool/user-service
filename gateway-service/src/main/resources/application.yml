@@ -6,32 +6,58 @@ spring:
     name: gateway-service
   cloud:
     gateway:
+      httpclient:
+        connect-timeout: 2000
+        response-timeout: 10s
       server:
         webflux:
           routes:
-          - id: user_service_route
-            uri: http://user-service:8081
-            predicates:
-              - Path=/api/v1/users/**
+            - id: user_service_route
+              uri: http://user-service:8081
+              predicates:
+                - Path=/api/v1/users/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: userKafkaCircuitBreaker
+                    fallbackUri: forward:/api/v1/gateway-fallback/email
 
-          - id: notification_service_route
-            uri: http://notification-service:8082
-            predicates:
-              - Path=/api/v1/email/**
+            - id: notification_service_route
+              uri: http://notification-service:8082
+              predicates:
+                - Path=/api/v1/email/**
 
-          - id: user_service_api_docs
-            uri: http://user-service:8081
-            predicates:
-              - Path=/openapi/users/**
-            filters:
-              - RewritePath=/openapi/users/(?<segment>.*), /$\{segment}
+            - id: gateway_fallback_route
+              uri: http://notification-service:8082
+              predicates:
+                - Path=/api/v1/gateway-fallback/email
+              filters:
+                - RewritePath=/api/v1/gateway-fallback/email, /api/notification/sendUserDeletedToEmail
 
-          - id: notification_service_api_docs
-            uri: http://notification-service:8082
-            predicates:
-              - Path=/openapi/email/**
-            filters:
-              - RewritePath=/openapi/email/(?<segment>.*), /$\{segment}
+            - id: user_service_api_docs
+              uri: http://user-service:8081
+              predicates:
+                - Path=/openapi/users/**
+              filters:
+                - RewritePath=/openapi/users/(?<segment>.*), /$\{segment}
+
+            - id: notification_service_api_docs
+              uri: http://notification-service:8082
+              predicates:
+                - Path=/openapi/email/**
+              filters:
+                - RewritePath=/openapi/email/(?<segment>.*), /$\{segment}
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      userKafkaCircuitBreaker:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 15000ms
+        statusCodes:
+          - INTERNAL_SERVER_ERROR
+          - SERVICE_UNAVAILABLE
 
 springdoc:
   swagger-ui:

@@ -7,6 +7,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import tools.jackson.databind.ObjectMapper;
 
+
+// по сути класс больше не нужен circuit breaker сам будет отправлять сообщения
+// пока не удаляла
 @Slf4j
 @Component
 public class SendEmailService {

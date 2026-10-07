@@ -24,35 +24,31 @@ public class EmailDtoProducer {
 
 
     private final KafkaTemplate<String, EmailDto> kafkaTemplate;
-    private final SendEmailService sendEmailService;
 
-    public EmailDtoProducer(KafkaTemplate<String, EmailDto> kafkaTemplate,
-                            SendEmailService sendEmailService) {
+    public EmailDtoProducer(KafkaTemplate<String, EmailDto> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
-        this.sendEmailService = sendEmailService;
     }
 
     public void sendToEmailUserCreated(String email) {
-        send(Operation.CREATE, new EmailDto(email), sendEmailService::sendViaHttpFallbackCreate);
+        send(Operation.CREATE, new EmailDto(email));
     }
 
     public void sendToEmailUserDeleted(String email) {
-        send(Operation.DELETE, new EmailDto(email), sendEmailService::sendViaHttpFallbackDelete);
+        send(Operation.DELETE, new EmailDto(email));
     }
 
-    protected void send(Operation operation, EmailDto emailDto, Consumer<EmailDto> sendViaHttpFallbackFunction) {
-        kafkaTemplate.send(createKafkaEvent(operation, emailDto))
-                .orTimeout(KAFKA_SEND_TIMEOUT, TimeUnit.SECONDS)
-                .whenComplete((result, ex) -> {
-                    if (ex != null) {
-                        log.error("Kafka not responding for {}. Reason: {}", emailDto, ex.getMessage());
-                        sendViaHttpFallbackFunction.accept(emailDto);
-                    } else {
-                        log.info("Sent to partition {} offset {}",
-                                result.getRecordMetadata().partition(),
-                                result.getRecordMetadata().offset());
-                    }
-                });
+    protected void send(Operation operation, EmailDto emailDto) {
+        try {
+            var result = kafkaTemplate.send(createKafkaEvent(operation, emailDto))
+                    .get(KAFKA_SEND_TIMEOUT, TimeUnit.SECONDS);
+
+            log.info("Sent to partition {} offset {}",
+                    result.getRecordMetadata().partition(),
+                    result.getRecordMetadata().offset());
+        } catch (Exception e) {
+            log.error("Kafka not responding for {}. Reason: {}", emailDto, e.getMessage());
+            throw new RuntimeException(e);
+        }
     }
 
     protected ProducerRecord<String, EmailDto> createKafkaEvent(Operation operation, EmailDto emailDto) {
