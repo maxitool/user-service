@@ -35,6 +35,10 @@ spring:
                 - name: CircuitBreaker
                   args:
                     name: userEurekaCircuitBreaker
+                    fallbackUri: forward:/fallback/user-service
+                    statusCodes:
+                      - "500"
+                      - "503"
                 - name: Retry
                   args:
                     retries: 2
@@ -43,6 +47,8 @@ spring:
                       - SERVICE_UNAVAILABLE
                       - GATEWAY_TIMEOUT
                     exceptions:
+                      - java.io.IOException
+                      - java.net.ConnectException
                       - java.util.concurrent.TimeoutException
                       - io.netty.handler.timeout.ReadTimeoutException
                       - io.netty.channel.ConnectTimeoutException
@@ -56,6 +62,32 @@ spring:
               uri: lb://notification-service
               predicates:
                 - Path=/api/v1/email/**
+              filters:
+                - name: CircuitBreaker
+                  args:
+                    name: notificationEurekaCircuitBreaker
+                    fallbackUri: forward:/fallback/notification-service
+                    statusCodes:
+                      - "500"
+                      - "503"
+                - name: Retry
+                  args:
+                    retries: 2
+                    statuses:
+                      - INTERNAL_SERVER_ERROR
+                      - SERVICE_UNAVAILABLE
+                      - GATEWAY_TIMEOUT
+                    exceptions:
+                      - java.io.IOException
+                      - java.net.ConnectException
+                      - java.util.concurrent.TimeoutException
+                      - io.netty.handler.timeout.ReadTimeoutException
+                      - io.netty.channel.ConnectTimeoutException
+                    methods:
+                      - GET
+                      - POST
+                      - DELETE
+                      - PUT
 
           globalcors:
             cors-configurations:
@@ -70,9 +102,16 @@ resilience4j:
     instances:
       userEurekaCircuitBreaker:
         timeoutDuration: 4s
+      notificationEurekaCircuitBreaker:
+        timeoutDuration: 4s
   circuitbreaker:
     instances:
       userEurekaCircuitBreaker:
+        slidingWindowSize: 2
+        minimumNumberOfCalls: 2
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10000ms
+      notificationEurekaCircuitBreaker:
         slidingWindowSize: 2
         minimumNumberOfCalls: 2
         failureRateThreshold: 50
@@ -82,7 +121,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health, circuitbreakers
+        include: health, circuitbreakers, circuitbreakerevents
   endpoint:
     health:
       show-details: always
