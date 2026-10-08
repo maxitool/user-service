@@ -15,45 +15,85 @@ services:
     depends_on:
       discovery-service:
         condition: service_started
-      user-service:
+      notification-service_1:
         condition: service_started
-      notification-service:
+      notification-service_2:
+        condition: service_started
+      user-service_1:
+        condition: service_started
+      user-service_2:
         condition: service_started
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
 
-  user-service:
+  user-service_1:
     build:
       context: .
       dockerfile: ./user-service/Dockerfile
-    ports:
-      - "8081:8081"
+    env_file:
+      - config/user_common.env
+      - config/user_1.env
     depends_on:
       discovery-service:
         condition: service_started
-      notification-service:
+      notification-service_1:
+        condition: service_started
+      notification-service_2:
         condition: service_started
       kafka:
         condition: service_healthy
-    env_file:
-      - ./config/user.env
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
       - SPRING_KAFKA_BOOTSTRAP-SERVERS=kafka:9092
 
-  notification-service:
+  user-service_2:
+    build:
+      context: .
+      dockerfile: ./user-service/Dockerfile
+    env_file:
+      - config/user_common.env
+      - config/user_2.env
+    depends_on:
+      discovery-service:
+        condition: service_started
+      notification-service_1:
+        condition: service_started
+      notification-service_2:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
+      - SPRING_KAFKA_BOOTSTRAP-SERVERS=kafka:9092
+
+  notification-service_1:
     build:
       context: .
       dockerfile: ./notification-service/Dockerfile
-    ports:
-      - "8082:8082"
+    env_file:
+      - config/notification_common.env
+      - config/notification_1.env
     depends_on:
       discovery-service:
         condition: service_started
       kafka:
         condition: service_healthy
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
+      - SPRING_KAFKA_BOOTSTRAP-SERVERS=kafka:9092
+
+  notification-service_2:
+    build:
+      context: .
+      dockerfile: ./notification-service/Dockerfile
     env_file:
-      - ./config/notification.env
+      - config/notification_common.env
+      - config/notification_2.env
+    depends_on:
+      discovery-service:
+        condition: service_started
+      kafka:
+        condition: service_healthy
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
       - SPRING_KAFKA_BOOTSTRAP-SERVERS=kafka:9092

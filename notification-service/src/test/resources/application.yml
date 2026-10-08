@@ -1,0 +1,11 @@
+server:
+  port: 0
+
+spring:
+  kafka:
+    consumer:
+      auto-offset-reset: earliest
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: org.example.kafka
+        spring.json.value.default.type: org.example.kafka.EmailDto
