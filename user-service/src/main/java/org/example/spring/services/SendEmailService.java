@@ -1,7 +1,7 @@
 package org.example.spring.services;
 
 import lombok.extern.slf4j.Slf4j;
-import org.example.kafka.EmailDto;
+import org.example.kafka.dto.EmailDto;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;

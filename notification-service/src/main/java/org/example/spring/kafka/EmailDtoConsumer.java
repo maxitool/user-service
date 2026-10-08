@@ -1,8 +1,8 @@
 package org.example.spring.kafka;
 
 import lombok.extern.slf4j.Slf4j;
-import org.example.kafka.EmailDto;
 import org.example.kafka.Operation;
+import org.example.kafka.dto.EmailDto;
 import org.example.spring.services.NotificationService;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;

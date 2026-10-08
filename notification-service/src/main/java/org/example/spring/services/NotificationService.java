@@ -6,7 +6,7 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.example.constants.EmailMessages;
 import org.example.constants.ResourcesUrl;
-import org.example.kafka.EmailDto;
+import org.example.kafka.dto.EmailDto;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;

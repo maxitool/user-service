@@ -7,15 +7,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.kafka.EmailDto;
+import org.example.kafka.dto.EmailDto;
+import org.example.kafka.dto.response.MetaApiResponse;
 import org.example.spring.dto.ApiRootDto;
-import org.example.spring.dto.response.MetaApiResponse;
 import org.example.spring.hateoas.assemblers.RepresentationAssembler;
 import org.example.spring.properties.AppServerProperties;
 import org.example.spring.services.NotificationService;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -63,34 +62,34 @@ public class NotificationController {
             summary = "Send user created message to email"
     )
     @ApiResponse(
-            responseCode = "204",
+            responseCode = "200",
             description = "User created message was sent"
     )
     @PostMapping("/sendUserCreatedToEmail")
     @ResponseStatus(HttpStatus.OK)
-    public MetaApiResponse<ResponseEntity<Void>> sendUserCreatedToEmail(
+    public MetaApiResponse<Void> sendUserCreatedToEmail(
             @Valid
             @RequestBody
             EmailDto emailDto) {
         notificationService.sendUserCreatedToEmail(emailDto);
-        return addMetaData(ResponseEntity.noContent().build());
+        return addMetaData(null);
     }
 
     @Operation(
             summary = "Send user deleted message to email"
     )
     @ApiResponse(
-            responseCode = "204",
+            responseCode = "200",
             description = "User deleted message was sent"
     )
     @PostMapping("/sendUserDeletedToEmail")
     @ResponseStatus(HttpStatus.OK)
-    public MetaApiResponse<ResponseEntity<Void>> sendUserDeletedToEmail(
+    public MetaApiResponse<Void> sendUserDeletedToEmail(
             @Valid
             @RequestBody
             EmailDto emailDto) {
         notificationService.sendUserDeletedToEmail(emailDto);
-        return addMetaData(ResponseEntity.noContent().build());
+        return addMetaData(null);
     }
 
     private <T> MetaApiResponse<T> addMetaData(T dto) {

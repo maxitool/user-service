@@ -9,17 +9,16 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.kafka.dto.response.MetaApiResponse;
 import org.example.spring.dto.ApiRootDto;
 import org.example.spring.dto.UserCreateUpdateDto;
 import org.example.spring.dto.UserDto;
-import org.example.spring.dto.response.MetaApiResponse;
 import org.example.spring.hateoas.assemblers.RepresentationAssembler;
 import org.example.spring.properties.AppServerProperties;
 import org.example.spring.services.UserService;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -243,7 +242,7 @@ public class UserController {
             description = "Deletes the user with the specified identifier"
     )
     @ApiResponse(
-            responseCode = "204",
+            responseCode = "200",
             description = "User successfully deleted"
     )
     @ApiResponse(
@@ -252,12 +251,12 @@ public class UserController {
     )
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public MetaApiResponse<ResponseEntity<Void>> deleteById(
+    public MetaApiResponse<Void> deleteById(
             @PathVariable
             @Parameter(name = "id", description = "User id", example = "1")
             Long id) {
         userService.deleteById(id);
-        return addMetaData(ResponseEntity.noContent().build());
+        return addMetaData(null);
     }
 
     private <T> MetaApiResponse<T> addMetaData(T dto) {

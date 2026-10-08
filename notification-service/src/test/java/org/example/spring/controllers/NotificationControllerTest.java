@@ -1,6 +1,6 @@
 package org.example.spring.controllers;
 
-import org.example.kafka.EmailDto;
+import org.example.kafka.dto.EmailDto;
 import org.example.spring.dto.ApiRootDto;
 import org.example.spring.hateoas.assemblers.RepresentationAssembler;
 import org.example.spring.properties.AppServerProperties;

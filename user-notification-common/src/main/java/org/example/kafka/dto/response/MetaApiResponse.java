@@ -1,7 +1,6 @@
-package org.example.spring.dto.response;
+package org.example.kafka.dto.response;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,7 +15,6 @@ public class MetaApiResponse<T> {
     @NotBlank(message = "hostPortMessage can't be blank")
     private String hostPortMessage;
 
-    @NotNull(message = "dto can't be null")
     private T dto;
 
     @Override

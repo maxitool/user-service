@@ -1,4 +1,4 @@
-package org.example.spring.eureka;
+package org.example.spring.feign;
 
 public class EurekaUrl {
     private EurekaUrl() {
