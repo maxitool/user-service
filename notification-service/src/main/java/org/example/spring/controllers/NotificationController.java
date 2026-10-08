@@ -9,12 +9,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.kafka.EmailDto;
 import org.example.spring.dto.ApiRootDto;
+import org.example.spring.dto.response.MetaApiResponse;
 import org.example.spring.hateoas.assemblers.RepresentationAssembler;
+import org.example.spring.properties.AppServerProperties;
 import org.example.spring.services.NotificationService;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,7 +33,6 @@ import org.springframework.web.bind.annotation.RestController;
         }
 )
 @RequiredArgsConstructor
-@Validated
 @Tag(
         name = "Notification",
         description = "Operations for users notification"
@@ -40,6 +40,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class NotificationController {
     private final NotificationService notificationService;
     private final RepresentationAssembler representationAssembler;
+    private final AppServerProperties appServerProperties;
 
     @Operation(
             summary = "Get api",
@@ -54,8 +55,8 @@ public class NotificationController {
     )
     @GetMapping("/getApi")
     @ResponseStatus(HttpStatus.OK)
-    public EntityModel<ApiRootDto> getApi() {
-        return representationAssembler.toModel(new ApiRootDto());
+    public MetaApiResponse<EntityModel<ApiRootDto>> getApi() {
+        return addMetaData(representationAssembler.toModel(new ApiRootDto()));
     }
 
     @Operation(
@@ -66,13 +67,13 @@ public class NotificationController {
             description = "User created message was sent"
     )
     @PostMapping("/sendUserCreatedToEmail")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ResponseEntity<Void> sendUserCreatedToEmail(
+    @ResponseStatus(HttpStatus.OK)
+    public MetaApiResponse<ResponseEntity<Void>> sendUserCreatedToEmail(
             @Valid
             @RequestBody
             EmailDto emailDto) {
         notificationService.sendUserCreatedToEmail(emailDto);
-        return ResponseEntity.noContent().build();
+        return addMetaData(ResponseEntity.noContent().build());
     }
 
     @Operation(
@@ -83,12 +84,19 @@ public class NotificationController {
             description = "User deleted message was sent"
     )
     @PostMapping("/sendUserDeletedToEmail")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ResponseEntity<Void> sendUserDeletedToEmail(
+    @ResponseStatus(HttpStatus.OK)
+    public MetaApiResponse<ResponseEntity<Void>> sendUserDeletedToEmail(
             @Valid
             @RequestBody
             EmailDto emailDto) {
         notificationService.sendUserDeletedToEmail(emailDto);
-        return ResponseEntity.noContent().build();
+        return addMetaData(ResponseEntity.noContent().build());
+    }
+
+    private <T> MetaApiResponse<T> addMetaData(T dto) {
+        return new MetaApiResponse<>(
+                appServerProperties.hostPortMessage(),
+                dto
+        );
     }
 }

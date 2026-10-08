@@ -7,6 +7,7 @@ import org.example.spring.dto.UserDto;
 import org.example.spring.exception.ErrorMessag;
 import org.example.spring.exception.UserAlreadyExistsException;
 import org.example.spring.hateoas.assemblers.RepresentationAssembler;
+import org.example.spring.properties.AppServerProperties;
 import org.example.spring.services.UserService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -45,7 +46,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(UserController.class)
 class UserControllerTest {
     private static final String REQUEST_MAPPING = "/api/v1/users";
-    private static final String JSON_RESPONSE_COMMON = "$._embedded.userDtoList.";
+    private static final String JSON_RESPONSE_COMMON = "$.dto";
+    private static final String JSON_RESPONSE_COLLECTIONS_COMMON = JSON_RESPONSE_COMMON + ".content";
     private static ObjectMapper mapper;
     private static UserDto userIrina1;
     private static UserDto userIrina2;
@@ -59,6 +61,8 @@ class UserControllerTest {
     private UserService userService;
     @MockitoBean
     private RepresentationAssembler representationAssembler;
+    @MockitoBean
+    private AppServerProperties appServerProperties;
 
     @Autowired
     private MockMvc mockMvc;
@@ -94,15 +98,24 @@ class UserControllerTest {
         mockMvc.perform(get(REQUEST_MAPPING))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "size()").value(users.size()))
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[0].id").value(users.get(0).id()))
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[0].name").value(users.get(0).name()))
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[0].email").value(users.get(0).email()))
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[0].age").value(users.get(0).age()))
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[1].id").value(users.get(1).id()))
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[1].name").value(users.get(1).name()))
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[1].email").value(users.get(1).email()))
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[1].age").value(users.get(1).age()));
+                .andExpect(jsonPath(JSON_RESPONSE_COLLECTIONS_COMMON +
+                        ".size()").value(users.size()))
+                .andExpect(jsonPath(JSON_RESPONSE_COLLECTIONS_COMMON +
+                        "[0].id").value(users.get(0).id()))
+                .andExpect(jsonPath(JSON_RESPONSE_COLLECTIONS_COMMON +
+                        "[0].name").value(users.get(0).name()))
+                .andExpect(jsonPath(JSON_RESPONSE_COLLECTIONS_COMMON +
+                        "[0].email").value(users.get(0).email()))
+                .andExpect(jsonPath(JSON_RESPONSE_COLLECTIONS_COMMON +
+                        "[0].age").value(users.get(0).age()))
+                .andExpect(jsonPath(JSON_RESPONSE_COLLECTIONS_COMMON +
+                        "[1].id").value(users.get(1).id()))
+                .andExpect(jsonPath(JSON_RESPONSE_COLLECTIONS_COMMON +
+                        "[1].name").value(users.get(1).name()))
+                .andExpect(jsonPath(JSON_RESPONSE_COLLECTIONS_COMMON +
+                        "[1].email").value(users.get(1).email()))
+                .andExpect(jsonPath(JSON_RESPONSE_COLLECTIONS_COMMON +
+                        "[1].age").value(users.get(1).age()));
         verify(userService).findAll();
     }
 
@@ -113,10 +126,10 @@ class UserControllerTest {
         mockMvc.perform(get(REQUEST_MAPPING + "/{id}", userIrina1.id()))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(userIrina1.id()))
-                .andExpect(jsonPath("$.name").value(userIrina1.name()))
-                .andExpect(jsonPath("$.email").value(userIrina1.email()))
-                .andExpect(jsonPath("$.age").value(userIrina1.age()));
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + ".id").value(userIrina1.id()))
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + ".name").value(userIrina1.name()))
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + ".email").value(userIrina1.email()))
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + ".age").value(userIrina1.age()));
         verify(userService).findById(any(Long.class));
     }
 
@@ -143,10 +156,10 @@ class UserControllerTest {
                         .param("email", userIrina1.email()))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(userIrina1.id()))
-                .andExpect(jsonPath("$.name").value(userIrina1.name()))
-                .andExpect(jsonPath("$.email").value(userIrina1.email()))
-                .andExpect(jsonPath("$.age").value(userIrina1.age()));
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + ".id").value(userIrina1.id()))
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + ".name").value(userIrina1.name()))
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + ".email").value(userIrina1.email()))
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + ".age").value(userIrina1.age()));
         verify(userService).findByEmail(any(String.class));
     }
 
@@ -185,15 +198,24 @@ class UserControllerTest {
                         .param("name", userIrina1.name()))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "size()").value(users.size()))
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[0].id").value(users.get(0).id()))
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[0].name").value(users.get(0).name()))
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[0].email").value(users.get(0).email()))
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[0].age").value(users.get(0).age()))
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[1].id").value(users.get(1).id()))
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[1].name").value(users.get(1).name()))
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[1].email").value(users.get(1).email()))
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[1].age").value(users.get(1).age()));
+                .andExpect(jsonPath(JSON_RESPONSE_COLLECTIONS_COMMON +
+                        ".size()").value(users.size()))
+                .andExpect(jsonPath(JSON_RESPONSE_COLLECTIONS_COMMON +
+                        "[0].id").value(users.get(0).id()))
+                .andExpect(jsonPath(JSON_RESPONSE_COLLECTIONS_COMMON +
+                        "[0].name").value(users.get(0).name()))
+                .andExpect(jsonPath(JSON_RESPONSE_COLLECTIONS_COMMON +
+                        "[0].email").value(users.get(0).email()))
+                .andExpect(jsonPath(JSON_RESPONSE_COLLECTIONS_COMMON +
+                        "[0].age").value(users.get(0).age()))
+                .andExpect(jsonPath(JSON_RESPONSE_COLLECTIONS_COMMON +
+                        "[1].id").value(users.get(1).id()))
+                .andExpect(jsonPath(JSON_RESPONSE_COLLECTIONS_COMMON +
+                        "[1].name").value(users.get(1).name()))
+                .andExpect(jsonPath(JSON_RESPONSE_COLLECTIONS_COMMON +
+                        "[1].email").value(users.get(1).email()))
+                .andExpect(jsonPath(JSON_RESPONSE_COLLECTIONS_COMMON +
+                        "[1].age").value(users.get(1).age()));
         verify(userService).findByName(any(String.class));
     }
 
@@ -215,15 +237,24 @@ class UserControllerTest {
                         .param("age", userIrina1.age().toString()))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "size()").value(users.size()))
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[0].id").value(users.get(0).id()))
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[0].name").value(users.get(0).name()))
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[0].email").value(users.get(0).email()))
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[0].age").value(users.get(0).age()))
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[1].id").value(users.get(1).id()))
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[1].name").value(users.get(1).name()))
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[1].email").value(users.get(1).email()))
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + "[1].age").value(users.get(1).age()));
+                .andExpect(jsonPath(JSON_RESPONSE_COLLECTIONS_COMMON +
+                        ".size()").value(users.size()))
+                .andExpect(jsonPath(JSON_RESPONSE_COLLECTIONS_COMMON +
+                        "[0].id").value(users.get(0).id()))
+                .andExpect(jsonPath(JSON_RESPONSE_COLLECTIONS_COMMON +
+                        "[0].name").value(users.get(0).name()))
+                .andExpect(jsonPath(JSON_RESPONSE_COLLECTIONS_COMMON +
+                        "[0].email").value(users.get(0).email()))
+                .andExpect(jsonPath(JSON_RESPONSE_COLLECTIONS_COMMON +
+                        "[0].age").value(users.get(0).age()))
+                .andExpect(jsonPath(JSON_RESPONSE_COLLECTIONS_COMMON +
+                        "[1].id").value(users.get(1).id()))
+                .andExpect(jsonPath(JSON_RESPONSE_COLLECTIONS_COMMON +
+                        "[1].name").value(users.get(1).name()))
+                .andExpect(jsonPath(JSON_RESPONSE_COLLECTIONS_COMMON +
+                        "[1].email").value(users.get(1).email()))
+                .andExpect(jsonPath(JSON_RESPONSE_COLLECTIONS_COMMON +
+                        "[1].age").value(users.get(1).age()));
         verify(userService).findByAge(any(Integer.class));
     }
 
@@ -246,10 +277,10 @@ class UserControllerTest {
                         .content(mapper.writeValueAsString(userIrina1CreateUpdateDto)))
                 .andDo(print())
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(userIrina1.id()))
-                .andExpect(jsonPath("$.name").value(userIrina1.name()))
-                .andExpect(jsonPath("$.email").value(userIrina1.email()))
-                .andExpect(jsonPath("$.age").value(userIrina1.age()));
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + ".id").value(userIrina1.id()))
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + ".name").value(userIrina1.name()))
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + ".email").value(userIrina1.email()))
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + ".age").value(userIrina1.age()));
         verify(userService).createUser(any(UserCreateUpdateDto.class));
     }
 
@@ -314,10 +345,10 @@ class UserControllerTest {
                         .content(mapper.writeValueAsString(userIrina1CreateUpdateDto)))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(userIrina1.id()))
-                .andExpect(jsonPath("$.name").value(userIrina1.name()))
-                .andExpect(jsonPath("$.email").value(userIrina1.email()))
-                .andExpect(jsonPath("$.age").value(userIrina1.age()));
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + ".id").value(userIrina1.id()))
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + ".name").value(userIrina1.name()))
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + ".email").value(userIrina1.email()))
+                .andExpect(jsonPath(JSON_RESPONSE_COMMON + ".age").value(userIrina1.age()));
         verify(userService).updateUser(any(Long.class), any(UserCreateUpdateDto.class));
     }
 
@@ -342,7 +373,7 @@ class UserControllerTest {
     void when_deleteById_then_verify() throws Exception {
         mockMvc.perform(delete(REQUEST_MAPPING + "/{id}", userIrina1.id()))
                 .andDo(print())
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk());
         verify(userService).deleteById(any(Long.class));
     }
 

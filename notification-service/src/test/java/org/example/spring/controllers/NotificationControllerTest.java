@@ -3,6 +3,7 @@ package org.example.spring.controllers;
 import org.example.kafka.EmailDto;
 import org.example.spring.dto.ApiRootDto;
 import org.example.spring.hateoas.assemblers.RepresentationAssembler;
+import org.example.spring.properties.AppServerProperties;
 import org.example.spring.services.NotificationService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -38,6 +39,8 @@ public class NotificationControllerTest {
     private NotificationService service;
     @MockitoBean
     private RepresentationAssembler representationAssembler;
+    @MockitoBean
+    private AppServerProperties appServerProperties;
 
     @Autowired
     private MockMvc mockMvc;
@@ -65,7 +68,7 @@ public class NotificationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(emailDto)))
                 .andDo(print())
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk());
         verify(service).sendUserCreatedToEmail(emailDto);
     }
 
@@ -97,7 +100,7 @@ public class NotificationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(emailDto)))
                 .andDo(print())
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk());
         verify(service).sendUserDeletedToEmail(emailDto);
     }
 
