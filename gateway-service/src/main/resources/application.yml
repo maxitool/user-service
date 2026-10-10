@@ -27,6 +27,13 @@ spring:
               filters:
                 - RewritePath=/v3/api-docs/user-service, /v3/api-docs
 
+            - id: notification_service_v3_docs
+              uri: lb://notification-service
+              predicates:
+                - Path=/v3/api-docs/notification-service
+              filters:
+                - RewritePath=/v3/api-docs/notification-service, /v3/api-docs
+
             - id: user_service_route
               uri: lb://user-service
               predicates:
@@ -133,6 +140,8 @@ springdoc:
     urls:
       - name: user-service
         url: /v3/api-docs/user-service
+      - name: notification-service
+        url: /v3/api-docs/notification-service
 
 eureka:
   client:
