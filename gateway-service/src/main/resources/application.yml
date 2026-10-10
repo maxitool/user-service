@@ -45,10 +45,12 @@ spring:
                     fallbackUri: forward:/fallback/user-service
                     statusCodes:
                       - "500"
+                      - "502"
                       - "503"
+                      - "504"
                 - name: Retry
                   args:
-                    retries: 2
+                    retries: 1
                     statuses:
                       - INTERNAL_SERVER_ERROR
                       - SERVICE_UNAVAILABLE
@@ -56,6 +58,7 @@ spring:
                     exceptions:
                       - java.io.IOException
                       - java.net.ConnectException
+                      - java.net.SocketTimeoutException
                       - java.util.concurrent.TimeoutException
                       - io.netty.handler.timeout.ReadTimeoutException
                       - io.netty.channel.ConnectTimeoutException
@@ -76,10 +79,12 @@ spring:
                     fallbackUri: forward:/fallback/notification-service
                     statusCodes:
                       - "500"
+                      - "502"
                       - "503"
+                      - "504"
                 - name: Retry
                   args:
-                    retries: 2
+                    retries: 1
                     statuses:
                       - INTERNAL_SERVER_ERROR
                       - SERVICE_UNAVAILABLE
@@ -87,6 +92,7 @@ spring:
                     exceptions:
                       - java.io.IOException
                       - java.net.ConnectException
+                      - java.net.SocketTimeoutException
                       - java.util.concurrent.TimeoutException
                       - io.netty.handler.timeout.ReadTimeoutException
                       - io.netty.channel.ConnectTimeoutException
@@ -108,17 +114,19 @@ resilience4j:
   timelimiter:
     instances:
       userEurekaCircuitBreaker:
-        timeoutDuration: 4s
+        timeoutDuration: 7s
       notificationEurekaCircuitBreaker:
-        timeoutDuration: 4s
+        timeoutDuration: 7s
   circuitbreaker:
     instances:
       userEurekaCircuitBreaker:
+        registerHealthIndicator: true
         slidingWindowSize: 2
         minimumNumberOfCalls: 2
         failureRateThreshold: 50
         waitDurationInOpenState: 10000ms
       notificationEurekaCircuitBreaker:
+        registerHealthIndicator: true
         slidingWindowSize: 2
         minimumNumberOfCalls: 2
         failureRateThreshold: 50
@@ -145,6 +153,8 @@ springdoc:
 
 eureka:
   client:
+    register-with-eureka: false
+    fetch-registry: true
     service-url:
       defaultZone: http://discovery-service:8761/eureka/
   instance:
