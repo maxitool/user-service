@@ -8,4 +8,4 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: org.example.kafka
-        spring.json.value.default.type: org.example.kafka.EmailDto
+        spring.json.value.default.type: org.example.kafka.dto.EmailDto

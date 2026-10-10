@@ -1,7 +1,7 @@
 package org.example.spring.kafka;
 
-import org.example.kafka.EmailDto;
 import org.example.kafka.Operation;
+import org.example.kafka.dto.EmailDto;
 import org.example.spring.services.NotificationService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;

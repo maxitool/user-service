@@ -2,7 +2,7 @@ package org.example.spring.services;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import org.example.kafka.EmailDto;
+import org.example.kafka.dto.EmailDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

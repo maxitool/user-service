@@ -3,9 +3,10 @@ package org.example.spring.kafka;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.internals.RecordHeader;
-import org.example.kafka.EmailDto;
 import org.example.kafka.Operation;
-import org.example.spring.eureka.NotificationServiceClient;
+import org.example.kafka.dto.EmailDto;
+import org.example.kafka.dto.response.MetaApiResponse;
+import org.example.spring.feign.NotificationServiceClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
@@ -25,7 +26,9 @@ import static org.example.kafka.CommunicationData.TOPIC;
 public class EmailDtoProducer {
 
     private final KafkaTemplate<String, EmailDto> kafkaTemplate;
-    private final Map<Operation, Function<EmailDto, ResponseEntity<Void>>> sendViaFeignMethods;
+    private final Map<
+            Operation,
+            Function<EmailDto, ResponseEntity<MetaApiResponse<Void>>>> sendViaFeignMethods;
 
     public EmailDtoProducer(KafkaTemplate<String, EmailDto> kafkaTemplate,
                             NotificationServiceClient notificationServiceClient) {

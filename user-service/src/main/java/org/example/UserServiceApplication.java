@@ -21,7 +21,7 @@ import org.springframework.hateoas.config.EnableHypermediaSupport;
 })
 @SpringBootApplication
 @EnableDiscoveryClient
-@EnableFeignClients(basePackages = "org.example.spring.eureka")
+@EnableFeignClients(basePackages = "org.example.spring.feign")
 public class UserServiceApplication {
     static void main(String[] args) {
         System.setProperty("org.jboss.logging.provider", "slf4j");
