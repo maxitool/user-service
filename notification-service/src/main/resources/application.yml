@@ -44,3 +44,5 @@ eureka:
       defaultZone: http://discovery-service:8761/eureka/
   instance:
     prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 5
+    lease-expiration-duration-in-seconds: 9

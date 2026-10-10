@@ -121,12 +121,14 @@ resilience4j:
     instances:
       userEurekaCircuitBreaker:
         registerHealthIndicator: true
+        automaticTransitionFromOpenToHalfOpenEnabled: true
         slidingWindowSize: 2
         minimumNumberOfCalls: 2
         failureRateThreshold: 50
         waitDurationInOpenState: 10000ms
       notificationEurekaCircuitBreaker:
         registerHealthIndicator: true
+        automaticTransitionFromOpenToHalfOpenEnabled: true
         slidingWindowSize: 2
         minimumNumberOfCalls: 2
         failureRateThreshold: 50
@@ -157,5 +159,4 @@ eureka:
     fetch-registry: true
     service-url:
       defaultZone: http://discovery-service:8761/eureka/
-  instance:
-    prefer-ip-address: true
+    registry-fetch-interval-seconds: 5
