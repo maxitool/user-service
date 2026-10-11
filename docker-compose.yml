@@ -15,18 +15,21 @@ services:
     depends_on:
       discovery-service:
         condition: service_started
-      notification-service_1:
+      notification-service-1:
         condition: service_started
-      notification-service_2:
+      notification-service-2:
         condition: service_started
-      user-service_1:
+      user-service-1:
         condition: service_started
-      user-service_2:
+      user-service-2:
         condition: service_started
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
+      - LOGGING_FILE_NAME=/app/shared-logs/common.log
+    volumes:
+      - shared-logs:/app/shared-logs
 
-  user-service_1:
+  user-service-1:
     build:
       context: .
       dockerfile: ./user-service/Dockerfile
@@ -36,17 +39,20 @@ services:
     depends_on:
       discovery-service:
         condition: service_started
-      notification-service_1:
+      notification-service-1:
         condition: service_started
-      notification-service_2:
+      notification-service-2:
         condition: service_started
       kafka:
         condition: service_healthy
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
       - SPRING_KAFKA_BOOTSTRAP-SERVERS=kafka:9092
+      - LOGGING_FILE_NAME=/app/shared-logs/common.log
+    volumes:
+      - shared-logs:/app/shared-logs
 
-  user-service_2:
+  user-service-2:
     build:
       context: .
       dockerfile: ./user-service/Dockerfile
@@ -56,17 +62,20 @@ services:
     depends_on:
       discovery-service:
         condition: service_started
-      notification-service_1:
+      notification-service-1:
         condition: service_started
-      notification-service_2:
+      notification-service-2:
         condition: service_started
       kafka:
         condition: service_healthy
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
       - SPRING_KAFKA_BOOTSTRAP-SERVERS=kafka:9092
+      - LOGGING_FILE_NAME=/app/shared-logs/common.log
+    volumes:
+      - shared-logs:/app/shared-logs
 
-  notification-service_1:
+  notification-service-1:
     build:
       context: .
       dockerfile: ./notification-service/Dockerfile
@@ -81,8 +90,11 @@ services:
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
       - SPRING_KAFKA_BOOTSTRAP-SERVERS=kafka:9092
+      - LOGGING_FILE_NAME=/app/shared-logs/common.log
+    volumes:
+      - shared-logs:/app/shared-logs
 
-  notification-service_2:
+  notification-service-2:
     build:
       context: .
       dockerfile: ./notification-service/Dockerfile
@@ -97,6 +109,9 @@ services:
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
       - SPRING_KAFKA_BOOTSTRAP-SERVERS=kafka:9092
+      - LOGGING_FILE_NAME=/app/shared-logs/common.log
+    volumes:
+      - shared-logs:/app/shared-logs
 
   kafka:
     image: apache/kafka:3.9.0
@@ -118,3 +133,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+volumes:
+  shared-logs:

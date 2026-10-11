@@ -5,7 +5,6 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.internals.RecordHeader;
 import org.example.kafka.Operation;
 import org.example.kafka.dto.EmailDto;
-import org.example.kafka.dto.response.MetaApiResponse;
 import org.example.spring.feign.NotificationServiceClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -28,7 +27,7 @@ public class EmailDtoProducer {
     private final KafkaTemplate<String, EmailDto> kafkaTemplate;
     private final Map<
             Operation,
-            Function<EmailDto, ResponseEntity<MetaApiResponse<Void>>>> sendViaFeignMethods;
+            Function<EmailDto, ResponseEntity<Void>>> sendViaFeignMethods;
 
     public EmailDtoProducer(KafkaTemplate<String, EmailDto> kafkaTemplate,
                             NotificationServiceClient notificationServiceClient) {

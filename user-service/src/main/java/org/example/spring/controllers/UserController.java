@@ -9,16 +9,18 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.kafka.dto.response.MetaApiResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.example.spring.dto.ApiRootDto;
 import org.example.spring.dto.UserCreateUpdateDto;
 import org.example.spring.dto.UserDto;
 import org.example.spring.hateoas.assemblers.RepresentationAssembler;
+import org.example.spring.hateoas.assemblers.UserAssembler;
 import org.example.spring.properties.AppServerProperties;
 import org.example.spring.services.UserService;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -44,10 +46,12 @@ import org.springframework.web.bind.annotation.RestController;
         name = "Users",
         description = "Operations for creating, reading, updating and deleting users"
 )
+@Slf4j
 public class UserController {
     private final UserService userService;
     private final RepresentationAssembler representationAssembler;
     private final AppServerProperties appServerProperties;
+    private final UserAssembler userAssembler;
 
     @Operation(
             summary = "Get api",
@@ -62,8 +66,9 @@ public class UserController {
     )
     @GetMapping("/getApi")
     @ResponseStatus(HttpStatus.OK)
-    public MetaApiResponse<EntityModel<ApiRootDto>> getApi() {
-        return addMetaData(representationAssembler.toModel(new ApiRootDto()));
+    public EntityModel<ApiRootDto> getApi() {
+        logging();
+        return representationAssembler.toModel(new ApiRootDto());
     }
 
     @Operation(
@@ -81,8 +86,9 @@ public class UserController {
     )
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public MetaApiResponse<CollectionModel<EntityModel<UserDto>>> findAll() {
-        return addMetaData(userService.findAll());
+    public CollectionModel<EntityModel<UserDto>> findAll() {
+        logging();
+        return userAssembler.toCollectionModel(userService.findAll());
     }
 
     @Operation(
@@ -102,11 +108,12 @@ public class UserController {
     )
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public MetaApiResponse<EntityModel<UserDto>> findById(
+    public EntityModel<UserDto> findById(
             @PathVariable
             @Parameter(name = "id", description = "User id", example = "1")
             Long id) {
-        return addMetaData(userService.findById(id));
+        logging();
+        return userAssembler.toModel(userService.findById(id));
     }
 
     @Operation(
@@ -127,11 +134,12 @@ public class UserController {
 
     @GetMapping("/findByEmail")
     @ResponseStatus(HttpStatus.OK)
-    public MetaApiResponse<EntityModel<UserDto>> findByEmail(
+    public EntityModel<UserDto> findByEmail(
             @RequestParam
             @Parameter(name = "email", description = "User email", example = "test@mail.ru")
             String email) {
-        return addMetaData(userService.findByEmail(email));
+        logging();
+        return userAssembler.toModel(userService.findByEmail(email));
     }
 
     @Operation(
@@ -149,11 +157,12 @@ public class UserController {
     )
     @GetMapping("/findByName")
     @ResponseStatus(HttpStatus.OK)
-    public MetaApiResponse<CollectionModel<EntityModel<UserDto>>> findByName(
+    public CollectionModel<EntityModel<UserDto>> findByName(
             @RequestParam
             @Parameter(name = "name", description = "User name", example = "Ivan Ivanov")
             String name) {
-        return addMetaData(userService.findByName(name));
+        logging();
+        return userAssembler.toCollectionModel(userService.findByName(name));
     }
 
     @Operation(
@@ -171,11 +180,12 @@ public class UserController {
     )
     @GetMapping("/findByAge")
     @ResponseStatus(HttpStatus.OK)
-    public MetaApiResponse<CollectionModel<EntityModel<UserDto>>> findByAge(
+    public CollectionModel<EntityModel<UserDto>> findByAge(
             @RequestParam
             @Parameter(name = "age", description = "User age", example = "12")
             Integer age) {
-        return addMetaData(userService.findByAge(age));
+        logging();
+        return userAssembler.toCollectionModel(userService.findByAge(age));
     }
 
     @Operation(
@@ -199,11 +209,12 @@ public class UserController {
     )
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public MetaApiResponse<EntityModel<UserDto>> createUser(
+    public EntityModel<UserDto> createUser(
             @RequestBody
             @Valid
             UserCreateUpdateDto userDto) {
-        return addMetaData(userService.createUser(userDto));
+        logging();
+        return userAssembler.toModel(userService.createUser(userDto));
     }
 
     @Operation(
@@ -227,14 +238,15 @@ public class UserController {
     )
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public MetaApiResponse<EntityModel<UserDto>> updateUser(
+    public EntityModel<UserDto> updateUser(
             @PathVariable
             @Parameter(name = "id", description = "User id", example = "1")
             Long id,
             @RequestBody
             @Valid
             UserCreateUpdateDto userDto) {
-        return addMetaData(userService.updateUser(id, userDto));
+        logging();
+        return userAssembler.toModel(userService.updateUser(id, userDto));
     }
 
     @Operation(
@@ -242,7 +254,7 @@ public class UserController {
             description = "Deletes the user with the specified identifier"
     )
     @ApiResponse(
-            responseCode = "200",
+            responseCode = "204",
             description = "User successfully deleted"
     )
     @ApiResponse(
@@ -250,19 +262,16 @@ public class UserController {
             description = "User not found"
     )
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public MetaApiResponse<Void> deleteById(
+    public ResponseEntity<Void> deleteById(
             @PathVariable
             @Parameter(name = "id", description = "User id", example = "1")
             Long id) {
+        logging();
         userService.deleteById(id);
-        return addMetaData(null);
+        return ResponseEntity.noContent().build();
     }
 
-    private <T> MetaApiResponse<T> addMetaData(T dto) {
-        return new MetaApiResponse<>(
-                appServerProperties.hostPortMessage(),
-                dto
-        );
+    private void logging() {
+        log.debug(appServerProperties.hostPortMessage());
     }
 }
