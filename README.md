@@ -3,16 +3,48 @@
 <p>Максим Парфенов</p>
 <p>Ирина Разинкова</p>
 </br>
+
 <h3>Технологии:</h3>
 <p>JDK 26</p>
-<p>JUnit Jupiter 6.1.3</p>
-<p>Hibernate 8.0.5.Final</p>
+<p>Maven</p>
+<p>Docker</p>
+<p>Spring boot</p>
+<p>Spring cloud</p>
+<p>JDBC</p>
+<p>JPA</p>
+<p>Hibernate</p>
+<p>Kafka</p>
+<p>Feign</p>
+<p>Swagger</p>
+<p>Hateoas</p>
+<p>Mail</p>
 <p>slf4j</p>
-<p>PostgreSQL</p>
+<p>lombok</p>
 </br>
-<h3>Для корректной работы проекта необходимо:</h3>
-<p>1) Вставить переменные окружения: DB_HOST=ep-lingering-cake-auei7dld-pooler.c-10.us-east-1.aws.neon.tech;DB_NAME=neondb;DB_PASSWORD=npg_bQTMegkcO58F;DB_PORT=5432;DB_SCHEMA=public;DB_USER=neondb_owner</p>
-<p>Для Idea IDE это можно сделать следующим образом: More Actions (три точки сверху) -> Edit... -> Environment variables</p>
+<p>Eureka</p>
+<p>Loadbalancer</p>
+<p>Circuit breaker</p>
+<p>Gateway</p>
+<p>External configuration</p>
+</br>
+<p>PostgreSQL</p>
+<p>h2database</p>
+</br>
+<p>JUnit Jupiter</p>
+<p>Testcontainers</p>
+<p>Mock</p>
+<p>Mockmvc</p>
+<p>Spy</p>
+</br></br>
+<h3>О проекте:</h3>
+<p>У нас в проекте 5 модулей user-service, notification-service, общий для них user-notification-common, discovery-service с Eureka сервером и gateway-service.</p>
+<p>Для работы микросервисов параллельно мы настроили внутри проекта docker, чтобы запустить весь проект вам нужно в терминале ввести: docker-compose up --build. Глобальные переменные указаны в папке config.</p>
+<p>В контейнере докера запускаются следующие микросервисы:</p>
+<p>- discovery-service с Eureka сервером на порту 8761</p>
+<p>- 2 копии notification-service (notification-service-1 и notification-service-2) на портах 8081 и 8082</p>
+<p>- 2 копии user-service (user-service-1 и user-service-2) на портах 8083 и 8084</p>
+<p>- gateway-service на порту 8080</p>
+<p>Также в докере запускается kafka с healthcheck на порту 9092</p>
 </br>
 <h3>База данных:</h3>
 <p>Используем общую PostgreSQL, которая хостится на ресурсе neondb, ниже описаны настройки для подключения к ней</p>
@@ -24,11 +56,12 @@
 <h3>Договоренности:</h3>
 <p>1) Не используем комментарии и javadoc
 (Потому что код живет после того, как его написали. В процессе его жизни он будет не раз меняться и наступит переломный момент, когда код изменят, а javadoc - нет. В итоге этот javadoc никто так и не поменяет, он будет висеть бесполезным, потому что он противоречит реализации. Документацию в коде стоит писать только для библиотек/фреймворков/инструментов)</p>
-<p>2) Пишем JUnit тесты для своего кода</p>
+<p>2) Пишем JUnit тесты для кода</p>
 <p>3) Используем Jira для декомпозиции задач
 (Ссылка на Jira: https://maxitool.atlassian.net). Доступ к сайту нужно запросить по почте Parfenov.max24@yandex.ru, указав в сообщение свою почту для добавления</p>
+<p>4) Используем ci для проверки корректного выполнения тестов при пулл реквестах</p>
+<p>5) Используем git ruleset для безопасности основных веток, ветки могут создавать админ репозитория и Jira</p>
 </br>
-
 <h2>Ход разработки</h2>
 <h3>Задание 1:</h3>
 <p>Было вне этого проекта.</p>
@@ -85,3 +118,6 @@
 <h4><i>Требования</i></h4>
 <p>Задокументировать существующее API (из задания 4) с помощью Swagger (Springdoc OpenAPI), чтобы можно было легко изучить и тестировать API через веб-интерфейс.</p>
 <p>Добавить поддержку HATEOAS, чтобы API предоставляло ссылки для навигации по ресурсам.</p>
+</br>
+<h3>Задание 7:</h3>
+<p>Добавить к существующей системе паттерны: gateway api, service discovery, circuit breaker, external configuration - реализации данных паттернов можно найти в модулях spring cloud.</p>
