@@ -138,12 +138,13 @@ management:
   endpoints:
     web:
       exposure:
-        include: health, circuitbreakers, circuitbreakerevents
+        include: health, circuitbreakers, circuitbreakerevents, logfile
   endpoint:
     health:
       show-details: always
 
 springdoc:
+  show-actuator: true
   swagger-ui:
     path: /swagger-ui.html
     disable-swagger-default-url: true
@@ -152,6 +153,10 @@ springdoc:
         url: /v3/api-docs/user-service
       - name: notification-service
         url: /v3/api-docs/notification-service
+
+logging:
+  file:
+    name: /app/shared-logs/common.log
 
 eureka:
   client:

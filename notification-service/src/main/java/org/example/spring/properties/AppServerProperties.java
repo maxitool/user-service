@@ -17,8 +17,8 @@ public class AppServerProperties {
     public String hostPortMessage() {
         return String.format(
                 "Called function from %s:%d rest controller",
-                serverHost == null ? "UNKNOWN" : serverHost.toUpperCase(),
-                serverPort == null ? 0 : serverPort
+                serverHost,
+                serverPort
         );
     }
 }

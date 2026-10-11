@@ -19,6 +19,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -39,8 +41,6 @@ class UserServiceTest {
     private UserRepository userRepository;
     @MockitoSpyBean
     private UserMapper userMapper;
-    @MockitoSpyBean
-    private UserAssembler userAssembler;
 
     @Autowired
     private UserService userService;
@@ -67,18 +67,16 @@ class UserServiceTest {
     void when_saveUser_then_returnUserDtoAndVerify() {
         UserCreateUpdateDto newUser = new UserCreateUpdateDto("Irina", "test3@mail.ru", 13);
 
-        EntityModel<UserDto> saved = userService.createUser(newUser);
+        UserDto saved = userService.createUser(newUser);
 
         assertNotNull(saved);
-        UserDto body = saved.getContent();
-        assertNotNull(body);
-        assertEquals(newUser.email(), body.email());
-        assertEquals(newUser.name(), body.name());
-        assertEquals(newUser.age(), body.age());
+        assertNotNull(saved);
+        assertEquals(newUser.email(), saved.email());
+        assertEquals(newUser.name(), saved.name());
+        assertEquals(newUser.age(), saved.age());
         verify(userRepository).save(any(User.class));
         verify(userMapper).toEntity(any(UserCreateUpdateDto.class));
         verify(userMapper).toDto(any(User.class));
-        verify(userAssembler).toModel(any(UserDto.class));
     }
 
     @Test
@@ -94,17 +92,15 @@ class UserServiceTest {
         int age = 60;
         UserCreateUpdateDto update = new UserCreateUpdateDto(name, email, age);
 
-        EntityModel<UserDto> updated = userService.updateUser(userIrina1.getId(), update);
+        UserDto updated = userService.updateUser(userIrina1.getId(), update);
 
         assertNotNull(updated);
-        UserDto body = updated.getContent();
-        assertNotNull(body);
-        assertEquals(name, body.name());
-        assertEquals(email, body.email());
-        assertEquals(age, body.age());
+        assertNotNull(updated);
+        assertEquals(name, updated.name());
+        assertEquals(email, updated.email());
+        assertEquals(age, updated.age());
         verify(userRepository).save(any(User.class));
         verify(userMapper).toDto(any(User.class));
-        verify(userAssembler).toModel(any(UserDto.class));
     }
 
     @Test
@@ -118,12 +114,11 @@ class UserServiceTest {
 
     @Test
     void when_findByExistentId_then_returnUserDtoAndVerify() {
-        EntityModel<UserDto> found = userService.findById(userIrina1.getId());
+        UserDto found = userService.findById(userIrina1.getId());
 
         assertNotNull(found);
         verify(userRepository).findById(any(Long.class));
         verify(userMapper).toDto(any(User.class));
-        verify(userAssembler).toModel(any(UserDto.class));
     }
 
     @Test
@@ -134,13 +129,12 @@ class UserServiceTest {
 
     @Test
     void when_findAll_then_returnUsersDtoListAndVerify() {
-        CollectionModel<EntityModel<UserDto>> found = userService.findAll();
+        List<UserDto> found = userService.findAll();
 
         assertNotNull(found);
-        assertEquals(USERS_COUNT, found.getContent().size());
+        assertEquals(USERS_COUNT, found.size());
         verify(userRepository).findAll();
         verify(userMapper, times(USERS_COUNT)).toDto(any(User.class));
-        verify(userAssembler, times(USERS_COUNT)).toModel(any(UserDto.class));
     }
 
     @Test
@@ -157,12 +151,11 @@ class UserServiceTest {
 
     @Test
     void when_findByExistentEmail_then_returnUserDtoAndVerify() {
-        EntityModel<UserDto> found = userService.findByEmail(userIrina1.getEmail());
+        UserDto found = userService.findByEmail(userIrina1.getEmail());
 
         assertNotNull(found);
         verify(userRepository).findByEmail(any(String.class));
         verify(userMapper).toDto(any(User.class));
-        verify(userAssembler).toModel(any(UserDto.class));
     }
 
     @Test
@@ -173,23 +166,21 @@ class UserServiceTest {
 
     @Test
     void when_findByName_then_returnUsersDtoListAndVerify() {
-        CollectionModel<EntityModel<UserDto>> found = userService.findByName(userIrina1.getName());
+        List<UserDto> found = userService.findByName(userIrina1.getName());
 
         assertNotNull(found);
-        assertEquals(2, found.getContent().size());
+        assertEquals(2, found.size());
         verify(userRepository).findByName(any(String.class));
         verify(userMapper, times(2)).toDto(any(User.class));
-        verify(userAssembler, times(2)).toModel(any(UserDto.class));
     }
 
     @Test
     void when_findByAge_then_returnUsersDtoListAndVerify() {
-        CollectionModel<EntityModel<UserDto>> found = userService.findByAge(userIrina1.getAge());
+        List<UserDto> found = userService.findByAge(userIrina1.getAge());
 
         assertNotNull(found);
-        assertEquals(2, found.getContent().size());
+        assertEquals(2, found.size());
         verify(userRepository).findByAge(any(Integer.class));
         verify(userMapper, times(2)).toDto(any(User.class));
-        verify(userAssembler, times(2)).toModel(any(UserDto.class));
     }
 }

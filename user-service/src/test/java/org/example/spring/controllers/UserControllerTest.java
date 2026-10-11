@@ -4,9 +4,11 @@ import jakarta.persistence.EntityNotFoundException;
 import org.example.spring.dto.ApiRootDto;
 import org.example.spring.dto.UserCreateUpdateDto;
 import org.example.spring.dto.UserDto;
+import org.example.spring.entities.User;
 import org.example.spring.exception.ErrorMessag;
 import org.example.spring.exception.UserAlreadyExistsException;
 import org.example.spring.hateoas.assemblers.RepresentationAssembler;
+import org.example.spring.hateoas.assemblers.UserAssembler;
 import org.example.spring.properties.AppServerProperties;
 import org.example.spring.services.UserService;
 import org.junit.jupiter.api.BeforeAll;
@@ -20,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -46,16 +49,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(UserController.class)
 class UserControllerTest {
     private static final String REQUEST_MAPPING = "/api/v1/users";
-    private static final String JSON_RESPONSE_COMMON = "$.dto";
-    private static final String JSON_RESPONSE_COLLECTIONS_COMMON = JSON_RESPONSE_COMMON + ".content";
+    private static final String JSON_RESPONSE_COLLECTIONS_COMMON = "$._embedded.userDtoList";
     private static ObjectMapper mapper;
     private static UserDto userIrina1;
     private static UserDto userIrina2;
     private static List<UserDto> users;
+    private static UserCreateUpdateDto userIrina1CreateUpdateDto;
     private static EntityModel<UserDto> userIrina1Model;
     private static EntityModel<UserDto> userIrina2Model;
     private static CollectionModel<EntityModel<UserDto>> usersModel;
-    private static UserCreateUpdateDto userIrina1CreateUpdateDto;
 
     @MockitoBean
     private UserService userService;
@@ -63,6 +65,8 @@ class UserControllerTest {
     private RepresentationAssembler representationAssembler;
     @MockitoBean
     private AppServerProperties appServerProperties;
+    @MockitoBean
+    private UserAssembler userAssembler;
 
     @Autowired
     private MockMvc mockMvc;
@@ -74,9 +78,8 @@ class UserControllerTest {
         userIrina1CreateUpdateDto = new UserCreateUpdateDto(userIrina1.name(), userIrina1.email(), userIrina1.age());
         userIrina2 = new UserDto(2L, userIrina1.name(), "test2@mail.ru", userIrina1.age());
         users = List.of(userIrina1, userIrina2);
-
-        userIrina1Model = EntityModel.of(userIrina1, Link.of(REQUEST_MAPPING + "/" + userIrina1.id()));
-        userIrina2Model = EntityModel.of(userIrina2, Link.of(REQUEST_MAPPING + "/" + userIrina2.id()));
+        userIrina1Model = EntityModel.of(userIrina1);
+        userIrina2Model = EntityModel.of(userIrina2);
         usersModel = CollectionModel.of(List.of(userIrina1Model, userIrina2Model));
     }
 
@@ -93,7 +96,8 @@ class UserControllerTest {
 
     @Test
     void when_findAll_then_returnUsersDtoListAndVerify() throws Exception {
-        when(userService.findAll()).thenReturn(usersModel);
+        when(userService.findAll()).thenReturn(users);
+        when(userAssembler.toCollectionModel(users)).thenReturn(usersModel);
 
         mockMvc.perform(get(REQUEST_MAPPING))
                 .andDo(print())
@@ -117,20 +121,23 @@ class UserControllerTest {
                 .andExpect(jsonPath(JSON_RESPONSE_COLLECTIONS_COMMON +
                         "[1].age").value(users.get(1).age()));
         verify(userService).findAll();
+        verify(userAssembler).toCollectionModel(any());
     }
 
     @Test
     void when_findByExistentId_then_returnUserDtoAndVerify() throws Exception {
-        when(userService.findById(userIrina1.id())).thenReturn(userIrina1Model);
+        when(userService.findById(userIrina1.id())).thenReturn(userIrina1);
+        when(userAssembler.toModel(userIrina1)).thenReturn(userIrina1Model);
 
         mockMvc.perform(get(REQUEST_MAPPING + "/{id}", userIrina1.id()))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + ".id").value(userIrina1.id()))
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + ".name").value(userIrina1.name()))
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + ".email").value(userIrina1.email()))
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + ".age").value(userIrina1.age()));
+                .andExpect(jsonPath("$.id").value(userIrina1.id()))
+                .andExpect(jsonPath("$.name").value(userIrina1.name()))
+                .andExpect(jsonPath("$.email").value(userIrina1.email()))
+                .andExpect(jsonPath("$.age").value(userIrina1.age()));
         verify(userService).findById(any(Long.class));
+        verify(userAssembler).toModel(any());
     }
 
     @Test
@@ -150,17 +157,19 @@ class UserControllerTest {
 
     @Test
     void when_findByExistentEmail_then_returnUserDtoAndVerify() throws Exception {
-        when(userService.findByEmail(userIrina1.email())).thenReturn(userIrina1Model);
+        when(userService.findByEmail(userIrina1.email())).thenReturn(userIrina1);
+        when(userAssembler.toModel(userIrina1)).thenReturn(userIrina1Model);
 
         mockMvc.perform(get(REQUEST_MAPPING + "/findByEmail")
                         .param("email", userIrina1.email()))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + ".id").value(userIrina1.id()))
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + ".name").value(userIrina1.name()))
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + ".email").value(userIrina1.email()))
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + ".age").value(userIrina1.age()));
+                .andExpect(jsonPath("$.id").value(userIrina1.id()))
+                .andExpect(jsonPath("$.name").value(userIrina1.name()))
+                .andExpect(jsonPath("$.email").value(userIrina1.email()))
+                .andExpect(jsonPath("$.age").value(userIrina1.age()));
         verify(userService).findByEmail(any(String.class));
+        verify(userAssembler).toModel(any());
     }
 
     @Test
@@ -192,7 +201,8 @@ class UserControllerTest {
 
     @Test
     void when_findByName_then_returnUsersDtoListAndVerify() throws Exception {
-        when(userService.findByName(userIrina1.name())).thenReturn(usersModel);
+        when(userService.findByName(userIrina1.name())).thenReturn(users);
+        when(userAssembler.toCollectionModel(users)).thenReturn(usersModel);
 
         mockMvc.perform(get(REQUEST_MAPPING + "/findByName")
                         .param("name", userIrina1.name()))
@@ -217,6 +227,7 @@ class UserControllerTest {
                 .andExpect(jsonPath(JSON_RESPONSE_COLLECTIONS_COMMON +
                         "[1].age").value(users.get(1).age()));
         verify(userService).findByName(any(String.class));
+        verify(userAssembler).toCollectionModel(any());
     }
 
     @Test
@@ -231,7 +242,8 @@ class UserControllerTest {
 
     @Test
     void when_findByAge_then_returnUsersDtoListAndVerify() throws Exception {
-        when(userService.findByAge(userIrina1.age())).thenReturn(usersModel);
+        when(userService.findByAge(userIrina1.age())).thenReturn(users);
+        when(userAssembler.toCollectionModel(users)).thenReturn(usersModel);
 
         mockMvc.perform(get(REQUEST_MAPPING + "/findByAge")
                         .param("age", userIrina1.age().toString()))
@@ -256,6 +268,7 @@ class UserControllerTest {
                 .andExpect(jsonPath(JSON_RESPONSE_COLLECTIONS_COMMON +
                         "[1].age").value(users.get(1).age()));
         verify(userService).findByAge(any(Integer.class));
+        verify(userAssembler).toCollectionModel(any());
     }
 
     @Test
@@ -270,18 +283,20 @@ class UserControllerTest {
 
     @Test
     void when_createUser_then_returnUserDtoAndVerify() throws Exception {
-        when(userService.createUser(userIrina1CreateUpdateDto)).thenReturn(userIrina1Model);
+        when(userService.createUser(userIrina1CreateUpdateDto)).thenReturn(userIrina1);
+        when(userAssembler.toModel(userIrina1)).thenReturn(userIrina1Model);
 
         mockMvc.perform(post(REQUEST_MAPPING)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(userIrina1CreateUpdateDto)))
                 .andDo(print())
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + ".id").value(userIrina1.id()))
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + ".name").value(userIrina1.name()))
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + ".email").value(userIrina1.email()))
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + ".age").value(userIrina1.age()));
+                .andExpect(jsonPath("$.id").value(userIrina1.id()))
+                .andExpect(jsonPath("$.name").value(userIrina1.name()))
+                .andExpect(jsonPath("$.email").value(userIrina1.email()))
+                .andExpect(jsonPath("$.age").value(userIrina1.age()));
         verify(userService).createUser(any(UserCreateUpdateDto.class));
+        verify(userAssembler).toModel(any());
     }
 
     @Test
@@ -338,18 +353,20 @@ class UserControllerTest {
 
     @Test
     void when_updateUser_then_returnUserDtoAndVerify() throws Exception {
-        when(userService.updateUser(userIrina1.id(), userIrina1CreateUpdateDto)).thenReturn(userIrina1Model);
+        when(userService.updateUser(userIrina1.id(), userIrina1CreateUpdateDto)).thenReturn(userIrina1);
+        when(userAssembler.toModel(userIrina1)).thenReturn(userIrina1Model);
 
         mockMvc.perform(put(REQUEST_MAPPING + "/{id}", userIrina1.id())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(userIrina1CreateUpdateDto)))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + ".id").value(userIrina1.id()))
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + ".name").value(userIrina1.name()))
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + ".email").value(userIrina1.email()))
-                .andExpect(jsonPath(JSON_RESPONSE_COMMON + ".age").value(userIrina1.age()));
+                .andExpect(jsonPath("$.id").value(userIrina1.id()))
+                .andExpect(jsonPath("$.name").value(userIrina1.name()))
+                .andExpect(jsonPath("$.email").value(userIrina1.email()))
+                .andExpect(jsonPath("$.age").value(userIrina1.age()));
         verify(userService).updateUser(any(Long.class), any(UserCreateUpdateDto.class));
+        verify(userAssembler).toModel(any());
     }
 
     @Test
@@ -373,7 +390,7 @@ class UserControllerTest {
     void when_deleteById_then_verify() throws Exception {
         mockMvc.perform(delete(REQUEST_MAPPING + "/{id}", userIrina1.id()))
                 .andDo(print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
         verify(userService).deleteById(any(Long.class));
     }
 

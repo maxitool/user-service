@@ -23,6 +23,9 @@ WORKDIR /app
 
 RUN groupadd --system spring && useradd --system --gid spring spring
 
+# create the mount point and give it to the app user
+RUN mkdir -p /app/shared-logs && chown spring:spring /app/shared-logs
+
 COPY --from=build --chown=spring:spring /app/user-service/target/*.jar app.jar
 
 USER spring:spring

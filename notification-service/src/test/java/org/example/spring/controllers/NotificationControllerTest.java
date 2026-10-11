@@ -68,7 +68,7 @@ public class NotificationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(emailDto)))
                 .andDo(print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
         verify(service).sendUserCreatedToEmail(emailDto);
     }
 
@@ -100,7 +100,7 @@ public class NotificationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(emailDto)))
                 .andDo(print())
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
         verify(service).sendUserDeletedToEmail(emailDto);
     }
 
