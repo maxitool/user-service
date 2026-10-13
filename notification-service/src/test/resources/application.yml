@@ -2,6 +2,12 @@ server:
   port: 0
 
 spring:
+  cloud:
+    config:
+      enabled: false
+      import-check:
+        enabled: false
+
   kafka:
     consumer:
       auto-offset-reset: earliest
