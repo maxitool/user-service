@@ -9,6 +9,7 @@
 <p>Maven</p>
 <p>Docker</p>
 <p>Spring boot</p>
+<p>Spring web</p>
 <p>Spring cloud</p>
 <p>JDBC</p>
 <p>JPA</p>
@@ -20,16 +21,13 @@
 <p>Mail</p>
 <p>slf4j</p>
 <p>lombok</p>
-</br>
 <p>Eureka</p>
 <p>Loadbalancer</p>
 <p>Circuit breaker</p>
 <p>Gateway</p>
 <p>External configuration</p>
-</br>
 <p>PostgreSQL</p>
 <p>h2database</p>
-</br>
 <p>JUnit Jupiter</p>
 <p>Testcontainers</p>
 <p>Mock</p>
@@ -37,14 +35,15 @@
 <p>Spy</p>
 </br></br>
 <h3>О проекте:</h3>
-<p>У нас в проекте 5 модулей user-service, notification-service, общий для них user-notification-common, discovery-service с Eureka сервером и gateway-service.</p>
+<p>У нас в проекте 6 модулей user-service, notification-service, общий для них user-notification-common, discovery-service с Eureka сервером, gateway-service, config-service (для получения файлов конфигурации через гит (https://github.com/maxitool/test-spring-config-files.git)).</p>
 <p>Для работы микросервисов параллельно мы настроили внутри проекта docker, чтобы запустить весь проект вам нужно в терминале ввести: docker-compose up --build. Глобальные переменные указаны в папке config.</p>
 <p>В контейнере докера запускаются следующие микросервисы:</p>
 <p>- discovery-service с Eureka сервером на порту 8761</p>
 <p>- 2 копии notification-service (notification-service-1 и notification-service-2) на портах 8081 и 8082</p>
 <p>- 2 копии user-service (user-service-1 и user-service-2) на портах 8083 и 8084</p>
 <p>- gateway-service на порту 8080</p>
-<p>Также в докере запускается kafka с healthcheck на порту 9092</p>
+<p>- config-service на порту 8888</p>
+<p>Также в докере запускается kafka с healthcheck на порту 9092 и kafka ui на порту 8070</p>
 </br>
 <h3>База данных:</h3>
 <p>Используем общую PostgreSQL, которая хостится на ресурсе neondb, ниже описаны настройки для подключения к ней</p>

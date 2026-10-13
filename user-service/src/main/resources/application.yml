@@ -1,72 +1,7 @@
-server:
-  port: ${HOST_PORT}
-  forward-headers-strategy: framework
-
 spring:
   application:
     name: user-service
-  kafka:
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-      properties:
-        spring.json.add.type.headers: false
-        enable.idempotence: true
-
-  datasource:
-    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}?currentSchema=${DB_SCHEMA}
-    username: ${DB_USER}
-    password: ${DB_PASSWORD}
-    driver-class-name: org.postgresql.Driver
-
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    open-in-view: false
-    properties:
-      hibernate:
-        format_sql: true
-
-  web:
-    cors:
-      allowed-origin-patterns: "*"
-      allowed-methods: "*"
-      allowed-headers: "*"
-
-logging:
-  level:
-    org.example.spring: DEBUG
-  file:
-    name: /app/shared-logs/common.log
-  pattern:
-    file: "%d{HH:mm:ss.SSS} %-5level [${IMAGE_NAME}] : %msg%n"
-  logback:
-    rollingpolicy:
-      max-file-size: 10MB
-      max-history: 5
-
-app:
-  kafka:
-    topic:
-      email-dto: email-dto
-
-feign:
-  client:
-    config:
-      default:
-        connectTimeout: 5000
-        readTimeout: 60000
-      notification-service:
-        connectTimeout: 5000
-        readTimeout: 60000
-
-eureka:
-  client:
-    service-url:
-      defaultZone: http://discovery-service:8761/eureka/
-    registry-fetch-interval-seconds: 5
-  instance:
-    prefer-ip-address: true
-    lease-renewal-interval-in-seconds: 5
-    lease-expiration-duration-in-seconds: 9
+  config:
+    import: optional:configserver:${CONFIG_SERVICE_HOST}:${CONFIG_SERVICE_PORT}
+  profiles:
+    active: dev

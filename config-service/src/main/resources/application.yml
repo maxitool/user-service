@@ -1,0 +1,19 @@
+server:
+  port: ${CONFIG_SERVICE_PORT}
+
+spring:
+  application:
+    name: config-service
+  cloud:
+    config:
+      server:
+        git:
+          uri: ${CONFIG_GIT_URI}
+          default-label: ${DEFAULT_LABEL}
+          clone-on-start: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

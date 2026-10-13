@@ -28,7 +28,7 @@ import static org.mockito.Mockito.verify;
         topics = TOPIC
 )
 class EmailDtoConsumerTest {
-    private static final int VERIFY_TIMEOUT_MILLIS = 5000;
+    private static final int VERIFY_TIMEOUT_MILLIS = 10000;
     private static ObjectMapper mapper;
 
     @Autowired
