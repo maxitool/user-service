@@ -39,7 +39,8 @@
 <p><a href="http://localhost:8084/swagger-ui/index.html#">notification-service-2</a></p>
 <p><a href="http://localhost:8081/">redis-commander</a></p>
 <p><a href="http://localhost:8070/">kafka-ui</a></p>
-<p><a href="http://localhost:3000/">Grafana</a>   лог:пар admin:admin</p>
+<p><a href="http://localhost:3000/">grafana</a>   лог:пар admin:admin</p>
+<p><a href="http://localhost:8080/actuator/circuitbreakers">circuitbreakers</a></p>
 </br>
 <h3>О проекте:</h3>
 <p>У нас в проекте 6 модулей user-service, notification-service, общий для них user-notification-common, discovery-service с Eureka сервером, gateway-service, config-service (для получения файлов конфигурации через гит (https://github.com/maxitool/test-spring-config-files.git)).</p>
