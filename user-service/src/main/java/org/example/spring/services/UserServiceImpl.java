@@ -61,6 +61,9 @@ public class UserServiceImpl implements UserService {
     public UserDto updateUser(Long id, UserCreateUpdateDto dto) {
         User user = getUserOrThrow(id);
 
+        RedisUserChangedEvent redisEvent = new RedisUserChangedEvent(userMapper.toDto(user));
+        eventPublisher.publishEvent(redisEvent);
+
         user.setName(dto.name());
         user.setEmail(dto.email());
         user.setAge(dto.age());
@@ -68,9 +71,6 @@ public class UserServiceImpl implements UserService {
 
         User saved = userRepository.save(user);
         log.info("User {} was updated.", user);
-
-        RedisUserChangedEvent redisEvent = new RedisUserChangedEvent(userMapper.toDto(user));
-        eventPublisher.publishEvent(redisEvent);
 
         UserDto result = userMapper.toDto(saved);
         log.debug("User {} to UserDto entity {} was successful.", saved, result);
