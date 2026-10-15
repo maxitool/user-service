@@ -16,6 +16,7 @@ import org.example.spring.dto.UserDto;
 import org.example.spring.hateoas.assemblers.RepresentationAssembler;
 import org.example.spring.hateoas.assemblers.UserAssembler;
 import org.example.spring.properties.AppServerProperties;
+import org.example.spring.services.RedisUserService;
 import org.example.spring.services.UserService;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -31,6 +32,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(
@@ -52,6 +55,7 @@ public class UserController {
     private final RepresentationAssembler representationAssembler;
     private final AppServerProperties appServerProperties;
     private final UserAssembler userAssembler;
+    private final RedisUserService redisUserService;
 
     @Operation(
             summary = "Get api",
@@ -88,7 +92,12 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     public CollectionModel<EntityModel<UserDto>> findAll() {
         logging();
-        return userAssembler.toCollectionModel(userService.findAll());
+        List<UserDto> result = redisUserService.getCachedFindAll();
+        if (!result.isEmpty()) {
+            return userAssembler.toCollectionModel(result);
+        }
+        result = userService.findAll();
+        return userAssembler.toCollectionModel(result);
     }
 
     @Operation(
@@ -113,7 +122,12 @@ public class UserController {
             @Parameter(name = "id", description = "User id", example = "1")
             Long id) {
         logging();
-        return userAssembler.toModel(userService.findById(id));
+        UserDto result = redisUserService.getCachedFindById(id);
+        if (result != null) {
+            return userAssembler.toModel(result);
+        }
+        result = userService.findById(id);
+        return userAssembler.toModel(result);
     }
 
     @Operation(
@@ -139,7 +153,12 @@ public class UserController {
             @Parameter(name = "email", description = "User email", example = "test@mail.ru")
             String email) {
         logging();
-        return userAssembler.toModel(userService.findByEmail(email));
+        UserDto result = redisUserService.getCachedFindByEmail(email);
+        if (result != null) {
+            return userAssembler.toModel(result);
+        }
+        result = userService.findByEmail(email);
+        return userAssembler.toModel(result);
     }
 
     @Operation(
@@ -162,7 +181,12 @@ public class UserController {
             @Parameter(name = "name", description = "User name", example = "Ivan Ivanov")
             String name) {
         logging();
-        return userAssembler.toCollectionModel(userService.findByName(name));
+        List<UserDto> result = redisUserService.getCachedFindByName(name);
+        if (!result.isEmpty()) {
+            return userAssembler.toCollectionModel(result);
+        }
+        result = userService.findByName(name);
+        return userAssembler.toCollectionModel(result);
     }
 
     @Operation(
@@ -185,7 +209,12 @@ public class UserController {
             @Parameter(name = "age", description = "User age", example = "12")
             Integer age) {
         logging();
-        return userAssembler.toCollectionModel(userService.findByAge(age));
+        List<UserDto> result = redisUserService.getCachedFindByAge(age);
+        if (!result.isEmpty()) {
+            return userAssembler.toCollectionModel(result);
+        }
+        result = userService.findByAge(age);
+        return userAssembler.toCollectionModel(result);
     }
 
     @Operation(

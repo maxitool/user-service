@@ -40,7 +40,7 @@ class UserServiceTest {
     private UserMapper userMapper;
 
     @Autowired
-    private UserService userService;
+    private UserServiceImpl userService;
 
 
     @BeforeAll

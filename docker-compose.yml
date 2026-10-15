@@ -26,6 +26,7 @@ services:
         condition: service_healthy
     env_file:
       - config/common.env
+      - config/eureka.env
     volumes:
       - shared-logs:/app/shared-logs
     environment:
@@ -45,6 +46,7 @@ services:
       - "8080:8080"
     env_file:
       - config/common.env
+      - config/eureka.env
     depends_on:
       config-service:
         condition: service_healthy
@@ -75,11 +77,13 @@ services:
       context: .
       dockerfile: ./user-service/Dockerfile
     ports:
-      - "8081:8081"
+      - "8086:8086"
     env_file:
       - config/common.env
       - config/user_common.env
       - config/user_1.env
+      - config/eureka.env
+      - config/redis.env
     depends_on:
       config-service:
         condition: service_healthy
@@ -114,6 +118,8 @@ services:
       - config/common.env
       - config/user_common.env
       - config/user_2.env
+      - config/eureka.env
+      - config/redis.env
     depends_on:
       config-service:
         condition: service_healthy
@@ -148,6 +154,7 @@ services:
       - config/common.env
       - config/notification_common.env
       - config/notification_1.env
+      - config/eureka.env
     depends_on:
       config-service:
         condition: service_healthy
@@ -178,6 +185,7 @@ services:
       - config/common.env
       - config/notification_common.env
       - config/notification_2.env
+      - config/eureka.env
     depends_on:
       config-service:
         condition: service_healthy
@@ -264,5 +272,34 @@ services:
       loki:
         condition: service_started
 
+  redis:
+    image: redis:7-alpine
+    container_name: project-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    command: redis-server --appendonly yes
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: project-redis-ui
+    restart: always
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
+    depends_on:
+      redis:
+        condition: service_healthy
+
 volumes:
   shared-logs:
+  redis-data:

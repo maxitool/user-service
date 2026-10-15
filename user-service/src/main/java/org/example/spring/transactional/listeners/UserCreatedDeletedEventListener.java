@@ -1,9 +1,9 @@
-package org.example.spring.events.listeners;
+package org.example.spring.transactional.listeners;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.kafka.Operation;
-import org.example.spring.events.UserCreatedDeletedEvent;
 import org.example.spring.kafka.EmailDtoProducer;
+import org.example.spring.transactional.events.UserCreatedDeletedEvent;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;

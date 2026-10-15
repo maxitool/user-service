@@ -9,7 +9,7 @@ import org.example.spring.exception.UserAlreadyExistsException;
 import org.example.spring.hateoas.assemblers.RepresentationAssembler;
 import org.example.spring.hateoas.assemblers.UserAssembler;
 import org.example.spring.properties.AppServerProperties;
-import org.example.spring.services.UserService;
+import org.example.spring.services.UserServiceImpl;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +57,7 @@ class UserControllerTest {
     private static CollectionModel<EntityModel<UserDto>> usersModel;
 
     @MockitoBean
-    private UserService userService;
+    private UserServiceImpl userService;
     @MockitoBean
     private RepresentationAssembler representationAssembler;
     @MockitoBean

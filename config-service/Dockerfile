@@ -11,11 +11,11 @@ COPY user-service/pom.xml ./user-service/
 COPY notification-service/pom.xml ./notification-service/
 COPY user-notification-common/pom.xml ./user-notification-common/
 
-# Копируем код сервиса
-COPY config-service/src ./config-service/src
-
 # Скачиваем все зависимости внутрь слоя Docker
 RUN mvn dependency:go-offline -pl config-service -am
+
+# Копируем код сервиса
+COPY config-service/src ./config-service/src
 
 # Собираем модуль
 RUN mvn -pl config-service -am clean package -DskipTests
