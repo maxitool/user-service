@@ -11,12 +11,12 @@ COPY user-service/pom.xml ./user-service/
 COPY notification-service/pom.xml ./notification-service/
 COPY user-notification-common/pom.xml ./user-notification-common/
 
+# Скачиваем все зависимости внутрь слоя Docker
+RUN mvn dependency:go-offline -pl notification-service -am
+
 # Копируем код сервиса И код общего модуля
 COPY user-notification-common/src ./user-notification-common/src
 COPY notification-service/src ./notification-service/src
-
-# Скачиваем все зависимости внутрь слоя Docker
-RUN mvn dependency:go-offline -pl notification-service -am
 
 # Собираем модуль
 RUN mvn -pl notification-service -am clean package -DskipTests

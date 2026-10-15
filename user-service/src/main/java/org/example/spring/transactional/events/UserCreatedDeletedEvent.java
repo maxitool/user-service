@@ -1,4 +1,4 @@
-package org.example.spring.events;
+package org.example.spring.transactional.events;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;

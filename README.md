@@ -26,21 +26,31 @@
 <p>Circuit breaker</p>
 <p>Gateway</p>
 <p>External configuration</p>
-<p>PostgreSQL</p>
-<p>h2database</p>
+<p>PostgreSQL + Redis + h2database</p>
 <p>JUnit Jupiter + Testcontainers + Mock + Spy + Mockmvc</p>
 <p>Loki + Promtail + Grafana</p>
 </br></br>
+<h3>Локальные url:</h3>
+<p><a href="http://localhost:8761/">eureka</a></p>
+<p><a href="http://localhost:8080/swagger-ui/index.html#">gateway-service</a></p>
+<p><a href="http://localhost:8086/swagger-ui/index.html#">user-service-1</a></p>
+<p><a href="http://localhost:8082/swagger-ui/index.html#">user-service-2</a></p>
+<p><a href="http://localhost:8083/swagger-ui/index.html#">notification-service-1</a></p>
+<p><a href="http://localhost:8084/swagger-ui/index.html#">notification-service-2</a></p>
+<p><a href="http://localhost:8081/">redis-commander</a></p>
+<p><a href="http://localhost:8070/">kafka-ui</a></p>
+<p><a href="http://localhost:3000/">Grafana</a>   лог:пар admin:admin</p>
+</br>
 <h3>О проекте:</h3>
 <p>У нас в проекте 6 модулей user-service, notification-service, общий для них user-notification-common, discovery-service с Eureka сервером, gateway-service, config-service (для получения файлов конфигурации через гит (https://github.com/maxitool/test-spring-config-files.git)).</p>
 <p>Для работы микросервисов параллельно мы настроили внутри проекта docker, чтобы запустить весь проект вам нужно в терминале ввести: docker-compose up --build. Глобальные переменные указаны в папке config.</p>
 <p>В контейнере докера запускаются следующие микросервисы:</p>
 <p>- discovery-service с Eureka сервером на порту 8761</p>
-<p>- 2 копии notification-service (notification-service-1 и notification-service-2) на портах 8081 и 8082</p>
+<p>- 2 копии notification-service (notification-service-1 и notification-service-2) на портах 8086 и 8082</p>
 <p>- 2 копии user-service (user-service-1 и user-service-2) на портах 8083 и 8084</p>
 <p>- gateway-service на порту 8080</p>
 <p>- config-service на порту 8888</p>
-<p>Также в докере запускается kafka с healthcheck на порту 9092, kafka ui на порту 8070 и Loki + Promtail + Grafana (централизованный сбор, хранение и визуализация логов). Логи пишутся в shared-logs волуме.</p>
+<p>Также в докере запускается kafka на порту 9092 и kafka ui на порту 8070, redis на порту 6379 и redis-commander на порту 8081, Loki + Promtail + Grafana (централизованный сбор, хранение и визуализация логов). Логи пишутся в shared-logs волуме.</p>
 </br>
 <h3>Важно:</h3>
 <p>До запуска в терминале команды docker-compose up --build необходимо включить впн, иначе отправка на почту работать не будет (Authentication failed).</p>
