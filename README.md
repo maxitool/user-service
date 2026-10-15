@@ -46,7 +46,7 @@
 <p>До запуска в терминале команды docker-compose up --build необходимо включить впн, иначе отправка на почту работать не будет (Authentication failed).</p>
 </br>
 <h3>Удобный просмотр логов:</h3>
-<p>После поднятия докер контейнера зайдите по ссылке http://localhost:3000, авторизируйтесь с логином(admin) и паролем(admin), после перейдите на вкладку Connections -> Data sources -> Add data source. В данной вкладке нужно выбрать loki, записать внутри Connection URL  http://loki:3100, после нажать на кнопку Save & test. Теперь перейдите на вкладку Explore, вам стало доступно написание Queries для получение логов.</p>
+<p>После поднятия докер контейнера зайдите по ссылке http://localhost:3000, авторизируйтесь с логином (admin) и паролем (admin), после перейдите на вкладку Connections -> Data sources -> Add data source. В данной вкладке нужно выбрать loki, записать внутри Connection URL  http://loki:3100, после нажать на кнопку Save & test. Теперь перейдите на вкладку Explore, вам стало доступно написание Queries для получения логов.</p>
 </br>
 <p><b>Label filters:</b></p>
 <p>filename - имя файла логов, доступно только /var/log/shared-apps/common.log (общий файл)</p>
