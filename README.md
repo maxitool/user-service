@@ -28,11 +28,8 @@
 <p>External configuration</p>
 <p>PostgreSQL</p>
 <p>h2database</p>
-<p>JUnit Jupiter</p>
-<p>Testcontainers</p>
-<p>Mock</p>
-<p>Mockmvc</p>
-<p>Spy</p>
+<p>JUnit Jupiter + Testcontainers + Mock + Spy + Mockmvc</p>
+<p>Loki + Promtail + Grafana</p>
 </br></br>
 <h3>О проекте:</h3>
 <p>У нас в проекте 6 модулей user-service, notification-service, общий для них user-notification-common, discovery-service с Eureka сервером, gateway-service, config-service (для получения файлов конфигурации через гит (https://github.com/maxitool/test-spring-config-files.git)).</p>
@@ -43,7 +40,22 @@
 <p>- 2 копии user-service (user-service-1 и user-service-2) на портах 8083 и 8084</p>
 <p>- gateway-service на порту 8080</p>
 <p>- config-service на порту 8888</p>
-<p>Также в докере запускается kafka с healthcheck на порту 9092 и kafka ui на порту 8070</p>
+<p>Также в докере запускается kafka с healthcheck на порту 9092, kafka ui на порту 8070 и Loki + Promtail + Grafana (централизованный сбор, хранение и визуализация логов). Логи пишутся в shared-logs волуме.</p>
+</br>
+<h3>Удобный просмотр логов:</h3>
+<p>После поднятия докер контейнера зайдите по ссылке http://localhost:3000, авторизируйтесь с логином(admin) и паролем(admin), после перейдите на вкладку Connections -> Data sources -> Add data source. В данной вкладке нужно выбрать loki, записать внутри Connection URL  http://loki:3100, после нажать на кнопку Save & test. Теперь перейдите на вкладку Explore, вам стало доступно написание Queries для получение логов.</p>
+</br>
+<p><b>Label filters:</b></p>
+<p>filename - имя файла логов, доступно только /var/log/shared-apps/common.log (общий файл)</p>
+<p>service - имя микросервиса</p>
+<p>level - уровень логирования</p>
+</br>
+<p>Пример запроса для получении информации о том, какой хост и порт был дернут при вызове lb rest контроллера:</p>
+<p>Label filters:</p>
+<p>filename = /var/log/shared-apps/common.log</p>
+<p>Operations:</p>
+<p>Line Contains = Called</p>
+<p>После нужно нажать на кнопку Live сверху</p>
 </br>
 <h3>База данных:</h3>
 <p>Используем общую PostgreSQL, которая хостится на ресурсе neondb, ниже описаны настройки для подключения к ней</p>
@@ -120,3 +132,7 @@
 </br>
 <h3>Задание 7:</h3>
 <p>Добавить к существующей системе паттерны: gateway api, service discovery, circuit breaker, external configuration - реализации данных паттернов можно найти в модулях spring cloud.</p>
+</br>
+<h3>Задание 8:</h3>
+<p>DevOps</p>
+<p>Создать docker-compose.yml, который развернет всю микросервисную систему, включая Kafka, PostgreSQL, API Gateway, Service Discovery, External Configuration и 2 микросервиса(user-service и notification-service, созданные ранее). Проверить, что сервисы корректно взаимодействуют друг с другом в контейнерной среде.</p>
