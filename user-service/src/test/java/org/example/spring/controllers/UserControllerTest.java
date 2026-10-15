@@ -9,6 +9,7 @@ import org.example.spring.exception.UserAlreadyExistsException;
 import org.example.spring.hateoas.assemblers.RepresentationAssembler;
 import org.example.spring.hateoas.assemblers.UserAssembler;
 import org.example.spring.properties.AppServerProperties;
+import org.example.spring.services.RedisUserService;
 import org.example.spring.services.UserServiceImpl;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -64,6 +65,8 @@ class UserControllerTest {
     private AppServerProperties appServerProperties;
     @MockitoBean
     private UserAssembler userAssembler;
+    @MockitoBean
+    private RedisUserService redisUserService;
 
     @Autowired
     private MockMvc mockMvc;

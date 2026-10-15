@@ -40,7 +40,7 @@ class UserServiceTest {
     private UserMapper userMapper;
 
     @Autowired
-    private UserServiceImpl userService;
+    private UserService userService;
 
 
     @BeforeAll
@@ -73,7 +73,7 @@ class UserServiceTest {
         assertEquals(newUser.age(), saved.age());
         verify(userRepository).save(any(User.class));
         verify(userMapper).toEntity(any(UserCreateUpdateDto.class));
-        verify(userMapper).toDto(any(User.class));
+        verify(userMapper, times(2)).toDto(any(User.class));
     }
 
     @Test
@@ -97,7 +97,7 @@ class UserServiceTest {
         assertEquals(email, updated.email());
         assertEquals(age, updated.age());
         verify(userRepository).save(any(User.class));
-        verify(userMapper).toDto(any(User.class));
+        verify(userMapper, times(2)).toDto(any(User.class));
     }
 
     @Test
