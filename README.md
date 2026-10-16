@@ -181,7 +181,7 @@ graph TD
     subgraph Infrastructure ["Базы данных и Очереди"]
         Kafka[🖧 Apache Kafka<br/>Порт: 9092]
         Redis[💾 Redis<br/>Порт: 6379]
-        DB[(🐘 PostgreSQL<br/>Neon Cloud)]
+        DB[("(🐘 PostgreSQL<br/>Neon Cloud)")]
     end
 
     subgraph Observability ["Логирование и Мониторинг"]
@@ -189,51 +189,74 @@ graph TD
         Loki[🔥 Grafana Loki<br/>Порт: 3100] --> Grafana[📈 Grafana UI<br/>Порт: 3000]
     end
     
-    Client --> Gateway                             %% Индекс 0
-    Gateway -->|1. Роутинг| US                    %% Индекс 1
-    US --->|2. Кэш| Redis                          %% Индекс 2
-    US --->|3. Данные| DB                           %% Индекс 3
-    US --->|4. События| Kafka                      %% Индекс 4
-    Kafka --->|5. Вычитывание| NS                  %% Индекс 5
+    %% ==========================================
+    %% ПОТОКИ ДАННЫХ И СВЯЗИ (Порядок строго зафиксирован для linkStyle)
+    %% ==========================================
     
-    US -.->|5. Fallback HTTP| Feign                %% Индекс 6
-    Feign --->|6. Блокирующий POST| NS             %% Индекс 7
+    %% Основные бизнес-потоки и трафик (Индексы 0 - 5)
+    Client --> Gateway
+    Gateway -->|1. Роутинг| US
+    US --->|2. Кэш| Redis
+    US --->|3. Данные| DB
+    US --->|4. События| Kafka
+    Kafka --->|5. Вычитывание| NS
+    
+    %% Аварийный синхронный Fallback (Индексы 6 - 7)
+    US -.->|5. Fallback HTTP| Feign
+    Feign --->|6. Блокирующий POST| NS
 
-    Config -.->|Свойства| Discovery                %% Индекс 8
-    Config -.->|Свойства| Gateway                  %% Индекс 9
-    Config -.->|Свойства| US                       %% Индекс 10
-    Config -.->|Свойства| NS                       %% Индекс 11
+    %% Конфигурация через Config Server (Индексы 8 - 11)
+    Config -.->|Свойства| Discovery
+    Config -.->|Свойства| Gateway
+    Config -.->|Свойства| US
+    Config -.->|Свойства| NS
 
-    Gateway --->|Регистрация| Discovery            %% Индекс 12
-    US --->|Регистрация| Discovery                 %% Индекс 13
-    NS --->|Регистрация| Discovery                 %% Индекс 14
+    %% Регистрация в Service Discovery Eureka (Индексы 12 - 14)
+    Gateway --->|Регистрация| Discovery
+    US --->|Регистрация| Discovery
+    NS --->|Регистрация| Discovery
 
-    Gateway -->|Логи| Volume                       %% Индекс 15
-    US -->|Логи| Volume                            %% Индекс 16
-    NS -->|Логи| Volume                            %% Индекс 17
-    Volume --> Loki                                %% Индекс 18
-    Loki --> Grafana                               %% Индекс 19
+    %% Агрегация логов и мониторинг (Индексы 15 - 19)
+    Gateway -->|Логи| Volume
+    US -->|Логи| Volume
+    NS -->|Логи| Volume
+    Volume --> Loki
+    Loki --> Grafana
 
+    %% ==========================================
+    %% ЯРКАЯ КОНТРАСТНАЯ СТИЛИЗАЦИЯ (Концепция 3 цветов)
+    %% ==========================================
     classDef appStyle fill:#0284C7,stroke:#0369A1,stroke-width:2px,color:#FFFFFF,font-weight:bold;
     classDef dataStyle fill:#F59E0B,stroke:#D97706,stroke-width:2px,color:#FFFFFF,font-weight:bold;
     classDef logsStyle fill:#10B981,stroke:#047857,stroke-width:2px,color:#FFFFFF,font-weight:bold;
     
     classDef subContainer fill:#F8FAFC,stroke:#94A3B8,stroke-width:2px,stroke-dasharray: 4 4;
 
+    %% Применение насыщенных цветов к компонентам
     class Client,Gateway,Config,Discovery,US,NS,Feign appStyle;
     class Kafka,Redis,DB dataStyle;
     class Volume,Loki,Grafana logsStyle;
 
+    %% Применение стилей к рамкам подграфов
     class Core,Infrastructure,Observability subContainer;
+
+    %% ==========================================
+    %% СИНХРОНИЗИРОВАННАЯ ПОДСВЕТКА СТРЕЛОК (По стилю второй схемы)
+    %% ==========================================
     
+    %% Индексы 0-5: Штатный бизнес-трафик, запросы и данные (Зеленый Happy Path)
     linkStyle 0,1,2,3,4,5 stroke:#16A34A,stroke-width:2.5px;
     
+    %% Индексы 6-7: Аварийный Fallback путь деградации (Яркий красный)
     linkStyle 6,7 stroke:#EF4444,stroke-width:2.5px;
     
+    %% Индексы 8-11: Служебная раздача свойств Config (Предупреждающий оранжевый пунктир)
     linkStyle 8,9,10,11 stroke:#D97706,stroke-width:1.5px,stroke-dasharray: 4 4;
     
+    %% Индексы 12-14: Инфраструктурный Heartbeat в Eureka (Предупреждающий оранжевый сплошной)
     linkStyle 12,13,14 stroke:#D97706,stroke-width:1.5px;
     
+    %% Индексы 15-19: Сбор логов и графики мониторинга Loki/Grafana (Нейтральный графитовый)
     linkStyle 15,16,17,18,19 stroke:#4B5563,stroke-width:2px;
 ```
 
