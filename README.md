@@ -127,52 +127,33 @@
 
 ```mermaid
 flowchart TD
-    %% Стилизация блоков
+    %% Основной поток
+    Start([💻 Запрос клиента]) --> US[👥 user-service]
+    US --> Check{Статус Kafka?}
+    
+    %% Штатный асинхронный режим
+    Check -->|🟢 Доступна| Kafka[🪵 Топик: email-dto]
+    Kafka -->|@KafkaListener| NS_Async[✉️ notification-service]
+    NS_Async -->|Асинхронно| SMTP1(📧 Отправка Email)
+    
+    Kafka -.->|Быстрый ответ| Return([📱 HTTP 201 Success])
+
+    %% Аварийный синхронный режим (Fallback)
+    Check -->|🔴 Сбой / Таймаут 7с| Feign[🔗 OpenFeign Клиент]
+    Feign -->|POST HTTP| NS_Sync[✉️ notification-service]
+    NS_Sync -->|Синхронно| SMTP2(📧 Отправка Email)
+    SMTP2 --> Return
+
+    %% Стилизация (Безопасно для парсера GitHub)
     classDef client fill:#ececff,stroke:#9370db,stroke-width:2px;
     classDef core fill:#e1ffff,stroke:#20b2aa,stroke-width:2px;
-    classDef success fill:#d4edda,stroke:#28a745,stroke-width:2px,font-weight:bold;
-    classDef fail fill:#f8d7da,stroke:#dc3545,stroke-width:2px,font-weight:bold;
-    classDef action fill:#fff3cd,stroke:#ffc107,stroke-width:2px;
+    classDef success fill:#d4edda,stroke:#28a745,stroke-width:2px;
+    classDef fail fill:#f8d7da,stroke:#dc3545,stroke-width:2px;
 
-    Start([💻 Бизнес-действие пользователя]) --> Controller[👥 UserController]
-    Controller -->|Вызов сервиса| Producer[📦 EmailDtoProducer]
-    
-    %% Попытка отправки и асинхронный фьючер
-    Producer --> CreateRecord[📝 Сборка ProducerRecord<br/>Топик: email-dto<br/>Заголовок: operation]
-    CreateRecord --> KafkaSend{kafkaTemplate.send}
-    
-    %% Развилка по whenComplete
-    KafkaSend -->|orTimeout 7s| FutureCheck{Проверка фьючи<br/>в .whenComplete}
-    
-    %% Сценарий А: Успешная отправка в брокер (Асинхронный Happy Path)
-    FutureCheck -->|🟢 ex == null| SuccessLog[📝 Лог: Sent to partition/offset]
-    SuccessLog -.->|Быстрый ответ клиенту| HTTP_201([📱 HTTP 201 / 200 Created])
-    
-    KafkaBroker[🪵 Мониторинг брокера Kafka] -->|Слушатель @KafkaListener| Consumer[📥 EmailDtoConsumer]
-    SuccessLog -->|Запись в топик| KafkaBroker
-    
-    Consumer --> ParseHeader[⚙️ Десериализация заголовка<br/>Operation.fromString]
-    ParseHeader --> NS_Async[✉️ NotificationService]
-    NS_Async --> Send_Mail1[📧 Отправка Email через Gmail SMTP]
-    Send_Mail1 --> Success_End([🎉 Уведомление доставлено асинхронно])
-
-    %% Сценарий Б: Аварийная деградация (Синхронный Fallback-путь)
-    FutureCheck -->|🔴 ex != null| FallbackTrigger[🚨 Лог: Kafka not responding]
-    FallbackTrigger --> FeignCheck{Проверка типа операции<br/>CREATE / DELETE}
-    
-    FeignCheck -->|Синхронный REST вызов| FeignClient[🔗 NotificationServiceClient<br/>OpenFeign Client]
-    FeignClient -->|POST /api/v1/email/*| NS_Controller[🎛️ NotificationController]
-    NS_Controller --> NS_Sync[✉️ NotificationService]
-    NS_Sync --> Send_Mail2[📧 Отправка Email через Gmail SMTP]
-    Send_Mail2 --> Fallback_End([⚠️ Уведомление доставлено через Feign])
-    Fallback_End -.->|HTTP Ответ| HTTP_201
-
-    %% Назначение стилей
-    class Start,HTTP_201 client;
-    class Controller,Producer,Consumer,FeignClient,NS_Controller,NS_Sync,NS_Async core;
-    class CreateRecord,KafkaSend,FutureCheck,FeignCheck,ParseHeader,Send_Mail1,Send_Mail2 action;
-    class SuccessLog,KafkaBroker,Success_End,Fallback_End success;
-    class FallbackTrigger fail;
+    class Start client;
+    class US,NS_Async,NS_Sync core;
+    class Kafka,Return,SMTP1,SMTP2 success;
+    class Feign fail;
 ```
 
 ### 📋 Спецификация контракта взаимодействия
