@@ -85,6 +85,7 @@ graph TD
     %% ==========================================
     Client([💻 Клиент / Браузер])
     Gateway[🔀 Gateway Service<br/>Порт: 8080]
+    Feign[🔗 OpenFeign Client]
 
     subgraph Core ["Ядро системы"]
         Config[⚙️ Config Service<br/>Порт: 8888]
@@ -96,7 +97,7 @@ graph TD
     subgraph Infrastructure ["Базы данных и Очереди"]
         Kafka[🖧 Apache Kafka<br/>Порт: 9092]
         Redis[💾 Redis<br/>Порт: 6379]
-        DB[("(🐘 PostgreSQL<br/>Neon Cloud)")]
+        DB[(🐘 PostgreSQL<br/>Neon Cloud)]
     end
 
     subgraph Observability ["Логирование и Мониторинг"]
@@ -106,44 +107,42 @@ graph TD
     end
 
     %% ==========================================
-    %% ПОТОКИ ДАННЫХ И СВЯЗИ (Линейный порядок для linkStyle)
+    %% ПОТОКИ ДАННЫХ И СВЯЗИ СО СТИЛЯМИ КЛАССОВ
     %% ==========================================
     
-    %% Основные бизнес-потоки и трафик
-    Client --> Gateway
-    Gateway --->|Роутинг| Discovery
-    US --->|Кэш| Redis
-    US --->|Данные| DB
-    US --->|События| Kafka
-    Kafka --->|Вычитывание| NS
+    %% Основные бизнес-потоки и трафик (Happy Path -> зеленый)
+    Client --->|Запрос|:::happy Gateway
+    Gateway --->|Роутинг|:::happy Discovery
+    US --->|Кэш|:::happy Redis
+    US --->|Данные|:::happy DB
+    US --->|События|:::happy Kafka
+    Kafka --->|Вычитывание|:::happy NS
+    Discovery --->|Роутинг|:::happy US
+    Discovery --->|Роутинг|:::happy NS
     
-    %% Аварийный синхронный Fallback
-    US -.->|5. Fallback HTTP| Feign[🔗 OpenFeign Client]
-    Feign -.->|6. Блокирующий POST| NS
+    %% Аварийный синхронный Fallback (Путь ошибок -> красный)
+    US -.->|5. Fallback HTTP|:::fallback Feign
+    Feign -.->|6. Блокирующий POST|:::fallback NS
 
-    %% Конфигурация через Config Server
-    Config -.->|Свойства| Gateway
-    Config -.->|Свойства| US
-    Config -.->|Свойства| NS
+    %% Конфигурация через Config Server (Настройки -> желтый пунктир)
+    Config -.->|Свойства|:::configStyle Gateway
+    Config -.->|Свойства|:::configStyle US
+    Config -.->|Свойства|:::configStyle NS
 
-    %% Регистрация в Service Discovery Eureka
-    Gateway --->|Регистрация| Discovery
-    US --->|Регистрация| Discovery
-    NS --->|Регистрация| Discovery
+    %% Регистрация в Service Discovery Eureka (Дискавери -> желтый)
+    Gateway --->|Регистрация|:::eurekaStyle Discovery
+    US --->|Регистрация|:::eurekaStyle Discovery
+    NS --->|Регистрация|:::eurekaStyle Discovery
 
-    %% Агрегация логов и мониторинг
-    Gateway -->|Логи| Volume
-    US -->|Логи| Volume
-    NS -->|Логи| Volume
-    Volume --> Loki
-    Loki --> Grafana
-    
-    %% Роутинг далее
-    Discovery --->|Роутинг| US
-    Discovery --->|Роутинг| NS
+    %% Агрегация логов и мониторинг (Логи -> зеленый тонкий)
+    Gateway -->|Логи|:::logStyle Volume
+    US -->|Логи|:::logStyle Volume
+    NS -->|Логи|:::logStyle Volume
+    Volume -->|Сбор логов|:::logStyle Loki
+    Loki -->|Метрики|:::logStyle Grafana
 
     %% ==========================================
-    %% СТИЛИЗАЦИЯ ИЗ FILE2 (Пастельная палитра)
+    %% СТИЛИЗАЦИЯ УЗЛОВ И КОНТЕЙНЕРОВ
     %% ==========================================
     classDef client fill:#ececff,stroke:#9370db,stroke-width:2px;
     classDef core fill:#e1ffff,stroke:#20b2aa,stroke-width:2px;
@@ -153,36 +152,21 @@ graph TD
     
     classDef subContainer fill:#FAFAFA,stroke:#D4D4D8,stroke-width:1px,stroke-dasharray: 5 5;
 
-    %% Соответствие классов из file2 компонентам file1
     class Client client;
     class Gateway,Config,Discovery,US,NS core;
     class Kafka,Redis,DB,Volume,Loki,Grafana warn;
     class Feign fail;
 
-    %% Стилизация рамок подграфов
     class Core,Infrastructure,Observability warn;
 
     %% ==========================================
-    %% ПОДСВЕТКА СТРЕЛОК (Синхронизировано с file2)
+    %% ОПРЕДЕЛЕНИЕ СТИЛЕЙ ДЛЯ ЛИНИЙ
     %% ==========================================
-    
-    %% Индексы 0-5: Штатный бизнес-трафик и данные (Зеленый Happy Path)
-    linkStyle 0,1,2,3,4,5 stroke:#28a745,stroke-width:2.5px;
-    
-    %% Индексы 6-7: Аварийный Fallback путь через Feign (Красный цвет ошибок)
-    linkStyle 6,7 stroke:#dc3545,stroke-width:2.5px;
-    
-    %% Индексы 8-11: Конфигурации Config Server (Желтый предупреждающий пунктир)
-    linkStyle 8,9,10,11 stroke:#ffc107,stroke-width:1.5px,stroke-dasharray: 4 4;
-    
-    %% Индексы 12-14: Регистрация в дискавери Eureka (Желтый предупреждающий сплошной)
-    linkStyle 12,13,14 stroke:#ffc107,stroke-width:1.5px;
-    
-    %% Индексы 15-19: Сбор логов и вывод на мониторинг (Зеленый сплошной)
-    linkStyle 15,16,17,18,19 stroke:#28a745,stroke-width:2px;
-    
-    %% Индексы 20,21: Штатный бизнес-трафик и данные (Зеленый Happy Path)
-    linkStyle 20,21 stroke:#28a745,stroke-width:2.5px;
+    classDef happy stroke:#28a745,stroke-width:2.5px;
+    classDef fallback stroke:#dc3545,stroke-width:2.5px;
+    classDef configStyle stroke:#ffc107,stroke-width:1.5px,stroke-dasharray: 4 4;
+    classDef eurekaStyle stroke:#ffc107,stroke-width:1.5px;
+    classDef logStyle stroke:#28a745,stroke-width:2px;
 ```
 
 ## 📨 Схема циркуляции событий (Event-Driven Flow)
