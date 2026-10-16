@@ -107,39 +107,39 @@ graph TD
     end
 
     %% ==========================================
-    %% ПОТОКИ ДАННЫХ И СВЯЗИ СО СТИЛЯМИ КЛАССОВ
+    %% ПОТОКИ ДАННЫХ И СВЯЗИ (Линейный порядок для linkStyle)
     %% ==========================================
     
-    %% Основные бизнес-потоки и трафик (Happy Path -> зеленый)
-    Client --->|Запрос|:::happy Gateway
-    Gateway --->|Роутинг|:::happy Discovery
-    US --->|Кэш|:::happy Redis
-    US --->|Данные|:::happy DB
-    US --->|События|:::happy Kafka
-    Kafka --->|Вычитывание|:::happy NS
-    Discovery --->|Роутинг|:::happy US
-    Discovery --->|Роутинг|:::happy NS
+    %% Группа 0 (индексы 0-7): Штатный бизнес-трафик (Happy Path)
+    Client --->|Запрос| Gateway
+    Gateway --->|Роутинг| Discovery
+    US --->|Кэш| Redis
+    US --->|Данные| DB
+    US --->|События| Kafka
+    Kafka --->|Вычитывание| NS
+    Discovery --->|Роутинг| US
+    Discovery --->|Роутинг| NS
     
-    %% Аварийный синхронный Fallback (Путь ошибок -> красный)
-    US -.->|5. Fallback HTTP|:::fallback Feign
-    Feign -.->|6. Блокирующий POST|:::fallback NS
+    %% Группа 1 (индексы 8-9): Аварийный синхронный Fallback
+    US -.->|5. Fallback HTTP| Feign
+    Feign -.->|6. Блокирующий POST| NS
 
-    %% Конфигурация через Config Server (Настройки -> желтый пунктир)
-    Config -.->|Свойства|:::configStyle Gateway
-    Config -.->|Свойства|:::configStyle US
-    Config -.->|Свойства|:::configStyle NS
+    %% Группа 2 (индексы 10-12): Конфигурация через Config Server
+    Config -.->|Свойства| Gateway
+    Config -.->|Свойства| US
+    Config -.->|Свойства| NS
 
-    %% Регистрация в Service Discovery Eureka (Дискавери -> желтый)
-    Gateway --->|Регистрация|:::eurekaStyle Discovery
-    US --->|Регистрация|:::eurekaStyle Discovery
-    NS --->|Регистрация|:::eurekaStyle Discovery
+    %% Группа 3 (индексы 13-15): Регистрация в Eureka
+    Gateway --->|Регистрация| Discovery
+    US --->|Регистрация| Discovery
+    NS --->|Регистрация| Discovery
 
-    %% Агрегация логов и мониторинг (Логи -> зеленый тонкий)
-    Gateway -->|Логи|:::logStyle Volume
-    US -->|Логи|:::logStyle Volume
-    NS -->|Логи|:::logStyle Volume
-    Volume -->|Сбор логов|:::logStyle Loki
-    Loki -->|Метрики|:::logStyle Grafana
+    %% Группа 4 (индексы 16-20): Сбор логов и мониторинг
+    Gateway -->|Логи| Volume
+    US -->|Логи| Volume
+    NS -->|Логи| Volume
+    Volume -->|Сбор логов| Loki
+    Loki -->|Метрики| Grafana
 
     %% ==========================================
     %% СТИЛИЗАЦИЯ УЗЛОВ И КОНТЕЙНЕРОВ
@@ -160,13 +160,24 @@ graph TD
     class Core,Infrastructure,Observability warn;
 
     %% ==========================================
-    %% ОПРЕДЕЛЕНИЕ СТИЛЕЙ ДЛЯ ЛИНИЙ
+    %% ПОДСВЕТКА СТРЕЛОК (Безопасный linkStyle)
     %% ==========================================
-    classDef happy stroke:#28a745,stroke-width:2.5px;
-    classDef fallback stroke:#dc3545,stroke-width:2.5px;
-    classDef configStyle stroke:#ffc107,stroke-width:1.5px,stroke-dasharray: 4 4;
-    classDef eurekaStyle stroke:#ffc107,stroke-width:1.5px;
-    classDef logStyle stroke:#28a745,stroke-width:2px;
+    
+    %% Индексы 0-7: Штатный бизнес-трафик (Зеленый Happy Path)
+    linkStyle 0,1,2,3,4,5,6,7 stroke:#28a745,stroke-width:2.5px;
+    
+    %% Индексы 8-9: Аварийный Fallback путь через Feign (Красный цвет)
+    linkStyle 8,9 stroke:#dc3545,stroke-width:2.5px;
+    
+    %% Индексы 10-12: Конфигурации Config Server (Желтый пунктир)
+    linkStyle 10,11,12 stroke:#ffc107,stroke-width:1.5px,stroke-dasharray: 4 4;
+    
+    %% Индексы 13-15: Регистрация в дискавери Eureka (Желтый сплошной)
+    linkStyle 13,14,15 stroke:#ffc107,stroke-width:1.5px;
+    
+    %% Индексы 16-20: Сбор логов и вывод на мониторинг (Зеленый тонкий)
+    linkStyle 16,17,18,19,20 stroke:#28a745,stroke-width:2px;
+
 ```
 
 ## 📨 Схема циркуляции событий (Event-Driven Flow)
