@@ -127,22 +127,34 @@
 
 ```mermaid
 flowchart TD
-    %% Основной поток управления
-    Start([💻 Запрос клиента]) --> US[👥 user-service]
-    US --> Check{Статус Kafka?}
+    %% Основной поток управления (Бизнес-логика)
+    Start([💻 Запрос клиента]) --> Ctrl[🎛️ UserController]
+    Ctrl -->|1. Вызов бизнес-логики| Service[👥 UserServiceImpl]
     
-    %% Штатный режим (Асинхронно для клиента)
-    Check -->|🟢 Доступна| Kafka[🪵 Топик: email-dto]
-    Kafka --> NS_Async[✉️ notification-service <br/> Слушатель: KafkaListener]
-    NS_Async -->|Синхронный вызов SMTP| SMTP1(📧 Отправка Email)
+    %% Транзакционная работа с PostgreSQL и внутренними событиями
+    subgraph Spring_Transaction [@Transactional Сессия]
+        Service -->|2. Сохранение/Удаление| DB[(🐘 PostgreSQL)]
+        Service -->|3. Публикация| Event[🌱 UserCreatedDeletedEvent]
+    end
     
-    Kafka -.->|Быстрый ответ| Return([📱 HTTP 201 Success])
+    %% Момент отправки ответа клиенту
+    DB --->|4. Успешный Commit| Ctrl
+    Ctrl --->|5. Моментальный ответ клиенту| Return([📱 HTTP 201 / 200 Success])
 
-    %% Аварийный режим (Полностью синхронный Fallback-путь)
-    Check -->|🔴 Сбой / Таймаут 7с| Feign[🔗 OpenFeign Клиент]
+    %% Перехват события и отправка во внешнюю среду
+    Event ---> Listener[📦 EventListener / Producer]
+    Listener ---> Check{Доступен брокер?}
+    
+    %% Путь А: Кафка доступна (Штатный режим)
+    Check -->|🟢 Да| Kafka[🪵 Топик: email-dto]
+    Kafka --> NS_Async[✉️ notification-service <br/> @KafkaListener]
+    NS_Async -->|Синхронный SMTP| SMTP1(📧 Gmail SMTP)
+
+    %% Путь Б: Кафка упала (Аварийный деградационный Fallback)
+    Check -->|🔴 Нет / Таймаут 7с| Eureka[🔍 discovery-service <br/> Eureka Server]
+    Eureka -->|Разрешение хоста| Feign[🔗 OpenFeign Клиент]
     Feign -->|Блокирующий POST HTTP| NS_Sync[✉️ notification-service]
-    NS_Sync -->|Блокирующий вызов SMTP| SMTP2(📧 Отправка Email)
-    SMTP2 --> Return
+    NS_Sync -->|Синхронный SMTP| SMTP2(📧 Gmail SMTP)
 
     %% Стилизация (Безопасно для парсера GitHub)
     classDef client fill:#ececff,stroke:#9370db,stroke-width:2px;
@@ -151,9 +163,9 @@ flowchart TD
     classDef fail fill:#f8d7da,stroke:#dc3545,stroke-width:2px;
 
     class Start client;
-    class US,NS_Async,NS_Sync core;
-    class Kafka,Return,SMTP1,SMTP2 success;
-    class Feign fail;
+    class Ctrl,Service,Listener,NS_Async,NS_Sync,Eureka core;
+    class DB,Event,Kafka,Return,SMTP1,SMTP2 success;
+    class Feign,Check fill:#fff3cd,stroke:#ffc107,stroke-width:2px;
 ```
 
 ### 📋 Спецификация контракта взаимодействия
