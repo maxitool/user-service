@@ -101,63 +101,77 @@ graph TD
     end
 
     %% ==========================================
-    %% ПОТОКИ ДАННЫХ И СВЯЗИ (Строгий порядок для linkStyle)
+    %% ПОТОКИ ДАННЫХ И СВЯЗИ (Строгий порядок из file1)
     %% ==========================================
     
-    %% Основные бизнес-потоки и трафик (Индексы 0 - 6)
-    Client --> Gateway
-    Gateway -->|1. Роутинг| US
-    US --->|2. Кэш| Redis
-    US --->|3. Данные| DB
-    US --->|4. События| Kafka
-    Kafka --->|5. Вычитывание| NS
-    US -.->|5. Fallback HTTP| Feign[🔗 OpenFeign Client]
-    Feign --->|6. Блокирующий POST| NS
-
-    %% Конфигурация через Config Server (Индексы 7 - 10)
-    Config -.->|Свойства| Discovery
-    Config -.->|Свойства| Gateway
-    Config -.->|Свойства| US
-    Config -.->|Свойства| NS
-
-    %% Регистрация в Service Discovery Eureka (Индексы 11 - 13)
-    Gateway --->|Регистрация| Discovery
-    US --->|Регистрация| Discovery
-    NS --->|Регистрация| Discovery
-
-    %% Агрегация логов и мониторинг (Индексы 14 - 18)
-    Gateway -->|Логи| Volume
-    US -->|Логи| Volume
-    NS -->|Логи| Volume
-    Volume --> Loki
-    Loki --> Grafana
-
-    %% ==========================================
-    %% ЯРКАЯ КОНТРАСТНАЯ СТИЛИЗАЦИЯ (Концепция 3 цветов)
-    %% ==========================================
-    classDef appStyle fill:#0284C7,stroke:#0369A1,stroke-width:2px,color:#FFFFFF,font-weight:bold;
-    classDef dataStyle fill:#F59E0B,stroke:#D97706,stroke-width:2px,color:#FFFFFF,font-weight:bold;
-    classDef logsStyle fill:#10B981,stroke:#047857,stroke-width:2px,color:#FFFFFF,font-weight:bold;
+    %% Основные бизнес-потоки и трафик (Индексы 0 - 5)
+    Client --> Gateway                             %% Индекс 0
+    Gateway -->|1. Роутинг| US                    %% Индекс 1
+    US --->|2. Кэш| Redis                          %% Индекс 2
+    US --->|3. Данные| DB                           %% Индекс 3
+    US --->|4. События| Kafka                      %% Индекс 4
+    Kafka --->|5. Вычитывание| NS                  %% Индекс 5
     
-    classDef subContainer fill:#F8FAFC,stroke:#94A3B8,stroke-width:2px,stroke-dasharray: 4 4;
+    %% Аварийный синхронный Fallback (Индексы 6 - 7)
+    US -.->|5. Fallback HTTP| Feign[🔗 OpenFeign Client] %% Индекс 6
+    Feign --->|6. Блокирующий POST| NS             %% Индекс 7
 
-    %% Применение насыщенных цветов к компонентам
-    class Client,Gateway,Config,Discovery,US,NS,Feign appStyle;
-    class Kafka,Redis,DB dataStyle;
-    class Volume,Loki,Grafana logsStyle;
+    %% Конфигурация через Config Server (Индексы 8 - 11)
+    Config -.->|Свойства| Discovery                %% Индекс 8
+    Config -.->|Свойства| Gateway                  %% Индекс 9
+    Config -.->|Свойства| US                       %% Индекс 10
+    Config -.->|Свойства| NS                       %% Индекс 11
 
-    %% Применение стилей к рамкам подграфов
+    %% Регистрация в Service Discovery Eureka (Индексы 12 - 14)
+    Gateway --->|Регистрация| Discovery            %% Индекс 12
+    US --->|Регистрация| Discovery                 %% Индекс 13
+    NS --->|Регистрация| Discovery                 %% Индекс 14
+
+    %% Агрегация логов и мониторинг (Индексы 15 - 19)
+    Gateway -->|Логи| Volume                       %% Индекс 15
+    US -->|Логи| Volume                            %% Индекс 16
+    NS -->|Логи| Volume                            %% Индекс 17
+    Volume --> Loki                                %% Индекс 18
+    Loki --> Grafana                               %% Индекс 19
+
+    %% ==========================================
+    %% СТИЛИЗАЦИЯ ИЗ FILE2 (Пастельная палитра)
+    %% ==========================================
+    classDef client fill:#ececff,stroke:#9370db,stroke-width:2px;
+    classDef core fill:#e1ffff,stroke:#20b2aa,stroke-width:2px;
+    classDef success fill:#d4edda,stroke:#28a745,stroke-width:2px;
+    classDef fail fill:#f8d7da,stroke:#dc3545,stroke-width:2px;
+    classDef warn fill:#fff3cd,stroke:#ffc107,stroke-width:2px;
+    
+    classDef subContainer fill:#FAFAFA,stroke:#D4D4D8,stroke-width:1px,stroke-dasharray: 5 5;
+
+    %% Соответствие классов из file2 компонентам file1
+    class Client client;
+    class Gateway,Config,Discovery,US,NS core;
+    class Kafka,Redis,DB,Volume,Loki,Grafana success;
+    class Feign fail;
+
+    %% Стилизация рамок подграфов
     class Core,Infrastructure,Observability subContainer;
 
-    %% Точечное управление дизайном стрелок (linkStyle)
-    %% Индексы 0-6: Активный бизнес-трафик и данные (Толстый неоновый синий)
-    linkStyle 0,1,2,3,4,5,6 stroke:#2563EB,stroke-width:2.5px;
-    %% Индексы 7-10: Служебная раздача свойств Config (Контрастный фиолетовый пунктир)
-    linkStyle 7,8,9,10 stroke:#7C3AED,stroke-width:1.5px,stroke-dasharray: 4 4;
-    %% Индексы 11-13: Инфраструктурный Heartbeat в Eureka (Фиолетовый сплошной)
-    linkStyle 11,12,13 stroke:#7C3AED,stroke-width:1.5px;
-    %% Индексы 14-18: Сбор логов и графики мониторинга (Магистральный зеленый)
-    linkStyle 14,15,16,17,18 stroke:#10B981,stroke-width:2px;
+    %% ==========================================
+    %% ПОДСВЕТКА СТРЕЛОК (Синхронизировано с file2)
+    %% ==========================================
+    
+    %% Индексы 0-5: Штатный бизнес-трафик и данные (Зеленый Happy Path)
+    linkStyle 0,1,2,3,4,5 stroke:#28a745,stroke-width:2.5px;
+    
+    %% Индексы 6-7: Аварийный Fallback путь через Feign (Красный цвет ошибок)
+    linkStyle 6,7 stroke:#dc3545,stroke-width:2.5px;
+    
+    %% Индексы 8-11: Конфигурации Config Server (Желтый предупреждающий пунктир)
+    linkStyle 8,9,10,11 stroke:#ffc107,stroke-width:1.5px,stroke-dasharray: 4 4;
+    
+    %% Индексы 12-14: Регистрация в дискавери Eureka (Желтый предупреждающий сплошной)
+    linkStyle 12,13,14 stroke:#ffc107,stroke-width:1.5px;
+    
+    %% Индексы 15-19: Сбор логов и вывод на мониторинг (Зеленый сплошной)
+    linkStyle 15,16,17,18,19 stroke:#28a745,stroke-width:2px;
 ```
 
 ## 📨 Схема циркуляции событий (Event-Driven Flow)
@@ -165,106 +179,49 @@ graph TD
 Взаимодействие между `user-service` и `notification-service` спроектировано по событийно-ориентированной модели (EDA). Архитектура исключает жесткую связь: в случае недоступности брокера Kafka, система бесшовно деградирует до синхронных REST-вызовов через **OpenFeign** и **Eureka Server**, гарантируя доставку транзакционных уведомлений.
 
 ### 🔄 Потоки обработки событий и Резервные пути
-
 ```mermaid
-graph TD
-    %% ==========================================
-    %% ОБЪЯВЛЕНИЕ КОМПОНЕНТОВ СИСТЕМЫ
-    %% ==========================================
-    Client([💻 Клиент / Браузер])
-    Gateway[🔀 Gateway Service<br/>Порт: 8080]
-
-    subgraph Core ["Ядро системы"]
-        Config[⚙️ Config Service<br/>Порт: 8888]
-        Discovery["🔍 Discovery Server<br/>Eureka - Порт: 8761"]
-        US[👥 User Service<br/>Порты: 8086, 8082]
-        NS[✉️ Notification Service<br/>Порты: 8083, 8084]
-        Feign[🔗 OpenFeign Client]
+flowchart TD
+    %% Основной поток управления (Бизнес-логика)
+    Start([💻 Запрос клиента]) --> Ctrl[🎛️ UserController]
+    Ctrl -->|1. Вызов бизнес-логики| Service[👥 UserServiceImpl]
+    
+    %% Транзакционная работа с PostgreSQL и внутренними событиями (Исправленный синтаксис)
+    subgraph Spring_Transaction ["Transactional Сессия"]
+        Service -->|2. Сохранение/Удаление| DB[(🐘 PostgreSQL)]
+        Service -->|3. Публикация| Event[🌱 UserCreatedDeletedEvent]
     end
-
-    subgraph Infrastructure ["Базы данных и Очереди"]
-        Kafka[🖧 Apache Kafka<br/>Порт: 9092]
-        Redis[💾 Redis<br/>Порт: 6379]
-        DB[("(🐘 PostgreSQL<br/>Neon Cloud)")]
-    end
-
-    subgraph Observability ["Логирование и Мониторинг"]
-        Volume[(📁 Shared Logs Volume)]
-        Loki[🔥 Grafana Loki<br/>Порт: 3100]
-        Grafana[📈 Grafana UI<br/>Порт: 3000]
-    end
-
-    %% ==========================================
-    %% ПОТОКИ ДАННЫХ И СВЯЗИ (Линейный порядок для linkStyle)
-    %% ==========================================
     
-    %% Основные бизнес-потоки и трафик
-    Client --> Gateway
-    Gateway -->|1. Роутинг| US
-    US --->|2. Кэш| Redis
-    US --->|3. Данные| DB
-    US --->|4. События| Kafka
-    Kafka --->|5. Вычитывание| NS
+    %% Момент отправки ответа клиенту
+    DB --->|4. Успешный Commit| Ctrl
+    Ctrl --->|5. Моментальный ответ клиенту| Return([✔️ HTTP 201 / 200 Success])
+
+    %% Перехват события и отправка во внешнюю среду
+    Event ---> Listener[📦 EventListener / Producer]
+    Listener ---> Check{Доступен брокер?}
     
-    %% Аварийный синхронный Fallback
-    US -.->|5. Fallback HTTP| Feign
-    Feign --->|6. Блокирующий POST| NS
+    %% Путь А: Кафка доступна (Штатный режим)
+    Check -->|🟢 Да| Kafka[📌 Топик: email-dto]
+    Kafka --> NS_Async[✉️ notification-service <br/> Слушатель: KafkaListener]
+    NS_Async -->|Синхронный SMTP| SMTP1(📧 Gmail SMTP)
 
-    %% Конфигурация через Config Server
-    Config -.->|Свойства| Discovery
-    Config -.->|Свойства| Gateway
-    Config -.->|Свойства| US
-    Config -.->|Свойства| NS
+    %% Путь Б: Кафка упала (Аварийный деградационный Fallback)
+    Check -->|🔴 Нет / Таймаут 7с| Eureka[🔍 discovery-service <br/> Eureka Server]
+    Eureka -->|Разрешение хоста| Feign[🔗 OpenFeign Клиент]
+    Feign -->|Блокирующий POST HTTP| NS_Sync[✉️ notification-service]
+    NS_Sync -->|Синхронный SMTP| SMTP2(📧 Gmail SMTP)
 
-    %% Регистрация в Service Discovery Eureka
-    Gateway --->|Регистрация| Discovery
-    US --->|Регистрация| Discovery
-    NS --->|Регистрация| Discovery
+    %% Стилизация (Безопасно для парсера GitHub)
+    classDef client fill:#ececff,stroke:#9370db,stroke-width:2px;
+    classDef core fill:#e1ffff,stroke:#20b2aa,stroke-width:2px;
+    classDef success fill:#d4edda,stroke:#28a745,stroke-width:2px;
+    classDef fail fill:#f8d7da,stroke:#dc3545,stroke-width:2px;
+    classDef warn fill:#fff3cd,stroke:#ffc107,stroke-width:2px;
 
-    %% Агрегация логов и мониторинг
-    Gateway -->|Логи| Volume
-    US -->|Логи| Volume
-    NS -->|Логи| Volume
-    Volume --> Loki
-    Loki --> Grafana
-
-    %% ==========================================
-    %% ЯРКАЯ КОНТРАСТНАЯ СТИЛИЗАЦИЯ (Концепция 3 цветов)
-    %% ==========================================
-    classDef appStyle fill:#0284C7,stroke:#0369A1,stroke-width:2px,color:#FFFFFF,font-weight:bold;
-    classDef dataStyle fill:#F59E0B,stroke:#D97706,stroke-width:2px,color:#FFFFFF,font-weight:bold;
-    classDef logsStyle fill:#10B981,stroke:#047857,stroke-width:2px,color:#FFFFFF,font-weight:bold;
-    classDef subContainer fill:#F8FAFC,stroke:#94A3B8,stroke-width:2px,stroke-dasharray: 4 4;
-
-    %% Применение насыщенных цветов к компонентам
-    class Client,Gateway,Config,Discovery,US,NS,Feign appStyle;
-    class Kafka,Redis,DB dataStyle;
-    class Volume,Loki,Grafana logsStyle;
-
-    %% Применение стилей к рамкам подграфов
-    class Core,Infrastructure,Observability subContainer;
-
-    %% ==========================================
-    %% СИНХРОНИЗИРОВАННАЯ ПОДСВЕТКА СТРЕЛОК
-    %% ==========================================
-    
-    %% Индексы 0-5: Штатный бизнес-трафик, запросы и данные (Зеленый Happy Path)
-    linkStyle 0,1,2,3,4,5 stroke:#16A34A,stroke-width:2.5px;
-    
-    %% Индексы 6-7: Аварийный Fallback путь деградации (Яркий красный)
-    linkStyle 6,7 stroke:#EF4444,stroke-width:2.5px;
-    
-    %% Индексы 8-11: Служебная раздача свойств Config (Предупреждающий оранжевый пунктир)
-    linkStyle 8,9,10,11 stroke:#D97706,stroke-width:1.5px,stroke-dasharray: 4 4;
-    
-    %% Индексы 12-14: Инфраструктурный Heartbeat в Eureka (Предупреждающий оранжевый сплошной)
-    linkStyle 12,13,14 stroke:#D97706,stroke-width:1.5px;
-    
-    %% Индексы 15-19: Сбор логов и графики мониторинга Loki/Grafana (Нейтральный графитовый)
-    linkStyle 15,16,17,18,19 stroke:#4B5563,stroke-width:2px;
+    class Start client;
+    class Ctrl,Service,Listener,NS_Async,NS_Sync,Eureka core;
+    class DB,Event,Kafka,Return,SMTP1,SMTP2 success;
+    class Feign,Check warn;
 ```
-
-
 
 ### 📋 Спецификация контракта взаимодействия
 
