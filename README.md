@@ -100,71 +100,56 @@ graph TD
         Loki[🔥 Grafana Loki<br/>Порт: 3100] --> Grafana[📈 Grafana UI<br/>Порт: 3000]
     end
 
-    %% ==========================================
-    %% ПОТОКИ ДАННЫХ И СВЯЗИ (Важен порядок для linkStyle)
-    %% ==========================================
-    
-    %% Основные бизнес-потоки (Трафик)
-    Client --> Gateway                       %% Индекс 0
-    Gateway -->|Роутинг API| US              %% Индекс 1
-    Gateway -->|Роутинг API| NS              %% Индекс 2
-    US --->|Кэш| Redis                       %% Индекс 3
-    US --->|Данные| DB                        %% Индекс 4
-    US --->|События| Kafka                   %% Индекс 5
-    Kafka --->|События| NS                   %% Индекс 6
+    %% Бизнес-трафик (Индексы 0-5)
+    Gateway -->|1. Роутинг| US
+    US --->|2. Кэш| Redis
+    US --->|3. Данные| DB
+    US --->|4. События| Kafka
+    Kafka --->|5. Вычитывание| NS
+    US -.->|5. Fallback HTTP| Feign[🔗 OpenFeign Client] --> NS
 
-    %% Служебные связи: Раздача конфигураций (Config)
-    Config -.->|Свойства| Discovery          %% Индекс 7
-    Config -.->|Свойства| Gateway            %% Индекс 8
-    Config -.->|Свойства| US                 %% Индекс 9
-    Config -.->|Свойства| NS                 %% Индекс 10
-    
-    %% Служебные связи: Регистрация в Service Discovery (Eureka)
-    Gateway --->|Регистрация| Discovery      %% Индекс 11
-    US --->|Регистрация| Discovery           %% Индекс 12
-    NS --->|Регистрация| Discovery           %% Индекс 13
-    
-    %% Служебные связи: Агрегация логов (Shared Volume)
-    Gateway -->|Запись common.log| Volume    %% Индекс 14
-    US -->|Запись common.log| Volume         %% Индекс 15
-    NS -->|Запись common.log| Volume         %% Индекс 16
-    Volume --> Loki                          %% Индекс 17
-    Loki --> Grafana                         %% Индекс 18
+    %% Конфигурация через Config Server (Индексы 6-9)
+    Config -.->|Свойства| Discovery
+    Config -.->|Свойства| Gateway
+    Config -.->|Свойства| US
+    Config -.->|Свойства| NS
 
-    %% ==========================================
-    %% ДЕКЛАРАЦИЯ СТИЛЕЙ UI
-    %% ==========================================
-    classDef clientStyle fill:#F3E8FF,stroke:#9333EA,stroke-width:2px;
-    classDef gatewayStyle fill:#FFE4E6,stroke:#E11D48,stroke-width:2px,font-weight:bold;
-    classDef coreStyle fill:#E0F2FE,stroke:#0284C7,stroke-width:2px;
-    classDef infraStyle fill:#FEF3C7,stroke:#D97706,stroke-width:2px;
-    classDef monitorStyle fill:#DCFCE7,stroke:#16A34A,stroke-width:2px;
-    
-    classDef subCore fill:#FAFAFA,stroke:#CBD5E1,stroke-width:1px,stroke-dasharray: 3 3;
-    classDef subInfra fill:#FAFAFA,stroke:#CBD5E1,stroke-width:1px,stroke-dasharray: 3 3;
-    classDef subMonitor fill:#FAFAFA,stroke:#CBD5E1,stroke-width:1px,stroke-dasharray: 3 3;
+    %% Регистрация в Service Discovery (Индексы 10-12)
+    Gateway --->|Регистрация| Discovery
+    US --->|Регистрация| Discovery
+    NS --->|Регистрация| Discovery
 
-    %% Применение классов к узлам
-    class Client clientStyle;
-    class Gateway gatewayStyle;
-    class Config,Discovery,US,NS coreStyle;
-    class Kafka,Redis,DB infraStyle;
-    class Volume,Loki,Grafana monitorStyle;
-    
-    %% Применение классов к подграфам
-    class Core subCore;
-    class Infrastructure subInfra;
-    class Observability subMonitor;
+    %% Агрегация логов в Shared Volume (Индексы 13-16)
+    Gateway -->|Логи| Volume
+    US -->|Логи| Volume
+    NS -->|Логи| Volume
+    Volume --> Loki
 
-    %% Стилизация стрелок (Ребер графа) строго по индексам
-    %% Индексы 0-6: Основной бизнес-трафик, запросы и данные (Выделенный синий)
-    linkStyle 0,1,2,3,4,5,6 stroke:#0284C7,stroke-width:2px;
-    %% Индексы 7-10: Раздача конфигураций через Config Server (Пунктирный серый)
-    linkStyle 7,8,9,10 stroke:#94A3B8,stroke-width:1px,stroke-dasharray: 4 4;
-    %% Индексы 11-13: Регистрация инстансов в Service Discovery Eureka (Приглушенный индиго)
-    linkStyle 11,12,13 stroke:#6366F1,stroke-width:1.5px;
-    %% Индексы 14-18: Агрегация логов и вывод мониторинга (Мягкий зеленый)
-    linkStyle 14,15,16,17,18 stroke:#16A34A,stroke-width:1.5px;
+    %% Современные пастельные классы стилей компонентов
+    classDef client fill:#F3E8FF,stroke:#9333EA,stroke-width:2px;
+    classDef gateway fill:#FFE4E1,stroke:#CD5C5C,stroke-width:2px,font-weight:bold;
+    classDef core fill:#E0F2FE,stroke:#0284C7,stroke-width:2px;
+    classDef infra fill:#FEF3C7,stroke:#D97706,stroke-width:2px;
+    classDef monitor fill:#DCFCE7,stroke:#16A34A,stroke-width:2px;
+
+    %% Назначение стилей элементам
+    class Client client;
+    class Gateway gateway;
+    class Config,Discovery,US,NS core;
+    class Kafka,Redis,DB infra;
+    class Volume,Loki,Grafana monitor;
+
+    %% Кастомная стилизация контейнеров
+    style Core fill:#FAFAFA,stroke:#E4E4E7,stroke-width:2px,stroke-dasharray: 4 4,rx:8,ry:8;
+    style Infrastructure fill:#FAFAFA,stroke:#E4E4E7,stroke-width:2px,stroke-dasharray: 4 4,rx:8,ry:8;
+    style Observability fill:#FAFAFA,stroke:#E4E4E7,stroke-width:2px,stroke-dasharray: 4 4,rx:8,ry:8;
+
+    %% Точечное управление дизайном стрелок (linkStyle)
+    linkStyle 0,1,2,3,4,5 stroke:#4B5563,stroke-width:2px;
+    linkStyle 6,7 stroke:#EF4444,stroke-width:1.5px,stroke-dasharray: 3 3;
+    linkStyle 8,9,10,11 stroke:#9CA3AF,stroke-width:1.5px,stroke-dasharray: 5 5;
+    linkStyle 12,13,14 stroke:#0284C7,stroke-width:2px;
+    linkStyle 15,16,17,18 stroke:#EA580C,stroke-width:2px;
 ```
 
 ## 📨 Схема циркуляции событий (Event-Driven Flow)
