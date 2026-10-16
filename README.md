@@ -167,8 +167,10 @@ graph TD
 ### 🔄 Потоки обработки событий и Резервные пути
 ```mermaid
 graph TD
-    %% Компоненты системы
-    Client([💻 Клиент / Браузер]) --> Gateway[🔀 Gateway Service<br/>Порт: 8080]
+    %% ==========================================
+    %% ОБЪЯВЛЕНИЕ КОМПОНЕНТОВ СИСТЕМЫ
+    %% ==========================================
+    Client([💻 Клиент / Браузер])
 
     subgraph Core ["Ядро системы"]
         Config[⚙️ Config Service<br/>Порт: 8888]
@@ -186,42 +188,43 @@ graph TD
 
     subgraph Observability ["Логирование и Мониторинг"]
         Volume[(📁 Shared Logs Volume)]
-        Loki[🔥 Grafana Loki<br/>Порт: 3100] --> Grafana[📈 Grafana UI<br/>Порт: 3000]
+        Loki[🔥 Grafana Loki<br/>Порт: 3100]
+        Grafana[📈 Grafana UI<br/>Порт: 3000]
     end
-    
+
     %% ==========================================
     %% ПОТОКИ ДАННЫХ И СВЯЗИ (Порядок строго зафиксирован для linkStyle)
     %% ==========================================
     
-    %% Основные бизнес-потоки и трафик (Индексы 0 - 5)
-    Client --> Gateway
-    Gateway -->|1. Роутинг| US
-    US --->|2. Кэш| Redis
-    US --->|3. Данные| DB
-    US --->|4. События| Kafka
-    Kafka --->|5. Вычитывание| NS
+    %% Основные бизнес-потоки и трафик (Индексы 0 - 6)
+    Client --> Gateway[🔀 Gateway Service<br/>Порт: 8080]  %% Индекс 0
+    Gateway -->|1. Роутинг| US                            %% Индекс 1
+    US --->|2. Кэш| Redis                                  %% Индекс 2
+    US --->|3. Данные| DB                                   %% Индекс 3
+    US --->|4. События| Kafka                                %% Индекс 4
+    Kafka --->|5. Вычитывание| NS                            %% Индекс 5
     
     %% Аварийный синхронный Fallback (Индексы 6 - 7)
-    US -.->|5. Fallback HTTP| Feign
-    Feign --->|6. Блокирующий POST| NS
+    US -.->|5. Fallback HTTP| Feign                         %% Индекс 6
+    Feign --->|6. Блокирующий POST| NS                      %% Индекс 7
 
     %% Конфигурация через Config Server (Индексы 8 - 11)
-    Config -.->|Свойства| Discovery
-    Config -.->|Свойства| Gateway
-    Config -.->|Свойства| US
-    Config -.->|Свойства| NS
+    Config -.->|Свойства| Discovery                         %% Индекс 8
+    Config -.->|Свойства| Gateway                           %% Индекс 9
+    Config -.->|Свойства| US                                %% Индекс 10
+    Config -.->|Свойства| NS                                %% Индекс 11
 
     %% Регистрация в Service Discovery Eureka (Индексы 12 - 14)
-    Gateway --->|Регистрация| Discovery
-    US --->|Регистрация| Discovery
-    NS --->|Регистрация| Discovery
+    Gateway --->|Регистрация| Discovery                     %% Индекс 12
+    US --->|Регистрация| Discovery                          %% Индекс 13
+    NS --->|Регистрация| Discovery                          %% Индекс 14
 
-    %% Агрегация логов и мониторинг (Индексы 15 - 19)
-    Gateway -->|Логи| Volume
-    US -->|Логи| Volume
-    NS -->|Логи| Volume
-    Volume --> Loki
-    Loki --> Grafana
+    %% Агрегация логов и мониторинг (Индексы 15 - 20)
+    Gateway -->|Логи| Volume                                %% Индекс 15
+    US -->|Логи| Volume                                     %% Индекс 16
+    NS -->|Логи| Volume                                     %% Индекс 17
+    Volume --> Loki                                         %% Индекс 18
+    Loki --> Grafana                                        %% Индекс 19
 
     %% ==========================================
     %% ЯРКАЯ КОНТРАСТНАЯ СТИЛИЗАЦИЯ (Концепция 3 цветов)
@@ -229,7 +232,6 @@ graph TD
     classDef appStyle fill:#0284C7,stroke:#0369A1,stroke-width:2px,color:#FFFFFF,font-weight:bold;
     classDef dataStyle fill:#F59E0B,stroke:#D97706,stroke-width:2px,color:#FFFFFF,font-weight:bold;
     classDef logsStyle fill:#10B981,stroke:#047857,stroke-width:2px,color:#FFFFFF,font-weight:bold;
-    
     classDef subContainer fill:#F8FAFC,stroke:#94A3B8,stroke-width:2px,stroke-dasharray: 4 4;
 
     %% Применение насыщенных цветов к компонентам
@@ -241,7 +243,7 @@ graph TD
     class Core,Infrastructure,Observability subContainer;
 
     %% ==========================================
-    %% СИНХРОНИЗИРОВАННАЯ ПОДСВЕТКА СТРЕЛОК (По стилю второй схемы)
+    %% СИНХРОНИЗИРОВАННАЯ ПОДСВЕТКА СТРЕЛОК
     %% ==========================================
     
     %% Индексы 0-5: Штатный бизнес-трафик, запросы и данные (Зеленый Happy Path)
@@ -259,6 +261,7 @@ graph TD
     %% Индексы 15-19: Сбор логов и графики мониторинга Loki/Grafana (Нейтральный графитовый)
     linkStyle 15,16,17,18,19 stroke:#4B5563,stroke-width:2px;
 ```
+
 
 ### 📋 Спецификация контракта взаимодействия
 
