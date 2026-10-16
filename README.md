@@ -154,10 +154,111 @@ graph TD
 
     class Client client;
     class Gateway,Config,Discovery,US,NS core;
-    class Kafka,Redis,DB,Volume,Loki,Grafana warn;
+    class Kafka,Redis,DB,Volume,Loki,Grafana success;
     class Feign fail;
 
     class Core,Infrastructure,Observability warn;
+
+    %% ==========================================
+    %% ПОДСВЕТКА СТРЕЛОК (Безопасный linkStyle)
+    %% ==========================================
+    
+    %% Индексы 0-7: Штатный бизнес-трафик (Зеленый Happy Path)
+    linkStyle 0,1,2,3,4,5,6,7 stroke:#28a745,stroke-width:2.5px;
+    
+    %% Индексы 8-9: Аварийный Fallback путь через Feign (Красный цвет)
+    linkStyle 8,9 stroke:#dc3545,stroke-width:2.5px;
+    
+    %% Индексы 10-12: Конфигурации Config Server (Желтый пунктир)
+    linkStyle 10,11,12 stroke:#ffc107,stroke-width:1.5px,stroke-dasharray: 4 4;
+    
+    %% Индексы 13-15: Регистрация в дискавери Eureka (Желтый сплошной)
+    linkStyle 13,14,15 stroke:#ffc107,stroke-width:1.5px;
+    
+    %% Индексы 16-20: Сбор логов и вывод на мониторинг (Зеленый тонкий)
+    linkStyle 16,17,18,19,20 stroke:#28a745,stroke-width:2px;
+```
+
+```mermaid
+graph LR
+    %% ==========================================
+    %% ОБЪЯВЛЕНИЕ КОМПОНЕНТОВ СИСТЕМЫ
+    %% ==========================================
+    Client([💻 Клиент / Браузер])
+    Gateway[🔀 Gateway Service<br/>Порт: 8080]
+
+    subgraph Core ["Ядро системы"]
+        Config[⚙️ Config Service<br/>Порт: 8888]
+        Discovery["🔍 Discovery Server<br/>Eureka - Порт: 8761"]
+        US[👥 User Service<br/>Порты: 8086, 8082]
+        Feign[🔗 OpenFeign Client]
+        NS[✉️ Notification Service<br/>Порты: 8083, 8084]
+    end
+
+    subgraph Infrastructure ["Базы данных и Очереди"]
+        Kafka[🖧 Apache Kafka<br/>Порт: 9092]
+        Redis[💾 Redis<br/>Порт: 6379]
+        DB[(🐘 PostgreSQL<br/>Neon Cloud)]
+    end
+
+    subgraph Observability ["Логирование и Мониторинг"]
+        Volume[(📁 Shared Logs Volume)]
+        Loki[🔥 Grafana Loki<br/>Порт: 3100]
+        Grafana[📈 Grafana UI<br/>Порт: 3000]
+    end
+
+    %% ==========================================
+    %% ПОТОКИ ДАННЫХ И СВЯЗИ (Линейный порядок для linkStyle)
+    %% ==========================================
+    
+    %% Группа 0 (индексы 0-7): Штатный бизнес-трафик (Happy Path)
+    Client --->|Запрос| Gateway
+    Gateway --->|Роутинг| Discovery
+    US --->|Кэш| Redis
+    US --->|Данные| DB
+    US --->|События| Kafka
+    Kafka --->|Вычитывание| NS
+    Discovery --->|Роутинг| US
+    Discovery --->|Роутинг| NS
+    
+    %% Группа 1 (индексы 8-9): Аварийный синхронный Fallback
+    US -.->|5. Fallback HTTP| Feign
+    Feign -.->|6. Блокирующий POST| NS
+
+    %% Группа 2 (индексы 10-12): Конфигурация через Config Server
+    Config -.->|Свойства| Gateway
+    Config -.->|Свойства| US
+    Config -.->|Свойства| NS
+
+    %% Группа 3 (индексы 13-15): Регистрация в Eureka
+    Gateway --->|Регистрация| Discovery
+    US --->|Регистрация| Discovery
+    NS --->|Регистрация| Discovery
+
+    %% Группа 4 (индексы 16-20): Сбор логов и мониторинг
+    Gateway -->|Логи| Volume
+    US -->|Логи| Volume
+    NS -->|Логи| Volume
+    Volume -->|Сбор логов| Loki
+    Loki -->|Метрики| Grafana
+
+    %% ==========================================
+    %% СТИЛИЗАЦИЯ УЗЛОВ И КОНТЕЙНЕРОВ
+    %% ==========================================
+    classDef client fill:#ececff,stroke:#9370db,stroke-width:2px;
+    classDef core fill:#e1ffff,stroke:#20b2aa,stroke-width:2px;
+    classDef success fill:#d4edda,stroke:#28a745,stroke-width:2px;
+    classDef fail fill:#f8d7da,stroke:#dc3545,stroke-width:2px;
+    classDef warn fill:#fff3cd,stroke:#ffc107,stroke-width:2px;
+    
+    classDef subContainer fill:#FAFAFA,stroke:#D4D4D8,stroke-width:1px,stroke-dasharray: 5 5;
+
+    class Client client;
+    class Gateway,Config,Discovery,US,NS core;
+    class Kafka,Redis,DB,Volume,Loki,Grafana warn;
+    class Feign fail;
+
+    class Core,Infrastructure,Observability subContainer;
 
     %% ==========================================
     %% ПОДСВЕТКА СТРЕЛОК (Безопасный linkStyle)
