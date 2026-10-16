@@ -127,13 +127,13 @@
 
 ```mermaid
 flowchart TD
-    %% Основной поток
+    %% Основной поток управления
     Start([💻 Запрос клиента]) --> US[👥 user-service]
     US --> Check{Статус Kafka?}
     
-    %% Штатный асинхронный режим
+    %% Штатный асинхронный режим (Happy Path)
     Check -->|🟢 Доступна| Kafka[🪵 Топик: email-dto]
-    Kafka -->|@KafkaListener| NS_Async[✉️ notification-service]
+    Kafka --> NS_Async[✉️ notification-service <br/> Слушатель: KafkaListener]
     NS_Async -->|Асинхронно| SMTP1(📧 Отправка Email)
     
     Kafka -.->|Быстрый ответ| Return([📱 HTTP 201 Success])
