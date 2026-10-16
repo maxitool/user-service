@@ -111,18 +111,17 @@ graph TD
     
     %% Основные бизнес-потоки и трафик
     Client --> Gateway
-    Gateway -->|1. Роутинг| US
-    US --->|2. Кэш| Redis
-    US --->|3. Данные| DB
-    US --->|4. События| Kafka
-    Kafka --->|5. Вычитывание| NS
+    Gateway --->|Роутинг| Discovery
+    US --->|Кэш| Redis
+    US --->|Данные| DB
+    US --->|События| Kafka
+    Kafka --->|Вычитывание| NS
     
     %% Аварийный синхронный Fallback
     US -.->|5. Fallback HTTP| Feign[🔗 OpenFeign Client]
-    Feign --->|6. Блокирующий POST| NS
+    Feign -.->|6. Блокирующий POST| NS
 
     %% Конфигурация через Config Server
-    Config -.->|Свойства| Discovery
     Config -.->|Свойства| Gateway
     Config -.->|Свойства| US
     Config -.->|Свойства| NS
@@ -138,6 +137,10 @@ graph TD
     NS -->|Логи| Volume
     Volume --> Loki
     Loki --> Grafana
+    
+    %% Роутинг далее
+    Discovery --->|Роутинг| US
+    Discovery --->|Роутинг| NS
 
     %% ==========================================
     %% СТИЛИЗАЦИЯ ИЗ FILE2 (Пастельная палитра)
@@ -153,11 +156,11 @@ graph TD
     %% Соответствие классов из file2 компонентам file1
     class Client client;
     class Gateway,Config,Discovery,US,NS core;
-    class Kafka,Redis,DB,Volume,Loki,Grafana success;
+    class Kafka,Redis,DB,Volume,Loki,Grafana warn;
     class Feign fail;
 
     %% Стилизация рамок подграфов
-    class Core,Infrastructure,Observability subContainer;
+    class Core,Infrastructure,Observability warn;
 
     %% ==========================================
     %% ПОДСВЕТКА СТРЕЛОК (Синхронизировано с file2)
@@ -177,6 +180,9 @@ graph TD
     
     %% Индексы 15-19: Сбор логов и вывод на мониторинг (Зеленый сплошной)
     linkStyle 15,16,17,18,19 stroke:#28a745,stroke-width:2px;
+    
+    %% Индексы 20,21: Штатный бизнес-трафик и данные (Зеленый Happy Path)
+    linkStyle 20,21 stroke:#28a745,stroke-width:2.5px;
 ```
 
 ## 📨 Схема циркуляции событий (Event-Driven Flow)
