@@ -90,7 +90,7 @@ graph TD
     end
 
     subgraph Infrastructure ["Базы данных и Очереди"]
-        Kafka[🪵 Apache Kafka<br/>Порт: 9092]
+        Kafka[🖧 Apache Kafka<br/>Порт: 9092]
         Redis[💾 Redis<br/>Порт: 6379]
         DB[(🐘 PostgreSQL<br/>Neon Cloud)]
     end
@@ -105,11 +105,11 @@ graph TD
     US --->|Кэш| Redis
     US --->|Данные| DB
     US --->|События| Kafka
-    NS <---|События| Kafka
+    Kafka --->|События| NS
 
     %% Служебные связи (Сжатые и исправленные)
     Config -.->|Свойства| Discovery & Gateway & US & NS
-    Discovery <---|Регистрация| Gateway & US & NS
+    Gateway & US & NS --->|Регистрация| Discovery
     Gateway & US & NS -->|Запись common.log| Volume
     Volume --> Loki
 
@@ -149,14 +149,14 @@ flowchart TD
     
     %% Момент отправки ответа клиенту
     DB --->|4. Успешный Commit| Ctrl
-    Ctrl --->|5. Моментальный ответ клиенту| Return([📱 HTTP 201 / 200 Success])
+    Ctrl --->|5. Моментальный ответ клиенту| Return([✔️ HTTP 201 / 200 Success])
 
     %% Перехват события и отправка во внешнюю среду
     Event ---> Listener[📦 EventListener / Producer]
     Listener ---> Check{Доступен брокер?}
     
     %% Путь А: Кафка доступна (Штатный режим)
-    Check -->|🟢 Да| Kafka[🪵 Топик: email-dto]
+    Check -->|🟢 Да| Kafka[📌 Топик: email-dto]
     Kafka --> NS_Async[✉️ notification-service <br/> Слушатель: KafkaListener]
     NS_Async -->|Синхронный SMTP| SMTP1(📧 Gmail SMTP)
 
