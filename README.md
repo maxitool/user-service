@@ -116,13 +116,13 @@ graph TD
     US --->|Кэш| Redis
     US --->|Данные| DB
     US --->|События| Kafka
-    Kafka --->|Вычитывание| NS
+    Kafka --->|События| NS
     Discovery --->|Роутинг| US
     Discovery --->|Роутинг| NS
     
     %% Группа 1 (индексы 8-9): Аварийный синхронный Fallback
-    US -.->|5. Fallback HTTP| Feign
-    Feign -.->|6. Блокирующий POST| NS
+    US -.->|Fallback HTTP| Feign
+    Feign -.->|Блокирующий POST| NS
 
     %% Группа 2 (индексы 10-12): Конфигурация через Config Server
     Config -.->|Свойства| Gateway
@@ -180,7 +180,7 @@ graph TD
 ```
 
 ```mermaid
-graph LR
+graph TD
     %% ==========================================
     %% ОБЪЯВЛЕНИЕ КОМПОНЕНТОВ СИСТЕМЫ
     %% ==========================================
@@ -217,13 +217,13 @@ graph LR
     US --->|Кэш| Redis
     US --->|Данные| DB
     US --->|События| Kafka
-    Kafka --->|Вычитывание| NS
+    Kafka --->|События| NS
     Discovery --->|Роутинг| US
     Discovery --->|Роутинг| NS
     
     %% Группа 1 (индексы 8-9): Аварийный синхронный Fallback
-    US -.->|5. Fallback HTTP| Feign
-    Feign -.->|6. Блокирующий POST| NS
+    US -.->|Fallback HTTP| Feign
+    Feign -.->|Блокирующий POST| NS
 
     %% Группа 2 (индексы 10-12): Конфигурация через Config Server
     Config -.->|Свойства| Gateway
@@ -242,6 +242,9 @@ graph LR
     Volume -->|Сбор логов| Loki
     Loki -->|Метрики| Grafana
 
+    %% Индекс 21: Невидимая связь для удержания US и NS на одном горизонтальном уровне
+    US ~~~ NS
+
     %% ==========================================
     %% СТИЛИЗАЦИЯ УЗЛОВ И КОНТЕЙНЕРОВ
     %% ==========================================
@@ -255,10 +258,10 @@ graph LR
 
     class Client client;
     class Gateway,Config,Discovery,US,NS core;
-    class Kafka,Redis,DB,Volume,Loki,Grafana warn;
+    class Kafka,Redis,DB,Volume,Loki,Grafana success;
     class Feign fail;
 
-    class Core,Infrastructure,Observability subContainer;
+    class Core,Infrastructure,Observability warn;
 
     %% ==========================================
     %% ПОДСВЕТКА СТРЕЛОК (Безопасный linkStyle)
