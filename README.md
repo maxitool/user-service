@@ -100,41 +100,78 @@ graph TD
         Loki[🔥 Grafana Loki<br/>Порт: 3100] --> Grafana[📈 Grafana UI<br/>Порт: 3000]
     end
 
-    %% Основные потоки данных (Трафик)
-    Gateway -->|Роутинг API| US & NS
-    US --->|Кэш| Redis
-    US --->|Данные| DB
-    US --->|События| Kafka
-    Kafka --->|События| NS
+    %% ==========================================
+    %% ПОТОКИ ДАННЫХ И СВЯЗИ (Важен порядок для linkStyle)
+    %% ==========================================
+    
+    %% Основные бизнес-потоки (Трафик)
+    Client --> Gateway                       %% Индекс 0
+    Gateway -->|Роутинг API| US              %% Индекс 1
+    Gateway -->|Роутинг API| NS              %% Индекс 2
+    US --->|Кэш| Redis                       %% Индекс 3
+    US --->|Данные| DB                        %% Индекс 4
+    US --->|События| Kafka                   %% Индекс 5
+    Kafka --->|События| NS                   %% Индекс 6
 
-    %% Служебные связи (Сжатые и исправленные)
-    Config -.->|Свойства| Discovery & Gateway & US & NS
-    Gateway & US & NS --->|Регистрация| Discovery
-    Gateway & US & NS -->|Запись common.log| Volume
-    Volume --> Loki
+    %% Служебные связи: Раздача конфигураций (Config)
+    Config -.->|Свойства| Discovery          %% Индекс 7
+    Config -.->|Свойства| Gateway            %% Индекс 8
+    Config -.->|Свойства| US                 %% Индекс 9
+    Config -.->|Свойства| NS                 %% Индекс 10
+    
+    %% Служебные связи: Регистрация в Service Discovery (Eureka)
+    Gateway --->|Регистрация| Discovery      %% Индекс 11
+    US --->|Регистрация| Discovery           %% Индекс 12
+    NS --->|Регистрация| Discovery           %% Индекс 13
+    
+    %% Служебные связи: Агрегация логов (Shared Volume)
+    Gateway -->|Запись common.log| Volume    %% Индекс 14
+    US -->|Запись common.log| Volume         %% Индекс 15
+    NS -->|Запись common.log| Volume         %% Индекс 16
+    Volume --> Loki                          %% Индекс 17
+    Loki --> Grafana                         %% Индекс 18
 
-    %% Стилизация (Безопасно для GitHub)
-    classDef client fill:#ececff,stroke:#9370db,stroke-width:2px;
-    classDef gateway fill:#ffe4e1,stroke:#cd5c5c,stroke-width:2px,font-weight:bold;
-    classDef core fill:#e1ffff,stroke:#20b2aa,stroke-width:2px;
-    classDef infra fill:#f5f5dc,stroke:#d2b48c,stroke-width:2px;
-    classDef monitor fill:#f0fff0,stroke:#228b22,stroke-width:2px;
+    %% ==========================================
+    %% ДЕКЛАРАЦИЯ СТИЛЕЙ UI
+    %% ==========================================
+    classDef clientStyle fill:#F3E8FF,stroke:#9333EA,stroke-width:2px;
+    classDef gatewayStyle fill:#FFE4E6,stroke:#E11D48,stroke-width:2px,font-weight:bold;
+    classDef coreStyle fill:#E0F2FE,stroke:#0284C7,stroke-width:2px;
+    classDef infraStyle fill:#FEF3C7,stroke:#D97706,stroke-width:2px;
+    classDef monitorStyle fill:#DCFCE7,stroke:#16A34A,stroke-width:2px;
+    
+    classDef subCore fill:#FAFAFA,stroke:#CBD5E1,stroke-width:1px,stroke-dasharray: 3 3;
+    classDef subInfra fill:#FAFAFA,stroke:#CBD5E1,stroke-width:1px,stroke-dasharray: 3 3;
+    classDef subMonitor fill:#FAFAFA,stroke:#CBD5E1,stroke-width:1px,stroke-dasharray: 3 3;
 
-    class Client client;
-    class Gateway gateway;
-    class Config,Discovery,US,NS core;
-    class Kafka,Redis,DB infra;
-    class Volume,Loki,Grafana monitor;
+    %% Применение классов к узлам
+    class Client clientStyle;
+    class Gateway gatewayStyle;
+    class Config,Discovery,US,NS coreStyle;
+    class Kafka,Redis,DB infraStyle;
+    class Volume,Loki,Grafana monitorStyle;
+    
+    %% Применение классов к подграфам
+    class Core subCore;
+    class Infrastructure subInfra;
+    class Observability subMonitor;
+
+    %% Стилизация стрелок (Ребер графа) строго по индексам
+    %% Индексы 0-6: Основной бизнес-трафик, запросы и данные (Выделенный синий)
+    linkStyle 0,1,2,3,4,5,6 stroke:#0284C7,stroke-width:2px;
+    %% Индексы 7-10: Раздача конфигураций через Config Server (Пунктирный серый)
+    linkStyle 7,8,9,10 stroke:#94A3B8,stroke-width:1px,stroke-dasharray: 4 4;
+    %% Индексы 11-13: Регистрация инстансов в Service Discovery Eureka (Приглушенный индиго)
+    linkStyle 11,12,13 stroke:#6366F1,stroke-width:1.5px;
+    %% Индексы 14-18: Агрегация логов и вывод мониторинга (Мягкий зеленый)
+    linkStyle 14,15,16,17,18 stroke:#16A34A,stroke-width:1.5px;
 ```
-
----
 
 ## 📨 Схема циркуляции событий (Event-Driven Flow)
 
 Взаимодействие между `user-service` и `notification-service` спроектировано по событийно-ориентированной модели (EDA). Архитектура исключает жесткую связь: в случае недоступности брокера Kafka, система бесшовно деградирует до синхронных REST-вызовов через **OpenFeign** и **Eureka Server**, гарантируя доставку транзакционных уведомлений.
 
 ### 🔄 Потоки обработки событий и Резервные пути
-
 ```mermaid
 flowchart TD
     %% Основной поток управления (Бизнес-логика)
