@@ -102,7 +102,7 @@ services:
     volumes:
       - shared-logs:/app/shared-logs
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8081/actuator/health" ]
+      test: [ "CMD", "curl", "-f", "http://localhost:8086/actuator/health" ]
       interval: 5s
       timeout: 5s
       retries: 10
