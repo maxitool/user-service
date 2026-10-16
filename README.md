@@ -117,13 +117,13 @@
 
 ```mermaid
 graph TD
-    %% Объявление узлов верхнего уровня
+    %% Объявление основных узлов
     Client([💻 Клиент / Браузер])
     Gateway[🔀 Gateway Service<br/>Порт: 8080]
 
     subgraph "Ядро системы"
         Config[⚙️ Config Service<br/>Порт: 8888]
-        Discovery[🔍 Discovery Server<br/>Eureka | Порт: 8761]
+        Discovery["🔍 Discovery Server<br/>Eureka - Порт: 8761"]
         
         subgraph "User Services"
             US1[👥 User Service 1<br/>Порт: 8086]
@@ -153,34 +153,58 @@ graph TD
 
     %% Направления связей
     Client --> Gateway
-    Gateway -->|Роутинг API| US1 & US2 & NS1 & NS2
+    Gateway -->|Роутинг API| US1
+    Gateway -->|Роутинг API| US2
+    Gateway -->|Роутинг API| NS1
+    Gateway -->|Роутинг API| NS2
     
-    Discovery -.->|Регистрация| Gateway & US1 & US2 & NS1 & NS2
-    Config -.->|Раздача свойств| Discovery & Gateway & US1 & US2 & NS1 & NS2
+    Discovery -.->|Регистрация| Gateway
+    Discovery -.->|Регистрация| US1
+    Discovery -.->|Регистрация| US2
+    Discovery -.->|Регистрация| NS1
+    Discovery -.->|Регистрация| NS2
+    
+    Config -.->|Раздача свойств| Discovery
+    Config -.->|Раздача свойств| Gateway
+    Config -.->|Раздача свойств| US1
+    Config -.->|Раздача свойств| US2
+    Config -.->|Раздача свойств| NS1
+    Config -.->|Раздача свойств| NS2
 
-    US1 & US2 & NS1 & NS2 <-->|Асинхронные события| Kafka
-    US1 & US2 <-->|Кэширование| Redis
-    US1 & US2 --->|Персистентность| DB
+    US1 <-->|Асинхронные события| Kafka
+    US2 <-->|Асинхронные события| Kafka
+    NS1 <-->|Асинхронные события| Kafka
+    NS2 <-->|Асинхронные события| Kafka
+    
+    US1 <-->|Кэширование| Redis
+    US2 <-->|Кэширование| Redis
+    
+    US1 --->|Персистентность| DB
+    US2 --->|Персистентность| DB
     
     KafkaUI --- Kafka
     RedisUI --- Redis
 
-    US1 & US2 & NS1 & NS2 & Gateway -->|Запись common.log| Volume
+    US1 -->|Запись логов| Volume
+    US2 -->|Запись логов| Volume
+    NS1 -->|Запись логов| Volume
+    NS2 -->|Запись логов| Volume
+    Gateway -->|Запись логов| Volume
+    
     Volume --> Promtail --> Loki --> Grafana
 
-    %% Декларативное определение классов стилей
-    classDef client fill:#ececff,stroke:#9370db,stroke-width:2px;
-    classDef gateway fill:#ffe4e1,stroke:#cd5c5c,stroke-width:2px,font-weight:bold;
-    classDef core fill:#e1ffff,stroke:#20b2aa,stroke-width:2px;
-    classDef infra fill:#f5f5dc,stroke:#d2b48c,stroke-width:2px;
-    classDef monitor fill:#f0fff0,stroke:#228b22,stroke-width:2px;
+    %% Декларативное назначение стилей
+    classDef clientStyle fill:#ececff,stroke:#9370db,stroke-width:2px;
+    classDef gatewayStyle fill:#ffe4e1,stroke:#cd5c5c,stroke-width:2px,font-weight:bold;
+    classDef coreStyle fill:#e1ffff,stroke:#20b2aa,stroke-width:2px;
+    classDef infraStyle fill:#f5f5dc,stroke:#d2b48c,stroke-width:2px;
+    classDef monitorStyle fill:#f0fff0,stroke:#228b22,stroke-width:2px;
 
-    %% Применение классов к узлам (Безопасно для GitHub)
-    class Client client;
-    class Gateway gateway;
-    class Config,Discovery,US1,US2,NS1,NS2 core;
-    class Kafka,KafkaUI,Redis,RedisUI,DB infra;
-    class Volume,Promtail,Loki,Grafana monitor;
+    class Client clientStyle;
+    class Gateway gatewayStyle;
+    class Config,Discovery,US1,US2,NS1,NS2 coreStyle;
+    class Kafka,KafkaUI,Redis,RedisUI,DB infraStyle;
+    class Volume,Promtail,Loki,Grafana monitorStyle;
 ```
 
 ---
