@@ -77,10 +77,14 @@
 ## 🏗️ Архитектура системы и связи компонентов
 
 ### 🗺️ Диаграмма компонентов и связей
+
 ```mermaid
 graph TD
-    %% Компоненты системы
-    Client([💻 Клиент / Браузер]) --> Gateway[🔀 Gateway Service<br/>Порт: 8080]
+    %% ==========================================
+    %% ОБЪЯВЛЕНИЕ КОМПОНЕНТОВ СИСТЕМЫ
+    %% ==========================================
+    Client([💻 Клиент / Браузер])
+    Gateway[🔀 Gateway Service<br/>Порт: 8080]
 
     subgraph Core ["Ядро системы"]
         Config[⚙️ Config Service<br/>Порт: 8888]
@@ -97,42 +101,43 @@ graph TD
 
     subgraph Observability ["Логирование и Мониторинг"]
         Volume[(📁 Shared Logs Volume)]
-        Loki[🔥 Grafana Loki<br/>Порт: 3100] --> Grafana[📈 Grafana UI<br/>Порт: 3000]
+        Loki[🔥 Grafana Loki<br/>Порт: 3100]
+        Grafana[📈 Grafana UI<br/>Порт: 3000]
     end
 
     %% ==========================================
-    %% ПОТОКИ ДАННЫХ И СВЯЗИ (Строгий порядок из file1)
+    %% ПОТОКИ ДАННЫХ И СВЯЗИ (Линейный порядок для linkStyle)
     %% ==========================================
     
-    %% Основные бизнес-потоки и трафик (Индексы 0 - 5)
-    Client --> Gateway                             %% Индекс 0
-    Gateway -->|1. Роутинг| US                    %% Индекс 1
-    US --->|2. Кэш| Redis                          %% Индекс 2
-    US --->|3. Данные| DB                           %% Индекс 3
-    US --->|4. События| Kafka                      %% Индекс 4
-    Kafka --->|5. Вычитывание| NS                  %% Индекс 5
+    %% Основные бизнес-потоки и трафик
+    Client --> Gateway
+    Gateway -->|1. Роутинг| US
+    US --->|2. Кэш| Redis
+    US --->|3. Данные| DB
+    US --->|4. События| Kafka
+    Kafka --->|5. Вычитывание| NS
     
-    %% Аварийный синхронный Fallback (Индексы 6 - 7)
-    US -.->|5. Fallback HTTP| Feign[🔗 OpenFeign Client] %% Индекс 6
-    Feign --->|6. Блокирующий POST| NS             %% Индекс 7
+    %% Аварийный синхронный Fallback
+    US -.->|5. Fallback HTTP| Feign[🔗 OpenFeign Client]
+    Feign --->|6. Блокирующий POST| NS
 
-    %% Конфигурация через Config Server (Индексы 8 - 11)
-    Config -.->|Свойства| Discovery                %% Индекс 8
-    Config -.->|Свойства| Gateway                  %% Индекс 9
-    Config -.->|Свойства| US                       %% Индекс 10
-    Config -.->|Свойства| NS                       %% Индекс 11
+    %% Конфигурация через Config Server
+    Config -.->|Свойства| Discovery
+    Config -.->|Свойства| Gateway
+    Config -.->|Свойства| US
+    Config -.->|Свойства| NS
 
-    %% Регистрация в Service Discovery Eureka (Индексы 12 - 14)
-    Gateway --->|Регистрация| Discovery            %% Индекс 12
-    US --->|Регистрация| Discovery                 %% Индекс 13
-    NS --->|Регистрация| Discovery                 %% Индекс 14
+    %% Регистрация в Service Discovery Eureka
+    Gateway --->|Регистрация| Discovery
+    US --->|Регистрация| Discovery
+    NS --->|Регистрация| Discovery
 
-    %% Агрегация логов и мониторинг (Индексы 15 - 19)
-    Gateway -->|Логи| Volume                       %% Индекс 15
-    US -->|Логи| Volume                            %% Индекс 16
-    NS -->|Логи| Volume                            %% Индекс 17
-    Volume --> Loki                                %% Индекс 18
-    Loki --> Grafana                               %% Индекс 19
+    %% Агрегация логов и мониторинг
+    Gateway -->|Логи| Volume
+    US -->|Логи| Volume
+    NS -->|Логи| Volume
+    Volume --> Loki
+    Loki --> Grafana
 
     %% ==========================================
     %% СТИЛИЗАЦИЯ ИЗ FILE2 (Пастельная палитра)
