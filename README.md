@@ -117,44 +117,38 @@
 
 ```mermaid
 graph TD
-    %% Стилизация
-    classDef client fill:#ececff,stroke:#9370db,stroke-width:2px;
-    classDef gateway fill:#ffe4e1,stroke:#cd5c5c,stroke-width:2px,font-weight:bold;
-    classDef core fill:#e1ffff,stroke:#20b2aa,stroke-width:2px;
-    classDef infra fill:#f5f5dc,stroke:#d2b48c,stroke-width:2px;
-    classDef monitor fill:#f0fff0,stroke:#228b22,stroke-width:2px;
-
-    Client([💻 Клиент / Браузер]) :::client
-    Gateway[🔀 Gateway Service<br/>Порт: 8080] :::gateway
+    %% Объявление узлов верхнего уровня
+    Client([💻 Клиент / Браузер])
+    Gateway[🔀 Gateway Service<br/>Порт: 8080]
 
     subgraph "Ядро системы"
-        Config[⚙️ Config Service<br/>Порт: 8888] :::core
-        Discovery[🔍 Discovery Server<br/>Eureka | Порт: 8761] :::core
+        Config[⚙️ Config Service<br/>Порт: 8888]
+        Discovery[🔍 Discovery Server<br/>Eureka | Порт: 8761]
         
         subgraph "User Services"
-            US1[👥 User Service 1<br/>Порт: 8086] :::core
-            US2[👥 User Service 2<br/>Порт: 8082] :::core
+            US1[👥 User Service 1<br/>Порт: 8086]
+            US2[👥 User Service 2<br/>Порт: 8082]
         end
 
         subgraph "Notification Services"
-            NS1[✉️ Notification Service 1<br/>Порт: 8083] :::core
-            NS2[✉️ Notification Service 2<br/>Порт: 8084] :::core
+            NS1[✉️ Notification Service 1<br/>Порт: 8083]
+            NS2[✉️ Notification Service 2<br/>Порт: 8084]
         end
     end
 
     subgraph "Инфраструктурный слой"
-        Kafka[🪵 Apache Kafka<br/>Порт: 9092] :::infra
-        KafkaUI[🎛️ Kafka UI<br/>Порт: 8070] :::infra
-        Redis[💾 Redis<br/>Порт: 6379] :::infra
-        RedisUI[🖥️ Redis Commander<br/>Порт: 8081] :::infra
-        DB[(🐘 PostgreSQL<br/>Neon Cloud)] :::infra
+        Kafka[🪵 Apache Kafka<br/>Порт: 9092]
+        KafkaUI[🎛️ Kafka UI<br/>Порт: 8070]
+        Redis[💾 Redis<br/>Порт: 6379]
+        RedisUI[🖥️ Redis Commander<br/>Порт: 8081]
+        DB[(🐘 PostgreSQL<br/>Neon Cloud)]
     end
 
     subgraph "Служба Наблюдаемости (Observability)"
-        Volume[(📁 Shared Logs Volume)] :::monitor
-        Promtail[📝 Promtail] :::monitor
-        Loki[🔥 Grafana Loki<br/>Порт: 3100] :::monitor
-        Grafana[📈 Grafana UI<br/>Порт: 3000] :::monitor
+        Volume[(📁 Shared Logs Volume)]
+        Promtail[📝 Promtail]
+        Loki[🔥 Grafana Loki<br/>Порт: 3100]
+        Grafana[📈 Grafana UI<br/>Порт: 3000]
     end
 
     %% Направления связей
@@ -173,6 +167,20 @@ graph TD
 
     US1 & US2 & NS1 & NS2 & Gateway -->|Запись common.log| Volume
     Volume --> Promtail --> Loki --> Grafana
+
+    %% Декларативное определение классов стилей
+    classDef client fill:#ececff,stroke:#9370db,stroke-width:2px;
+    classDef gateway fill:#ffe4e1,stroke:#cd5c5c,stroke-width:2px,font-weight:bold;
+    classDef core fill:#e1ffff,stroke:#20b2aa,stroke-width:2px;
+    classDef infra fill:#f5f5dc,stroke:#d2b48c,stroke-width:2px;
+    classDef monitor fill:#f0fff0,stroke:#228b22,stroke-width:2px;
+
+    %% Применение классов к узлам (Безопасно для GitHub)
+    class Client client;
+    class Gateway gateway;
+    class Config,Discovery,US1,US2,NS1,NS2 core;
+    class Kafka,KafkaUI,Redis,RedisUI,DB infra;
+    class Volume,Promtail,Loki,Grafana monitor;
 ```
 
 ---
