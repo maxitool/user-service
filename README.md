@@ -131,8 +131,8 @@ flowchart TD
     Start([💻 Запрос клиента]) --> Ctrl[🎛️ UserController]
     Ctrl -->|1. Вызов бизнес-логики| Service[👥 UserServiceImpl]
     
-    %% Транзакционная работа с PostgreSQL и внутренними событиями
-    subgraph Spring_Transaction [@Transactional Сессия]
+    %% Транзакционная работа с PostgreSQL и внутренними событиями (Исправленный синтаксис)
+    subgraph Spring_Transaction ["Transactional Сессия"]
         Service -->|2. Сохранение/Удаление| DB[(🐘 PostgreSQL)]
         Service -->|3. Публикация| Event[🌱 UserCreatedDeletedEvent]
     end
@@ -147,7 +147,7 @@ flowchart TD
     
     %% Путь А: Кафка доступна (Штатный режим)
     Check -->|🟢 Да| Kafka[🪵 Топик: email-dto]
-    Kafka --> NS_Async[✉️ notification-service <br/> @KafkaListener]
+    Kafka --> NS_Async[✉️ notification-service <br/> Слушатель: KafkaListener]
     NS_Async -->|Синхронный SMTP| SMTP1(📧 Gmail SMTP)
 
     %% Путь Б: Кафка упала (Аварийный деградационный Fallback)
@@ -161,11 +161,12 @@ flowchart TD
     classDef core fill:#e1ffff,stroke:#20b2aa,stroke-width:2px;
     classDef success fill:#d4edda,stroke:#28a745,stroke-width:2px;
     classDef fail fill:#f8d7da,stroke:#dc3545,stroke-width:2px;
+    classDef warn fill:#fff3cd,stroke:#ffc107,stroke-width:2px;
 
     class Start client;
     class Ctrl,Service,Listener,NS_Async,NS_Sync,Eureka core;
     class DB,Event,Kafka,Return,SMTP1,SMTP2 success;
-    class Feign,Check fill:#fff3cd,stroke:#ffc107,stroke-width:2px;
+    class Feign,Check warn;
 ```
 
 ### 📋 Спецификация контракта взаимодействия
