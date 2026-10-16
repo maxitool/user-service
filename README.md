@@ -121,50 +121,77 @@
 
 Взаимодействие между `user-service` и `notification-service` построено на асинхронном обмене сообщениями через **Apache Kafka**.
 
-На случай, если брокер сообщений будет недоступен, реализован **резервный сценарий (Fallback)**: система автоматически переключится на синхронный REST-вызов через **Feign Client**, чтобы пользователь в любом случае гарантированно получил транзакционное письмо.
+На случай, если брокер сообщений будет недоступен, реализован программный **резервный сценарий (Fallback)**: при возникновении исключения или превышении лимита времени ожидания, система автоматически переключается на синхронный REST-вызов через **Spring Cloud OpenFeign**. Это гарантирует транзакционную доставку писем пользователям.
 
 ### 🔄 Потоки обработки событий и Резервные пути
 
 ```mermaid
 flowchart TD
-    %% Основные узлы потока данных
-    Start([💻 Действие пользователя]) --> US[👥 User Service]
-    US --> Check{Попытка отправки<br/>в Apache Kafka}
-    
-    %% Основной путь (Асинхронный Happy Path)
-    Check -->|🟢 Брокер ДОСТУПЕН| Kafka[🪵 Топик: email-dto]
-    Kafka -->|Вычитывание сообщения| NS_Async[✉️ Notification Service]
-    NS_Async --> Send_Mail1[📧 Отправка Email через SMTP]
-    Send_Mail1 --> Success_End([🎉 Пользователь уведомлен асинхронно])
-
-    %% Быстрый ответ клиенту при штатном режиме (Параллельный поток)
-    Kafka -.->|Быстрый ответ| Return_Client[📱 HTTP 201 Created]
-    Return_Client -.-> End_User([Пользователь видит успех в UI])
-
-    %% Резервный путь (Аварийный Fallback)
-    Check -->|🔴 СБОЙ / ТАЙМАУТ| Log_Error[📝 Лог: Kafka not responding]
-    Log_Error --> Feign[🔗 Включение Fallback:<br/>Spring Cloud OpenFeign]
-    Feign -->|Синхронный REST HTTP| NS_Sync[✉️ Notification Service]
-    NS_Sync --> Send_Mail2[📧 Отправка Email через SMTP]
-    Send_Mail2 --> Fallback_End([⚠️ Пользователь уведомлен через Fallback])
-
-    %% Декларативное назначение стилей оформления (Вынесено отдельно для фикса парсера)
+    %% Стилизация блоков
     classDef client fill:#ececff,stroke:#9370db,stroke-width:2px;
     classDef core fill:#e1ffff,stroke:#20b2aa,stroke-width:2px;
     classDef success fill:#d4edda,stroke:#28a745,stroke-width:2px,font-weight:bold;
     classDef fail fill:#f8d7da,stroke:#dc3545,stroke-width:2px,font-weight:bold;
     classDef action fill:#fff3cd,stroke:#ffc107,stroke-width:2px;
 
-    class Start,End_User client;
-    class US,NS_Async,NS_Sync core;
-    class Check,Feign,Send_Mail1,Send_Mail2 action;
-    class Kafka,Return_Client,Success_End,Fallback_End success;
-    class Log_Error fail;
+    Start([💻 Бизнес-действие пользователя]) --> Controller[👥 UserController]
+    Controller -->|Вызов сервиса| Producer[📦 EmailDtoProducer]
+    
+    %% Попытка отправки и асинхронный фьючер
+    Producer --> CreateRecord[📝 Сборка ProducerRecord<br/>Топик: email-dto<br/>Заголовок: operation]
+    CreateRecord --> KafkaSend{kafkaTemplate.send}
+    
+    %% Развилка по whenComplete
+    KafkaSend -->|orTimeout 7s| FutureCheck{Проверка фьючи<br/>в .whenComplete}
+    
+    %% Сценарий А: Успешная отправка в брокер (Асинхронный Happy Path)
+    FutureCheck -->|🟢 ex == null| SuccessLog[📝 Лог: Sent to partition/offset]
+    SuccessLog -.->|Быстрый ответ клиенту| HTTP_201([📱 HTTP 201 / 200 Created])
+    
+    KafkaBroker[🪵 Мониторинг брокера Kafka] -->|Слушатель @KafkaListener| Consumer[📥 EmailDtoConsumer]
+    SuccessLog -->|Запись в топик| KafkaBroker
+    
+    Consumer --> ParseHeader[⚙️ Десериализация заголовка<br/>Operation.fromString]
+    ParseHeader --> NS_Async[✉️ NotificationService]
+    NS_Async --> Send_Mail1[📧 Отправка Email через Gmail SMTP]
+    Send_Mail1 --> Success_End([🎉 Уведомление доставлено асинхронно])
+
+    %% Сценарий Б: Аварийная деградация (Синхронный Fallback-путь)
+    FutureCheck -->|🔴 ex != null| FallbackTrigger[🚨 Лог: Kafka not responding]
+    FallbackTrigger --> FeignCheck{Проверка типа операции<br/>CREATE / DELETE}
+    
+    FeignCheck -->|Синхронный REST вызов| FeignClient[🔗 NotificationServiceClient<br/>OpenFeign Client]
+    FeignClient -->|POST /api/v1/email/*| NS_Controller[🎛️ NotificationController]
+    NS_Controller --> NS_Sync[✉️ NotificationService]
+    NS_Sync --> Send_Mail2[📧 Отправка Email через Gmail SMTP]
+    Send_Mail2 --> Fallback_End([⚠️ Уведомление доставлено через Feign])
+    Fallback_End -.->|HTTP Ответ| HTTP_201
+
+    %% Назначение стилей
+    class Start,HTTP_201 client;
+    class Controller,Producer,Consumer,FeignClient,NS_Controller,NS_Sync,NS_Async core;
+    class CreateRecord,KafkaSend,FutureCheck,FeignCheck,ParseHeader,Send_Mail1,Send_Mail2 action;
+    class SuccessLog,KafkaBroker,Success_End,Fallback_End success;
+    class FallbackTrigger fail;
 ```
 
-### 📋 Спецификация сообщения
-*   **Формат данных (Payload):** `{"email": "user@example.com"}`
-*   **Тип операции (Kafka Header):** Передается в заголовке `Operation`. Принимает значения `CREATE` или `DELETE`, на основании которых `notification-service` распределяет бизнес-логику и выбирает шаблон письма.
+### 📋 Спецификация контракта взаимодействия
+
+#### 1. Структура Тела Сообщения (Payload DTO)
+Обмен данными строго типизирован через `EmailDto` в виде Java Record:
+```json
+{
+  "email": "test@mail.ru"
+}
+```
+*Валидация на уровне контроллера:* Строка не должна быть пустой (`@NotBlank`), формат валидируется регулярным выражением (`@Email`), максимальная длина — 100 символов.
+
+#### 2. Метаданные Заголовка (Kafka Headers)
+Взаимодействие внутри распределенной сети является полиморфным и опирается на заголовки пакета (`RecordHeader`):
+*   **Ключ заголовка:** `operation`
+*   **Допустимые строковые значения (`byte[]`):** `create` или `delete`
+
+На стороне потребителя `EmailDtoConsumer` вычитывает байты из заголовка `RECORD_HEADER_OPERATION_KEY`, преобразует их в строку UTF-8 и восстанавливает маппинг на `enum Operation` с помощью фабричного метода `Operation.fromString`. На основе полученного ключа из `Map<Operation, Consumer<EmailDto>> methods` вызывается соответствующий метод отправки почты.
 
 
 
