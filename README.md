@@ -92,7 +92,7 @@ graph TD
     subgraph Infrastructure ["Базы данных и Очереди"]
         Kafka[🖧 Apache Kafka<br/>Порт: 9092]
         Redis[💾 Redis<br/>Порт: 6379]
-        DB[(🐘 PostgreSQL<br/>Neon Cloud)]
+        DB[("(🐘 PostgreSQL<br/>Neon Cloud)")]
     end
 
     subgraph Observability ["Логирование и Мониторинг"]
@@ -100,56 +100,64 @@ graph TD
         Loki[🔥 Grafana Loki<br/>Порт: 3100] --> Grafana[📈 Grafana UI<br/>Порт: 3000]
     end
 
-    %% Бизнес-трафик (Индексы 0-5)
+    %% ==========================================
+    %% ПОТОКИ ДАННЫХ И СВЯЗИ (Строгий порядок для linkStyle)
+    %% ==========================================
+    
+    %% Основные бизнес-потоки и трафик (Индексы 0 - 6)
+    Client --> Gateway
     Gateway -->|1. Роутинг| US
     US --->|2. Кэш| Redis
     US --->|3. Данные| DB
     US --->|4. События| Kafka
     Kafka --->|5. Вычитывание| NS
-    US -.->|5. Fallback HTTP| Feign[🔗 OpenFeign Client] --> NS
+    US -.->|5. Fallback HTTP| Feign[🔗 OpenFeign Client]
+    Feign --->|6. Блокирующий POST| NS
 
-    %% Конфигурация через Config Server (Индексы 6-9)
+    %% Конфигурация через Config Server (Индексы 7 - 10)
     Config -.->|Свойства| Discovery
     Config -.->|Свойства| Gateway
     Config -.->|Свойства| US
     Config -.->|Свойства| NS
 
-    %% Регистрация в Service Discovery (Индексы 10-12)
+    %% Регистрация в Service Discovery Eureka (Индексы 11 - 13)
     Gateway --->|Регистрация| Discovery
     US --->|Регистрация| Discovery
     NS --->|Регистрация| Discovery
 
-    %% Агрегация логов в Shared Volume (Индексы 13-16)
+    %% Агрегация логов и мониторинг (Индексы 14 - 18)
     Gateway -->|Логи| Volume
     US -->|Логи| Volume
     NS -->|Логи| Volume
     Volume --> Loki
+    Loki --> Grafana
 
-    %% Современные пастельные классы стилей компонентов
-    classDef client fill:#F3E8FF,stroke:#9333EA,stroke-width:2px;
-    classDef gateway fill:#FFE4E1,stroke:#CD5C5C,stroke-width:2px,font-weight:bold;
-    classDef core fill:#E0F2FE,stroke:#0284C7,stroke-width:2px;
-    classDef infra fill:#FEF3C7,stroke:#D97706,stroke-width:2px;
-    classDef monitor fill:#DCFCE7,stroke:#16A34A,stroke-width:2px;
+    %% ==========================================
+    %% ЯРКАЯ КОНТРАСТНАЯ СТИЛИЗАЦИЯ (Концепция 3 цветов)
+    %% ==========================================
+    classDef appStyle fill:#0284C7,stroke:#0369A1,stroke-width:2px,color:#FFFFFF,font-weight:bold;
+    classDef dataStyle fill:#F59E0B,stroke:#D97706,stroke-width:2px,color:#FFFFFF,font-weight:bold;
+    classDef logsStyle fill:#10B981,stroke:#047857,stroke-width:2px,color:#FFFFFF,font-weight:bold;
+    
+    classDef subContainer fill:#F8FAFC,stroke:#94A3B8,stroke-width:2px,stroke-dasharray: 4 4;
 
-    %% Назначение стилей элементам
-    class Client client;
-    class Gateway gateway;
-    class Config,Discovery,US,NS core;
-    class Kafka,Redis,DB infra;
-    class Volume,Loki,Grafana monitor;
+    %% Применение насыщенных цветов к компонентам
+    class Client,Gateway,Config,Discovery,US,NS,Feign appStyle;
+    class Kafka,Redis,DB dataStyle;
+    class Volume,Loki,Grafana logsStyle;
 
-    %% Кастомная стилизация контейнеров
-    style Core fill:#FAFAFA,stroke:#E4E4E7,stroke-width:2px,stroke-dasharray: 4 4,rx:8,ry:8;
-    style Infrastructure fill:#FAFAFA,stroke:#E4E4E7,stroke-width:2px,stroke-dasharray: 4 4,rx:8,ry:8;
-    style Observability fill:#FAFAFA,stroke:#E4E4E7,stroke-width:2px,stroke-dasharray: 4 4,rx:8,ry:8;
+    %% Применение стилей к рамкам подграфов
+    class Core,Infrastructure,Observability subContainer;
 
     %% Точечное управление дизайном стрелок (linkStyle)
-    linkStyle 0,1,2,3,4,5 stroke:#4B5563,stroke-width:2px;
-    linkStyle 6,7 stroke:#EF4444,stroke-width:1.5px,stroke-dasharray: 3 3;
-    linkStyle 8,9,10,11 stroke:#9CA3AF,stroke-width:1.5px,stroke-dasharray: 5 5;
-    linkStyle 12,13,14 stroke:#0284C7,stroke-width:2px;
-    linkStyle 15,16,17,18 stroke:#EA580C,stroke-width:2px;
+    %% Индексы 0-6: Активный бизнес-трафик и данные (Толстый неоновый синий)
+    linkStyle 0,1,2,3,4,5,6 stroke:#2563EB,stroke-width:2.5px;
+    %% Индексы 7-10: Служебная раздача свойств Config (Контрастный фиолетовый пунктир)
+    linkStyle 7,8,9,10 stroke:#7C3AED,stroke-width:1.5px,stroke-dasharray: 4 4;
+    %% Индексы 11-13: Инфраструктурный Heartbeat в Eureka (Фиолетовый сплошной)
+    linkStyle 11,12,13 stroke:#7C3AED,stroke-width:1.5px;
+    %% Индексы 14-18: Сбор логов и графики мониторинга (Магистральный зеленый)
+    linkStyle 14,15,16,17,18 stroke:#10B981,stroke-width:2px;
 ```
 
 ## 📨 Схема циркуляции событий (Event-Driven Flow)
