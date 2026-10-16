@@ -166,47 +166,75 @@ graph TD
 
 ### 🔄 Потоки обработки событий и Резервные пути
 ```mermaid
-flowchart TD
-    %% Основной поток управления (Бизнес-логика)
-    Start([💻 Запрос клиента]) --> Ctrl[🎛️ UserController]
-    Ctrl -->|1. Вызов бизнес-логики| Service[👥 UserServiceImpl]
-    
-    %% Транзакционная работа с PostgreSQL и внутренними событиями (Исправленный синтаксис)
-    subgraph Spring_Transaction ["Transactional Сессия"]
-        Service -->|2. Сохранение/Удаление| DB[(🐘 PostgreSQL)]
-        Service -->|3. Публикация| Event[🌱 UserCreatedDeletedEvent]
+graph TD
+    %% Компоненты системы
+    Client([💻 Клиент / Браузер]) --> Gateway[🔀 Gateway Service<br/>Порт: 8080]
+
+    subgraph Core ["Ядро системы"]
+        Config[⚙️ Config Service<br/>Порт: 8888]
+        Discovery["🔍 Discovery Server<br/>Eureka - Порт: 8761"]
+        US[👥 User Service<br/>Порты: 8086, 8082]
+        NS[✉️ Notification Service<br/>Порты: 8083, 8084]
+        Feign[🔗 OpenFeign Client]
+    end
+
+    subgraph Infrastructure ["Базы данных и Очереди"]
+        Kafka[🖧 Apache Kafka<br/>Порт: 9092]
+        Redis[💾 Redis<br/>Порт: 6379]
+        DB[(🐘 PostgreSQL<br/>Neon Cloud)]
+    end
+
+    subgraph Observability ["Логирование и Мониторинг"]
+        Volume[(📁 Shared Logs Volume)]
+        Loki[🔥 Grafana Loki<br/>Порт: 3100] --> Grafana[📈 Grafana UI<br/>Порт: 3000]
     end
     
-    %% Момент отправки ответа клиенту
-    DB --->|4. Успешный Commit| Ctrl
-    Ctrl --->|5. Моментальный ответ клиенту| Return([✔️ HTTP 201 / 200 Success])
-
-    %% Перехват события и отправка во внешнюю среду
-    Event ---> Listener[📦 EventListener / Producer]
-    Listener ---> Check{Доступен брокер?}
+    Client --> Gateway                             %% Индекс 0
+    Gateway -->|1. Роутинг| US                    %% Индекс 1
+    US --->|2. Кэш| Redis                          %% Индекс 2
+    US --->|3. Данные| DB                           %% Индекс 3
+    US --->|4. События| Kafka                      %% Индекс 4
+    Kafka --->|5. Вычитывание| NS                  %% Индекс 5
     
-    %% Путь А: Кафка доступна (Штатный режим)
-    Check -->|🟢 Да| Kafka[📌 Топик: email-dto]
-    Kafka --> NS_Async[✉️ notification-service <br/> Слушатель: KafkaListener]
-    NS_Async -->|Синхронный SMTP| SMTP1(📧 Gmail SMTP)
+    US -.->|5. Fallback HTTP| Feign                %% Индекс 6
+    Feign --->|6. Блокирующий POST| NS             %% Индекс 7
 
-    %% Путь Б: Кафка упала (Аварийный деградационный Fallback)
-    Check -->|🔴 Нет / Таймаут 7с| Eureka[🔍 discovery-service <br/> Eureka Server]
-    Eureka -->|Разрешение хоста| Feign[🔗 OpenFeign Клиент]
-    Feign -->|Блокирующий POST HTTP| NS_Sync[✉️ notification-service]
-    NS_Sync -->|Синхронный SMTP| SMTP2(📧 Gmail SMTP)
+    Config -.->|Свойства| Discovery                %% Индекс 8
+    Config -.->|Свойства| Gateway                  %% Индекс 9
+    Config -.->|Свойства| US                       %% Индекс 10
+    Config -.->|Свойства| NS                       %% Индекс 11
 
-    %% Стилизация (Безопасно для парсера GitHub)
-    classDef client fill:#ececff,stroke:#9370db,stroke-width:2px;
-    classDef core fill:#e1ffff,stroke:#20b2aa,stroke-width:2px;
-    classDef success fill:#d4edda,stroke:#28a745,stroke-width:2px;
-    classDef fail fill:#f8d7da,stroke:#dc3545,stroke-width:2px;
-    classDef warn fill:#fff3cd,stroke:#ffc107,stroke-width:2px;
+    Gateway --->|Регистрация| Discovery            %% Индекс 12
+    US --->|Регистрация| Discovery                 %% Индекс 13
+    NS --->|Регистрация| Discovery                 %% Индекс 14
 
-    class Start client;
-    class Ctrl,Service,Listener,NS_Async,NS_Sync,Eureka core;
-    class DB,Event,Kafka,Return,SMTP1,SMTP2 success;
-    class Feign,Check warn;
+    Gateway -->|Логи| Volume                       %% Индекс 15
+    US -->|Логи| Volume                            %% Индекс 16
+    NS -->|Логи| Volume                            %% Индекс 17
+    Volume --> Loki                                %% Индекс 18
+    Loki --> Grafana                               %% Индекс 19
+
+    classDef appStyle fill:#0284C7,stroke:#0369A1,stroke-width:2px,color:#FFFFFF,font-weight:bold;
+    classDef dataStyle fill:#F59E0B,stroke:#D97706,stroke-width:2px,color:#FFFFFF,font-weight:bold;
+    classDef logsStyle fill:#10B981,stroke:#047857,stroke-width:2px,color:#FFFFFF,font-weight:bold;
+    
+    classDef subContainer fill:#F8FAFC,stroke:#94A3B8,stroke-width:2px,stroke-dasharray: 4 4;
+
+    class Client,Gateway,Config,Discovery,US,NS,Feign appStyle;
+    class Kafka,Redis,DB dataStyle;
+    class Volume,Loki,Grafana logsStyle;
+
+    class Core,Infrastructure,Observability subContainer;
+    
+    linkStyle 0,1,2,3,4,5 stroke:#16A34A,stroke-width:2.5px;
+    
+    linkStyle 6,7 stroke:#EF4444,stroke-width:2.5px;
+    
+    linkStyle 8,9,10,11 stroke:#D97706,stroke-width:1.5px,stroke-dasharray: 4 4;
+    
+    linkStyle 12,13,14 stroke:#D97706,stroke-width:1.5px;
+    
+    linkStyle 15,16,17,18,19 stroke:#4B5563,stroke-width:2px;
 ```
 
 ### 📋 Спецификация контракта взаимодействия
