@@ -127,34 +127,39 @@
 
 ```mermaid
 flowchart TD
-    %% Стилизация блоков
+    %% Основные узлы потока данных
+    Start([💻 Действие пользователя]) --> US[👥 User Service]
+    US --> Check{Попытка отправки<br/>в Apache Kafka}
+    
+    %% Основной путь (Асинхронный Happy Path)
+    Check -->|🟢 Брокер ДОСТУПЕН| Kafka[🪵 Топик: email-dto]
+    Kafka -->|Вычитывание сообщения| NS_Async[✉️ Notification Service]
+    NS_Async --> Send_Mail1[📧 Отправка Email через SMTP]
+    Send_Mail1 --> Success_End([🎉 Пользователь уведомлен асинхронно])
+
+    %% Быстрый ответ клиенту при штатном режиме (Параллельный поток)
+    Kafka -.->|Быстрый ответ| Return_Client[📱 HTTP 201 Created]
+    Return_Client -.-> End_User([Пользователь видит успех в UI])
+
+    %% Резервный путь (Аварийный Fallback)
+    Check -->|🔴 СБОЙ / ТАЙМАУТ| Log_Error[📝 Лог: Kafka not responding]
+    Log_Error --> Feign[🔗 Включение Fallback:<br/>Spring Cloud OpenFeign]
+    Feign -->|Синхронный REST HTTP| NS_Sync[✉️ Notification Service]
+    NS_Sync --> Send_Mail2[📧 Отправка Email через SMTP]
+    Send_Mail2 --> Fallback_End([⚠️ Пользователь уведомлен через Fallback])
+
+    %% Декларативное назначение стилей оформления (Вынесено отдельно для фикса парсера)
     classDef client fill:#ececff,stroke:#9370db,stroke-width:2px;
     classDef core fill:#e1ffff,stroke:#20b2aa,stroke-width:2px;
     classDef success fill:#d4edda,stroke:#28a745,stroke-width:2px,font-weight:bold;
     classDef fail fill:#f8d7da,stroke:#dc3545,stroke-width:2px,font-weight:bold;
     classDef action fill:#fff3cd,stroke:#ffc107,stroke-width:2px;
 
-    Start([💻 Действие пользователя]) :::client --> US[👥 User Service] :::core
-    
-    %% Развилка отправки
-    US --> Check{Попытка отправки<br/>в Apache Kafka} :::action
-    
-    %% Основной путь (Асинхронный)
-    Check -->|🟢 Брокер ДОСТУПЕН| Kafka[🪵 Топик: email-dto] :::success
-    Kafka -->|Вычитывание| NS_Async[✉️ Notification Service] :::core
-    NS_Async --> Send_Mail1[📧 Отправка Email через SMTP] :::action
-    Send_Mail1 --> Success_End([🎉 Пользователь уведомлен асинхронно]) :::success
-
-    %% Резервный путь (Fallback)
-    Check -->|🔴 СБОЙ / ТАЙМАУТ| Log_Error[📝 Лог: Kafka not responding] :::fail
-    Log_Error --> Feign[🔗 Включение Fallback:<br/>Spring Cloud OpenFeign] :::action
-    Feign -->|Синхронный REST HTTP| NS_Sync[✉️ Notification Service] :::core
-    NS_Sync --> Send_Mail2[📧 Отправка Email через SMTP] :::action
-    Send_Mail2 --> Fallback_End([⚠️ Пользователь уведомлен через Fallback]) :::success
-
-    %% Быстрый ответ клиенту при штатном режиме
-    Kafka -.->|Быстрый ответ| Return_Client[📱 HTTP 201 Created] :::success
-    Return_Client -.-> End_User([Пользователь видит успех в UI]) :::client
+    class Start,End_User client;
+    class US,NS_Async,NS_Sync core;
+    class Check,Feign,Send_Mail1,Send_Mail2 action;
+    class Kafka,Return_Client,Success_End,Fallback_End success;
+    class Log_Error fail;
 ```
 
 ### 📋 Спецификация сообщения
