@@ -117,94 +117,51 @@
 
 ```mermaid
 graph TD
-    %% Объявление основных узлов
-    Client([💻 Клиент / Браузер])
-    Gateway[🔀 Gateway Service<br/>Порт: 8080]
+    %% Компоненты системы
+    Client([💻 Клиент / Браузер]) --> Gateway[🔀 Gateway Service<br/>Порт: 8080]
 
-    subgraph "Ядро системы"
+    subgraph Core ["Ядро системы"]
         Config[⚙️ Config Service<br/>Порт: 8888]
         Discovery["🔍 Discovery Server<br/>Eureka - Порт: 8761"]
-        
-        subgraph "User Services"
-            US1[👥 User Service 1<br/>Порт: 8086]
-            US2[👥 User Service 2<br/>Порт: 8082]
-        end
-
-        subgraph "Notification Services"
-            NS1[✉️ Notification Service 1<br/>Порт: 8083]
-            NS2[✉️ Notification Service 2<br/>Порт: 8084]
-        end
+        US[👥 User Service<br/>Порты: 8086, 8082]
+        NS[✉️ Notification Service<br/>Порты: 8083, 8084]
     end
 
-    subgraph "Инфраструктурный слой"
+    subgraph Infrastructure ["Базы данных и Очереди"]
         Kafka[🪵 Apache Kafka<br/>Порт: 9092]
-        KafkaUI[🎛️ Kafka UI<br/>Порт: 8070]
         Redis[💾 Redis<br/>Порт: 6379]
-        RedisUI[🖥️ Redis Commander<br/>Порт: 8081]
         DB[(🐘 PostgreSQL<br/>Neon Cloud)]
     end
 
-    subgraph "Служба Наблюдаемости (Observability)"
+    subgraph Observability ["Логирование и Мониторинг"]
         Volume[(📁 Shared Logs Volume)]
-        Promtail[📝 Promtail]
-        Loki[🔥 Grafana Loki<br/>Порт: 3100]
-        Grafana[📈 Grafana UI<br/>Порт: 3000]
+        Loki[🔥 Grafana Loki<br/>Порт: 3100] --> Grafana[📈 Grafana UI<br/>Порт: 3000]
     end
 
-    %% Направления связей
-    Client --> Gateway
-    Gateway -->|Роутинг API| US1
-    Gateway -->|Роутинг API| US2
-    Gateway -->|Роутинг API| NS1
-    Gateway -->|Роутинг API| NS2
-    
-    Discovery -.->|Регистрация| Gateway
-    Discovery -.->|Регистрация| US1
-    Discovery -.->|Регистрация| US2
-    Discovery -.->|Регистрация| NS1
-    Discovery -.->|Регистрация| NS2
-    
-    Config -.->|Раздача свойств| Discovery
-    Config -.->|Раздача свойств| Gateway
-    Config -.->|Раздача свойств| US1
-    Config -.->|Раздача свойств| US2
-    Config -.->|Раздача свойств| NS1
-    Config -.->|Раздача свойств| NS2
+    %% Основные потоки данных (Трафик)
+    Gateway -->|Роутинг API| US & NS
+    US <-->|Кэш| Redis
+    US --->|Данные| DB
+    US & NS <-->|События| Kafka
 
-    US1 <-->|Асинхронные события| Kafka
-    US2 <-->|Асинхронные события| Kafka
-    NS1 <-->|Асинхронные события| Kafka
-    NS2 <-->|Асинхронные события| Kafka
-    
-    US1 <-->|Кэширование| Redis
-    US2 <-->|Кэширование| Redis
-    
-    US1 --->|Персистентность| DB
-    US2 --->|Персистентность| DB
-    
-    KafkaUI --- Kafka
-    RedisUI --- Redis
+    %% Служебные связи (Сжатые и исправленные)
+    Config -.->|Свойства| Discovery & Gateway & US & NS
+    Discovery -.->|Регистрация| Gateway & US & NS
+    Gateway & US & NS -->|Запись common.log| Volume
+    Volume --> Loki
 
-    US1 -->|Запись логов| Volume
-    US2 -->|Запись логов| Volume
-    NS1 -->|Запись логов| Volume
-    NS2 -->|Запись логов| Volume
-    Gateway -->|Запись логов| Volume
-    
-    Volume --> Promtail --> Loki --> Grafana
+    %% Стилизация (Безопасно для GitHub)
+    classDef client fill:#ececff,stroke:#9370db,stroke-width:2px;
+    classDef gateway fill:#ffe4e1,stroke:#cd5c5c,stroke-width:2px,font-weight:bold;
+    classDef core fill:#e1ffff,stroke:#20b2aa,stroke-width:2px;
+    classDef infra fill:#f5f5dc,stroke:#d2b48c,stroke-width:2px;
+    classDef monitor fill:#f0fff0,stroke:#228b22,stroke-width:2px;
 
-    %% Декларативное назначение стилей
-    classDef clientStyle fill:#ececff,stroke:#9370db,stroke-width:2px;
-    classDef gatewayStyle fill:#ffe4e1,stroke:#cd5c5c,stroke-width:2px,font-weight:bold;
-    classDef coreStyle fill:#e1ffff,stroke:#20b2aa,stroke-width:2px;
-    classDef infraStyle fill:#f5f5dc,stroke:#d2b48c,stroke-width:2px;
-    classDef monitorStyle fill:#f0fff0,stroke:#228b22,stroke-width:2px;
-
-    class Client clientStyle;
-    class Gateway gatewayStyle;
-    class Config,Discovery,US1,US2,NS1,NS2 coreStyle;
-    class Kafka,KafkaUI,Redis,RedisUI,DB infraStyle;
-    class Volume,Promtail,Loki,Grafana monitorStyle;
+    class Client client;
+    class Gateway gateway;
+    class Config,Discovery,US,NS core;
+    class Kafka,Redis,DB infra;
+    class Volume,Loki,Grafana monitor;
 ```
 
 ---
