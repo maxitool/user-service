@@ -131,17 +131,17 @@ flowchart TD
     Start([💻 Запрос клиента]) --> US[👥 user-service]
     US --> Check{Статус Kafka?}
     
-    %% Штатный асинхронный режим (Happy Path)
+    %% Штатный режим (Асинхронно для клиента)
     Check -->|🟢 Доступна| Kafka[🪵 Топик: email-dto]
     Kafka --> NS_Async[✉️ notification-service <br/> Слушатель: KafkaListener]
-    NS_Async -->|Асинхронно| SMTP1(📧 Отправка Email)
+    NS_Async -->|Синхронный вызов SMTP| SMTP1(📧 Отправка Email)
     
     Kafka -.->|Быстрый ответ| Return([📱 HTTP 201 Success])
 
-    %% Аварийный синхронный режим (Fallback)
+    %% Аварийный режим (Полностью синхронный Fallback-путь)
     Check -->|🔴 Сбой / Таймаут 7с| Feign[🔗 OpenFeign Клиент]
-    Feign -->|POST HTTP| NS_Sync[✉️ notification-service]
-    NS_Sync -->|Синхронно| SMTP2(📧 Отправка Email)
+    Feign -->|Блокирующий POST HTTP| NS_Sync[✉️ notification-service]
+    NS_Sync -->|Блокирующий вызов SMTP| SMTP2(📧 Отправка Email)
     SMTP2 --> Return
 
     %% Стилизация (Безопасно для парсера GitHub)
