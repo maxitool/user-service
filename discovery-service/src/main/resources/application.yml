@@ -1,0 +1,22 @@
+server:
+  port: ${EUREKA_PORT}
+
+spring:
+  application:
+    name: discovery-service
+
+eureka:
+  server:
+    response-cache-update-interval: 5
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+logging:
+  config: "${CONFIG_SERVICE_HOST}:${CONFIG_SERVICE_PORT}/${spring.application.name}/${GIT_CONFIG_LOG_XML_PATH}"
